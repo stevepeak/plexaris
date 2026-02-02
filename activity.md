@@ -56,3 +56,23 @@ The task:
 **Note:** Run `bun install` to link the `@app/db` workspace dependency in the trigger app's node_modules.
 
 **Screenshot:** `screenshots/seed-suppliers-task.png` (dashboard showing app is running)
+
+### Create claim token generation task
+
+Built a Trigger.dev task (`generate-claim-tokens`) in `apps/trigger/src/tasks/generate-claim-tokens.ts` that generates unique claim tokens (UUID, 90-day expiry) for all unclaimed supplier organizations and stores them in the `claim_token` table.
+
+The task:
+
+1. Queries all organizations with `type: 'supplier'` and `status: 'unclaimed'`
+2. Skips suppliers without an email address (no way to send them a claim link)
+3. Skips suppliers that already have an unused claim token (prevents duplicates on re-runs)
+4. Generates a UUID token with 90-day expiry for each eligible supplier
+5. Processes in batches of 50 with per-record error handling
+6. Returns statistics: `{ generated, skipped, failed }`
+
+**Changes:**
+
+- `apps/trigger/src/tasks/generate-claim-tokens.ts` — new claim token generation task
+- `apps/trigger/src/index.ts` — export the new task
+
+**Screenshot:** `screenshots/generate-claim-tokens-task.png` (dashboard showing app is running)

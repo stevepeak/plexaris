@@ -13,8 +13,8 @@ Work on this epic.
 - [x] **Create supplier seeding task** — Build a Trigger.dev task that takes scraped exhibitor data and inserts unclaimed supplier organization records into the database, with deduplication on company name + email.
   - passes: true
 
-- [ ] **Create claim token generation task** — Build a Trigger.dev task that generates unique claim tokens (UUID, 90-day expiry) for all unclaimed supplier organizations and stores them in the `claim_token` table.
-  - passes: false
+- [x] **Create claim token generation task** — Build a Trigger.dev task that generates unique claim tokens (UUID, 90-day expiry) for all unclaimed supplier organizations and stores them in the `claim_token` table.
+  - passes: true
 
 - [ ] **Create CSV export for outreach** — Build a Trigger.dev task (or utility script) that exports unclaimed supplier profiles with their claim tokens to CSV format (columns: company name, email, claim URL) for the outreach team.
   - passes: false
