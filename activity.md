@@ -13,3 +13,14 @@ Created the signup page and supporting auth flow:
 - Demo user flow: click "Enter Demo User" on signup, auto-creates `demo@plexaris.com` account and redirects to dashboard
 
 Screenshots: `screenshots/signup-page.png`, `screenshots/signup-page-demo-flow.png`
+
+## 2026-02-02 — login-page
+
+Verified and improved the login page:
+
+- **`/login`** page with email and password form, error handling for invalid credentials, and redirect to `/dashboard` on success
+- Replaced plain `<a>` tag with Next.js `<Link>` for client-side navigation to `/signup`
+- Tested full login flow: sign out → enter credentials → sign in → dashboard redirect
+- Tested error handling: invalid credentials display "Invalid email or password" message
+
+Screenshots: `screenshots/login-page.png`

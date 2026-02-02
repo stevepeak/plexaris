@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -86,12 +87,12 @@ export default function LoginPage() {
         <CardFooter className="justify-center">
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}
-            <a
+            <Link
               href="/signup"
               className="text-primary underline-offset-4 hover:underline"
             >
               Sign up
-            </a>
+            </Link>
           </p>
         </CardFooter>
       </Card>
