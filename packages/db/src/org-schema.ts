@@ -13,6 +13,7 @@ export const organization = pgTable('organization', {
   email: text('email'),
   address: text('address'),
   deliveryAddress: text('delivery_address'),
+  deliveryAreas: text('delivery_areas'),
   createdAt: timestamp('created_at').notNull(),
   updatedAt: timestamp('updated_at').notNull(),
   archivedAt: timestamp('archived_at'),

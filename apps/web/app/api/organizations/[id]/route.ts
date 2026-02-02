@@ -78,7 +78,16 @@ export async function PATCH(
   }
 
   const body = await request.json()
-  const { name, description, phone, email, address, deliveryAddress } = body
+  const {
+    name,
+    description,
+    phone,
+    email,
+    address,
+    deliveryAddress,
+    logoUrl,
+    deliveryAreas,
+  } = body
 
   if (!name || typeof name !== 'string' || name.trim().length === 0) {
     return NextResponse.json(
@@ -96,6 +105,8 @@ export async function PATCH(
       email: email || null,
       address: address || null,
       deliveryAddress: deliveryAddress || null,
+      logoUrl: logoUrl || null,
+      deliveryAreas: deliveryAreas || null,
       updatedAt: new Date(),
     })
     .where(eq(schema.organization.id, id))

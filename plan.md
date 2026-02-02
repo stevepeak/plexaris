@@ -16,8 +16,8 @@ Work on these epics:
 - [x] **03-03 Supplier profile page**: Build `/supplier/[id]` public read-only profile page showing org name, description, logo, contact info, address, and placeholder for products list.
   - passes: true
 
-- [ ] **03-04 Supplier profile edit**: Add edit functionality to org settings for supplier orgs — editable fields: name, description, logo URL, phone, email, address, delivery areas. Owner-only access.
-  - passes: false
+- [x] **03-04 Supplier profile edit**: Add edit functionality to org settings for supplier orgs — editable fields: name, description, logo URL, phone, email, address, delivery areas. Owner-only access.
+  - passes: true
 
 ### Epic 04 — Product Catalog
 

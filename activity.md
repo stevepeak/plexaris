@@ -38,3 +38,22 @@ Built `/supplier/[id]` public read-only profile page for suppliers.
 Tested with seeded "Bakkerij de Gouden Korst" supplier org — verified profile display with all fields and error handling for invalid IDs.
 
 Screenshot: `screenshots/03-03-supplier-profile-page.png`
+
+### 03-04 Supplier profile edit
+
+Added supplier-specific editable fields to the organization settings page for supplier orgs.
+
+- **New DB column**: Added `deliveryAreas` text column to the `organization` table with migration.
+- **PATCH API update**: Extended `PATCH /api/organizations/[id]` to accept and persist `logoUrl` and `deliveryAreas` fields.
+- **Supplier API update**: Extended `GET /api/supplier/[id]` to include `deliveryAreas` in the response.
+- **Org settings form**: Added two supplier-only fields to `OrgSettingsFormFields`:
+  - **Logo URL**: Input with live preview thumbnail (shows image when URL is set, placeholder icon otherwise).
+  - **Delivery areas**: Textarea for specifying delivery regions.
+  - These fields only appear when the organization type is `supplier`. The existing `deliveryAddress` field continues to appear only for `horeca` orgs.
+  - All fields remain owner-only (disabled for non-owners).
+- **Supplier profile card**: Updated `SupplierProfileCard` to display the logo image (instead of placeholder icon) when `logoUrl` is set, and to show a "Delivery Areas" section when `deliveryAreas` is populated.
+- **Storybook**: Updated stories for both `OrgSettingsFormFields` and `SupplierProfileCard` to include the new fields.
+
+Tested with "Bakkerij de Gouden Korst" supplier org — verified Logo URL and Delivery areas fields appear, save successfully, and success message displays.
+
+Screenshot: `screenshots/03-04-supplier-profile-edit.png`

@@ -27,6 +27,7 @@ const sampleSupplier = {
   phone: '+31 20 555 1234',
   email: 'info@goudenkorst.nl',
   address: 'Prinsengracht 42, 1015 DK Amsterdam',
+  deliveryAreas: 'Amsterdam, Haarlem, Utrecht, Rotterdam',
 }
 
 export const Loading: Story = {
@@ -64,6 +65,7 @@ export const MinimalProfile: Story = {
         phone: null,
         email: null,
         address: null,
+        deliveryAreas: null,
       },
     },
   },

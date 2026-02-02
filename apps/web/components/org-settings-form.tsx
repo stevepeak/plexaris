@@ -1,6 +1,15 @@
 'use client'
 
-import { Building2, Crown, Loader2, Mail, Phone, User } from 'lucide-react'
+import {
+  Building2,
+  Crown,
+  Image,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  User,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import {
@@ -28,18 +37,20 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 
-export type OrgDetails = {
+type OrgDetails = {
   id: string
   name: string
   type: 'supplier' | 'horeca'
   description: string | null
+  logoUrl: string | null
   phone: string | null
   email: string | null
   address: string | null
   deliveryAddress: string | null
+  deliveryAreas: string | null
 }
 
-export type Member = {
+type Member = {
   id: string
   userId: string
   role: string
@@ -69,12 +80,14 @@ export function OrgSettingsFormFields({
 }) {
   const [name, setName] = useState(org?.name ?? '')
   const [description, setDescription] = useState(org?.description ?? '')
+  const [logoUrl, setLogoUrl] = useState(org?.logoUrl ?? '')
   const [phone, setPhone] = useState(org?.phone ?? '')
   const [email, setEmail] = useState(org?.email ?? '')
   const [address, setAddress] = useState(org?.address ?? '')
   const [deliveryAddress, setDeliveryAddress] = useState(
     org?.deliveryAddress ?? '',
   )
+  const [deliveryAreas, setDeliveryAreas] = useState(org?.deliveryAreas ?? '')
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -86,10 +99,12 @@ export function OrgSettingsFormFields({
     if (org) {
       setName(org.name)
       setDescription(org.description ?? '')
+      setLogoUrl(org.logoUrl ?? '')
       setPhone(org.phone ?? '')
       setEmail(org.email ?? '')
       setAddress(org.address ?? '')
       setDeliveryAddress(org.deliveryAddress ?? '')
+      setDeliveryAreas(org.deliveryAreas ?? '')
     }
   }, [org])
 
@@ -103,10 +118,12 @@ export function OrgSettingsFormFields({
     const result = await onUpdateOrg({
       name,
       description,
+      logoUrl,
       phone,
       email,
       address,
       deliveryAddress,
+      deliveryAreas,
     })
 
     if (result.error) {
@@ -170,6 +187,7 @@ export function OrgSettingsFormFields({
               <Input
                 id="org-name"
                 type="text"
+                autoComplete="organization"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -181,6 +199,7 @@ export function OrgSettingsFormFields({
               <Label htmlFor="org-description">Description</Label>
               <Textarea
                 id="org-description"
+                autoComplete="off"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
@@ -188,12 +207,41 @@ export function OrgSettingsFormFields({
               />
             </div>
 
+            {org.type === 'supplier' && (
+              <div className="grid gap-2">
+                <Label htmlFor="org-logo-url">Logo URL</Label>
+                <div className="flex items-center gap-3">
+                  {logoUrl ? (
+                    <img
+                      src={logoUrl}
+                      alt={`${org.name} logo`}
+                      className="h-10 w-10 shrink-0 rounded-md border object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border bg-muted">
+                      <Image className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  )}
+                  <Input
+                    id="org-logo-url"
+                    type="url"
+                    autoComplete="off"
+                    placeholder="https://example.com/logo.png"
+                    value={logoUrl}
+                    onChange={(e) => setLogoUrl(e.target.value)}
+                    disabled={!isOwner}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="org-phone">Phone</Label>
                 <Input
                   id="org-phone"
                   type="tel"
+                  autoComplete="off"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   disabled={!isOwner}
@@ -204,6 +252,7 @@ export function OrgSettingsFormFields({
                 <Input
                   id="org-email"
                   type="email"
+                  autoComplete="off"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={!isOwner}
@@ -216,11 +265,27 @@ export function OrgSettingsFormFields({
               <Input
                 id="org-address"
                 type="text"
+                autoComplete="off"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 disabled={!isOwner}
               />
             </div>
+
+            {org.type === 'supplier' && (
+              <div className="grid gap-2">
+                <Label htmlFor="org-delivery-areas">Delivery areas</Label>
+                <Textarea
+                  id="org-delivery-areas"
+                  autoComplete="off"
+                  placeholder="e.g. Amsterdam, Rotterdam, The Hague"
+                  value={deliveryAreas}
+                  onChange={(e) => setDeliveryAreas(e.target.value)}
+                  rows={2}
+                  disabled={!isOwner}
+                />
+              </div>
+            )}
 
             {org.type === 'horeca' && (
               <div className="grid gap-2">
@@ -228,6 +293,7 @@ export function OrgSettingsFormFields({
                 <Input
                   id="org-delivery-address"
                   type="text"
+                  autoComplete="off"
                   value={deliveryAddress}
                   onChange={(e) => setDeliveryAddress(e.target.value)}
                   disabled={!isOwner}

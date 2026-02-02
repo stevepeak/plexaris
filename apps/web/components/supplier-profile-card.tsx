@@ -16,6 +16,7 @@ interface SupplierProfile {
   phone: string | null
   email: string | null
   address: string | null
+  deliveryAreas: string | null
 }
 
 export type SupplierProfileCardState =
@@ -74,9 +75,17 @@ export function SupplierProfileCard({ state }: SupplierProfileCardProps) {
     <Card className="w-full max-w-2xl">
       <CardHeader>
         <div className="flex items-start gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-muted">
-            <Building2 className="h-8 w-8 text-muted-foreground" />
-          </div>
+          {supplier.logoUrl ? (
+            <img
+              src={supplier.logoUrl}
+              alt={`${supplier.name} logo`}
+              className="h-16 w-16 shrink-0 rounded-lg border object-cover"
+            />
+          ) : (
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-muted">
+              <Building2 className="h-8 w-8 text-muted-foreground" />
+            </div>
+          )}
           <div className="grid gap-1">
             <CardTitle className="text-2xl">{supplier.name}</CardTitle>
             <div className="flex gap-2">
@@ -115,6 +124,16 @@ export function SupplierProfileCard({ state }: SupplierProfileCardProps) {
                   <span>{supplier.address}</span>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {supplier.deliveryAreas && (
+          <div className="grid gap-3">
+            <h3 className="text-sm font-medium">Delivery Areas</h3>
+            <div className="flex items-start gap-2 text-sm text-muted-foreground">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{supplier.deliveryAreas}</span>
             </div>
           </div>
         )}

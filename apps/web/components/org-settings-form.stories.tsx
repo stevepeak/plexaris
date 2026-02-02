@@ -19,10 +19,12 @@ const sampleOrg = {
   name: 'Fresh Foods BV',
   type: 'supplier' as const,
   description: 'Premium fresh food supplier for restaurants and cafes.',
+  logoUrl: 'https://placehold.co/100x100?text=FF',
   phone: '+31 20 123 4567',
   email: 'info@freshfoods.nl',
   address: 'Keizersgracht 123, 1015 CJ Amsterdam',
   deliveryAddress: null,
+  deliveryAreas: 'Amsterdam, Haarlem, Amstelveen, Zaandam',
 }
 
 const sampleHorecaOrg = {
@@ -30,10 +32,12 @@ const sampleHorecaOrg = {
   name: 'Restaurant De Gouden Leeuw',
   type: 'horeca' as const,
   description: 'Traditional Dutch restaurant in the heart of Amsterdam.',
+  logoUrl: null,
   phone: '+31 20 987 6543',
   email: 'reservations@goudeleeuw.nl',
   address: 'Herengracht 456, 1017 CA Amsterdam',
   deliveryAddress: 'Achterdeur, Herengracht 456',
+  deliveryAreas: null,
 }
 
 const sampleMembers = [

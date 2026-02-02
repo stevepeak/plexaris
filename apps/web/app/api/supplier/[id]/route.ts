@@ -33,6 +33,7 @@ export async function GET(
       phone: organization.phone,
       email: organization.email,
       address: organization.address,
+      deliveryAreas: organization.deliveryAreas,
     },
   })
 }
