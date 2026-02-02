@@ -57,3 +57,14 @@ Added supplier-specific editable fields to the organization settings page for su
 Tested with "Bakkerij de Gouden Korst" supplier org — verified Logo URL and Delivery areas fields appear, save successfully, and success message displays.
 
 Screenshot: `screenshots/03-04-supplier-profile-edit.png`
+
+### 04-01 Product schema
+
+Added `product` table to the database schema with Drizzle ORM.
+
+- **Schema file**: Created `packages/db/src/product-schema.ts` defining the `product` table with columns: `id` (text PK), `organizationId` (FK to organization), `name`, `description`, `price` (numeric 10,2), `unit`, `category`, `status` (default `draft`), `images` (jsonb array), `createdAt`, `updatedAt`, `archivedAt`.
+- **Migration**: Generated and applied migration `0006_small_doctor_spectrum.sql` creating the table with a foreign key constraint to the `organization` table.
+- **Schema export**: Updated `packages/db/src/schema.ts` to re-export the product schema.
+- **Verified**: Product table created in PostgreSQL with correct column types, constraints, and defaults. App dashboard loads without errors after migration.
+
+Screenshot: `screenshots/04-01-product-schema.png`

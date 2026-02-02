@@ -43,6 +43,13 @@
       "when": 1770065740422,
       "tag": "0005_dazzling_deathbird",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1770066158299,
+      "tag": "0006_small_doctor_spectrum",
+      "breakpoints": true
     }
   ]
 }

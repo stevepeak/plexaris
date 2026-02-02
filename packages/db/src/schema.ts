@@ -3,3 +3,6 @@ export * from './auth-schema'
 
 // Organization schema
 export * from './org-schema'
+
+// Product schema
+export * from './product-schema'
