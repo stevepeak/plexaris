@@ -13,5 +13,5 @@ Work on this epic.
 - [x] **org-switcher** — Add organization switcher in dashboard header for users with multiple orgs. <!-- passes: true -->
 - [x] **user-invitation** — Invite users by email to join an organization. Accept/reject flow. <!-- passes: true -->
 - [x] **user-profile** — Create `/settings/profile` page for editing name, email, password. <!-- passes: true -->
-- [ ] **org-settings** — Create `/settings/organization` page for editing org details, viewing members. <!-- passes: false -->
+- [x] **org-settings** — Create `/settings/organization` page for editing org details, viewing members. <!-- passes: true -->
 - [ ] **account-management** — Leave org, archive org, archive account flows. <!-- passes: false -->

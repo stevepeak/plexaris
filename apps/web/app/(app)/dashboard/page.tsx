@@ -1,6 +1,6 @@
 'use client'
 
-import { LogOut, Mail, Settings, User } from 'lucide-react'
+import { Building2, LogOut, Mail, Settings, User } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
@@ -137,6 +137,12 @@ export default function DashboardPage() {
                   <Link href="/settings/profile">
                     <Settings className="h-4 w-4" />
                     Profile settings
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild className="w-fit">
+                  <Link href="/settings/organization">
+                    <Building2 className="h-4 w-4" />
+                    Organization settings
                   </Link>
                 </Button>
                 <Button

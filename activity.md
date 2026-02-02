@@ -127,3 +127,20 @@ Created `/settings/profile` page for editing name, email, and password:
 - No custom API routes needed — leverages better-auth's built-in endpoints
 
 Screenshots: `screenshots/user-profile.png`
+
+## 2026-02-02 — org-settings
+
+Created `/settings/organization` page for editing org details and viewing members:
+
+- **`/settings/organization`** page with back button to dashboard, org details form, and member list
+- **`OrgSettingsFormFields` component** (`components/org-settings-form.tsx`) with two card sections:
+  - **Organization details card**: business name, description, phone, contact email, business address, delivery address (horeca only), org type badge, save button (owners only), disabled fields for non-owners
+  - **Members card**: list of all org members with name, email, and role badge (owner badge with crown icon)
+- **API route** `GET /api/organizations/[id]` — fetch org details with membership authorization check, returns org + user role
+- **API route** `PATCH /api/organizations/[id]` — update org details (owners only), validates name required
+- **API route** `GET /api/organizations/[id]/members` — list org members with user names and emails
+- **Dashboard updated** with "Organization settings" button linking to `/settings/organization`
+- **`OrgSettings` container component** fetches org details and members in parallel, passes data to presentational component
+- **Storybook stories** (`components/org-settings-form.stories.tsx`) with OwnerView, MemberView, HorecaOrg, and Loading variants
+
+Screenshots: `screenshots/org-settings.png`
