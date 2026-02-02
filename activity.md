@@ -111,3 +111,19 @@ Added user invitation flow to invite members by email and accept/reject from the
 - **Storybook stories** for `InviteMembersList` (WithInvitations, Empty, MemberView, Loading) and `PendingInvitationsList` (WithInvitations, SingleInvitation)
 
 Screenshots: `screenshots/user-invitation.png`
+
+## 2026-02-02 — user-profile
+
+Created `/settings/profile` page for editing name, email, and password:
+
+- **`/settings/profile`** page with back button to dashboard, profile edit form, and password change form
+- **`ProfileFormFields` component** (`components/profile-form.tsx`) with two card sections:
+  - **Profile card**: editable name field, read-only email field (with "Email cannot be changed" note), save button that disables when name hasn't changed, success/error feedback
+  - **Password card**: current password, new password, confirm new password fields with client-side validation (match check, min 8 chars), success/error feedback
+- **Name updates** via `authClient.updateUser({ name })` (better-auth built-in)
+- **Password changes** via `authClient.changePassword({ currentPassword, newPassword })` (better-auth built-in)
+- **Dashboard updated** with two navigation paths to profile settings: clickable avatar in header and "Profile settings" button in user card
+- **Storybook stories** (`components/profile-form.stories.tsx`) with Default, Loading, and ReadOnly variants
+- No custom API routes needed — leverages better-auth's built-in endpoints
+
+Screenshots: `screenshots/user-profile.png`

@@ -12,6 +12,6 @@ Work on this epic.
 - [x] **org-creation** — Create organization creation flow after signup (choose Supplier or Horeca, enter business details). <!-- passes: true -->
 - [x] **org-switcher** — Add organization switcher in dashboard header for users with multiple orgs. <!-- passes: true -->
 - [x] **user-invitation** — Invite users by email to join an organization. Accept/reject flow. <!-- passes: true -->
-- [ ] **user-profile** — Create `/settings/profile` page for editing name, email, password. <!-- passes: false -->
+- [x] **user-profile** — Create `/settings/profile` page for editing name, email, password. <!-- passes: true -->
 - [ ] **org-settings** — Create `/settings/organization` page for editing org details, viewing members. <!-- passes: false -->
 - [ ] **account-management** — Leave org, archive org, archive account flows. <!-- passes: false -->

@@ -1,6 +1,7 @@
 'use client'
 
-import { LogOut, Mail, User } from 'lucide-react'
+import { LogOut, Mail, Settings, User } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 
@@ -21,7 +22,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
 
 function getInitials(name: string | undefined): string {
-  if (!name) return '?'
+  if (!name) {
+    return '?'
+  }
   return name
     .split(' ')
     .map((part) => part[0])
@@ -71,11 +74,15 @@ export default function DashboardPage() {
               <span className="text-sm text-muted-foreground">
                 {session?.user.name}
               </span>
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs">
-                  {getInitials(session?.user.name)}
-                </AvatarFallback>
-              </Avatar>
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/settings/profile">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="text-xs">
+                      {getInitials(session?.user.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              </Button>
             </div>
           )}
         </div>
@@ -125,14 +132,22 @@ export default function DashboardPage() {
                 <span>{session?.user.email}</span>
               </div>
               <Separator />
-              <Button
-                variant="outline"
-                onClick={handleSignOut}
-                className="w-fit"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign out
-              </Button>
+              <div className="flex gap-3">
+                <Button variant="outline" asChild className="w-fit">
+                  <Link href="/settings/profile">
+                    <Settings className="h-4 w-4" />
+                    Profile settings
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleSignOut}
+                  className="w-fit"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign out
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
