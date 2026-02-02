@@ -61,6 +61,7 @@ const config: KnipConfig = {
   },
   ignore: [
     'apps/web/components/ui/**',
+    'apps/web/hooks/**',
     '**/node_modules/**',
     '**/dist/**',
     '**/.turbo/**',

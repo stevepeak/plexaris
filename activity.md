@@ -124,3 +124,18 @@ Added archive and restore functionality to the product list.
 Tested with "Bakkerij de Gouden Korst" supplier org — archived "Croissant", verified it moved to the Archived tab with status badge, restored it back to active list with draft status.
 
 Screenshots: `screenshots/04-05-archive-dialog.png`, `screenshots/04-05-archived-tab.png`, `screenshots/04-05-product-archive-restore.png`
+
+### 04-06 Public product display
+
+Added product display with category filtering to the supplier profile page (`/supplier/[id]`).
+
+- **Supplier API update**: Extended `GET /api/supplier/[id]` to also return the supplier's non-archived products alongside the supplier profile data. Uses the existing `product` table with an `archivedAt IS NULL` filter.
+- **ProductCard component**: Inline presentational component within `SupplierProfileCard` showing product name, price with unit (formatted as EUR, e.g. "€ 3,95 / piece"), description (clamped to 2 lines), and category badge.
+- **ProductsSection component**: Wraps product cards with a category filter. Shows filter buttons (All + each unique category) when there are multiple categories. Clicking a category button filters the displayed products. Shows total product count in the section heading.
+- **SupplierProfileCard update**: Replaced the "No products listed yet" placeholder with the new `ProductsSection` when products exist. Falls back to an empty state with a Package icon when no products are available. Added `products` prop to the component.
+- **Supplier profile page update**: Updated `/supplier/[id]` page to pass products from the API response to the `SupplierProfileCard`.
+- **Storybook**: Updated stories with product data — added `WithProducts` (multiple categories with filter), `SingleCategory` (one category, no filter buttons), `NoProducts` (empty state), and updated `FullProfile` and `UnclaimedProfile` to include products.
+
+Tested with "Bakkerij de Gouden Korst" supplier org — verified 3 products display with name, description, price, and category badges. Category filter buttons (All, Bread, bakery) filter correctly.
+
+Screenshots: `screenshots/04-06-public-product-display.png`, `screenshots/04-06-product-filter.png`, `screenshots/04-06-all-products.png`

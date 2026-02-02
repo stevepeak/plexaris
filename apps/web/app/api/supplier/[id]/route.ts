@@ -1,4 +1,4 @@
-import { createDb, eq, schema } from '@app/db'
+import { and, createDb, eq, isNull, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 const db = createDb()
@@ -22,6 +22,14 @@ export async function GET(
     return NextResponse.json({ error: 'Supplier not found' }, { status: 404 })
   }
 
+  const products = await db.query.product.findMany({
+    where: and(
+      eq(schema.product.organizationId, id),
+      isNull(schema.product.archivedAt),
+    ),
+    orderBy: (product, { desc }) => [desc(product.createdAt)],
+  })
+
   return NextResponse.json({
     supplier: {
       id: organization.id,
@@ -35,5 +43,6 @@ export async function GET(
       address: organization.address,
       deliveryAreas: organization.deliveryAreas,
     },
+    products,
   })
 }

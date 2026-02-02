@@ -30,6 +30,56 @@ const sampleSupplier = {
   deliveryAreas: 'Amsterdam, Haarlem, Utrecht, Rotterdam',
 }
 
+const sampleProducts = [
+  {
+    id: 'p1',
+    name: 'Artisan Sourdough Bread',
+    description:
+      'Traditional slow-fermented sourdough with a crispy crust and open crumb structure.',
+    price: '4.50',
+    unit: 'piece',
+    category: 'Bread',
+    status: 'active',
+  },
+  {
+    id: 'p2',
+    name: 'Croissant',
+    description:
+      'Buttery, flaky French croissant made with premium European butter.',
+    price: '2.75',
+    unit: 'piece',
+    category: 'Pastry',
+    status: 'active',
+  },
+  {
+    id: 'p3',
+    name: 'Volkoren Brood',
+    description: 'Whole wheat bread with a dense, hearty texture.',
+    price: '3.80',
+    unit: 'piece',
+    category: 'Bread',
+    status: 'active',
+  },
+  {
+    id: 'p4',
+    name: 'Appeltaart',
+    description: 'Classic Dutch apple pie with cinnamon and raisins.',
+    price: '18.50',
+    unit: 'piece',
+    category: 'Pastry',
+    status: 'active',
+  },
+  {
+    id: 'p5',
+    name: 'Melk',
+    description: 'Fresh whole milk from local dairy farms.',
+    price: '1.85',
+    unit: 'liter',
+    category: 'Dairy',
+    status: 'active',
+  },
+]
+
 export const Loading: Story = {
   args: {
     state: { status: 'loading' },
@@ -39,6 +89,7 @@ export const Loading: Story = {
 export const FullProfile: Story = {
   args: {
     state: { status: 'loaded', supplier: sampleSupplier },
+    products: sampleProducts,
   },
 }
 
@@ -48,6 +99,7 @@ export const UnclaimedProfile: Story = {
       status: 'loaded',
       supplier: { ...sampleSupplier, status: 'unclaimed' },
     },
+    products: sampleProducts.slice(0, 2),
   },
 }
 
@@ -68,6 +120,27 @@ export const MinimalProfile: Story = {
         deliveryAreas: null,
       },
     },
+  },
+}
+
+export const WithProducts: Story = {
+  args: {
+    state: { status: 'loaded', supplier: sampleSupplier },
+    products: sampleProducts,
+  },
+}
+
+export const SingleCategory: Story = {
+  args: {
+    state: { status: 'loaded', supplier: sampleSupplier },
+    products: sampleProducts.filter((p) => p.category === 'Bread'),
+  },
+}
+
+export const NoProducts: Story = {
+  args: {
+    state: { status: 'loaded', supplier: sampleSupplier },
+    products: [],
   },
 }
 
