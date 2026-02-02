@@ -3,6 +3,17 @@
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -21,6 +32,7 @@ export function ProfileFormFields({
   isPending,
   onUpdateName,
   onChangePassword,
+  onArchiveAccount,
 }: {
   name: string
   email: string
@@ -30,6 +42,7 @@ export function ProfileFormFields({
     currentPassword: string,
     newPassword: string,
   ) => Promise<{ error?: string }>
+  onArchiveAccount?: () => Promise<{ error?: string }>
 }) {
   const [name, setName] = useState(initialName)
   useEffect(() => {
@@ -38,6 +51,9 @@ export function ProfileFormFields({
   const [nameLoading, setNameLoading] = useState(false)
   const [nameError, setNameError] = useState<string | null>(null)
   const [nameSuccess, setNameSuccess] = useState<string | null>(null)
+
+  const [archiveLoading, setArchiveLoading] = useState(false)
+  const [archiveError, setArchiveError] = useState<string | null>(null)
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -243,6 +259,73 @@ export function ProfileFormFields({
           </form>
         </CardContent>
       </Card>
+
+      {onArchiveAccount && (
+        <Card className="border-destructive/50">
+          <CardHeader>
+            <CardTitle className="text-lg text-destructive">
+              Danger zone
+            </CardTitle>
+            <CardDescription>
+              This action is irreversible. Please be certain.
+            </CardDescription>
+          </CardHeader>
+          <Separator />
+          <CardContent className="grid gap-4 pt-4">
+            {archiveError && (
+              <p className="text-sm text-destructive">{archiveError}</p>
+            )}
+            <div className="flex items-center justify-between rounded-md border px-4 py-3">
+              <div>
+                <p className="text-sm font-medium">Archive account</p>
+                <p className="text-xs text-muted-foreground">
+                  Permanently archive your account and remove all org
+                  memberships
+                </p>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    Archive
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Archive your account?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Your account will be permanently archived. You will be
+                      signed out and will not be able to sign in again. You must
+                      archive any organizations you own first.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      disabled={archiveLoading}
+                      onClick={async () => {
+                        setArchiveLoading(true)
+                        setArchiveError(null)
+                        const result = await onArchiveAccount()
+                        if (result.error) {
+                          setArchiveError(result.error)
+                        }
+                        setArchiveLoading(false)
+                      }}
+                    >
+                      {archiveLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        'Archive my account'
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

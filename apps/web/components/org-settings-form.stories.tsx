@@ -71,6 +71,7 @@ export const OwnerView: Story = {
       isOwner={true}
       isPending={false}
       onUpdateOrg={noop}
+      onArchiveOrg={noop}
     />
   ),
 }
@@ -82,6 +83,7 @@ export const MemberView: Story = {
       members={sampleMembers}
       isOwner={false}
       isPending={false}
+      onLeaveOrg={noop}
     />
   ),
 }
@@ -94,6 +96,7 @@ export const HorecaOrg: Story = {
       isOwner={true}
       isPending={false}
       onUpdateOrg={noop}
+      onArchiveOrg={noop}
     />
   ),
 }

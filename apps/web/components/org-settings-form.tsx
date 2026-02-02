@@ -3,6 +3,17 @@
 import { Building2, Crown, Loader2, Mail, Phone, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -43,6 +54,8 @@ export function OrgSettingsFormFields({
   isOwner,
   isPending,
   onUpdateOrg,
+  onLeaveOrg,
+  onArchiveOrg,
 }: {
   org: OrgDetails | null
   members: Member[]
@@ -51,6 +64,8 @@ export function OrgSettingsFormFields({
   onUpdateOrg?: (
     data: Omit<OrgDetails, 'id' | 'type'>,
   ) => Promise<{ error?: string }>
+  onLeaveOrg?: () => Promise<{ error?: string }>
+  onArchiveOrg?: () => Promise<{ error?: string }>
 }) {
   const [name, setName] = useState(org?.name ?? '')
   const [description, setDescription] = useState(org?.description ?? '')
@@ -64,6 +79,8 @@ export function OrgSettingsFormFields({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [dangerLoading, setDangerLoading] = useState(false)
+  const [dangerError, setDangerError] = useState<string | null>(null)
 
   useEffect(() => {
     if (org) {
@@ -286,11 +303,136 @@ export function OrgSettingsFormFields({
           )}
         </CardContent>
       </Card>
+
+      {(onLeaveOrg || onArchiveOrg) && (
+        <Card className="border-destructive/50">
+          <CardHeader>
+            <CardTitle className="text-lg text-destructive">
+              Danger zone
+            </CardTitle>
+            <CardDescription>
+              These actions are irreversible. Please be certain.
+            </CardDescription>
+          </CardHeader>
+          <Separator />
+          <CardContent className="grid gap-4 pt-4">
+            {dangerError && (
+              <p className="text-sm text-destructive">{dangerError}</p>
+            )}
+
+            {onLeaveOrg && !isOwner && (
+              <div className="flex items-center justify-between rounded-md border px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium">Leave organization</p>
+                  <p className="text-xs text-muted-foreground">
+                    Remove yourself from this organization
+                  </p>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      Leave
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Leave organization?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        You will lose access to {org.name}. You will need a new
+                        invitation to rejoin.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        disabled={dangerLoading}
+                        onClick={async () => {
+                          setDangerLoading(true)
+                          setDangerError(null)
+                          const result = await onLeaveOrg()
+                          if (result.error) {
+                            setDangerError(result.error)
+                          }
+                          setDangerLoading(false)
+                        }}
+                      >
+                        {dangerLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          'Leave organization'
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
+
+            {onArchiveOrg && isOwner && (
+              <div className="flex items-center justify-between rounded-md border px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium">Archive organization</p>
+                  <p className="text-xs text-muted-foreground">
+                    Permanently archive this organization and all its data
+                  </p>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      Archive
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Archive organization?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {org.name} will be permanently archived. All members
+                        will lose access. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        disabled={dangerLoading}
+                        onClick={async () => {
+                          setDangerLoading(true)
+                          setDangerError(null)
+                          const result = await onArchiveOrg()
+                          if (result.error) {
+                            setDangerError(result.error)
+                          }
+                          setDangerLoading(false)
+                        }}
+                      >
+                        {dangerLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          'Archive organization'
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
 
-export function OrgSettings({ organizationId }: { organizationId: string }) {
+export function OrgSettings({
+  organizationId,
+  onOrgLeft,
+  onOrgArchived,
+}: {
+  organizationId: string
+  onOrgLeft?: () => void
+  onOrgArchived?: () => void
+}) {
   const [org, setOrg] = useState<OrgDetails | null>(null)
   const [members, setMembers] = useState<Member[]>([])
   const [isOwner, setIsOwner] = useState(false)
@@ -341,6 +483,34 @@ export function OrgSettings({ organizationId }: { organizationId: string }) {
     return {}
   }
 
+  const handleLeaveOrg = async (): Promise<{ error?: string }> => {
+    const res = await fetch(`/api/organizations/${organizationId}/leave`, {
+      method: 'POST',
+    })
+
+    if (!res.ok) {
+      const json = await res.json()
+      return { error: json.error ?? 'Failed to leave organization' }
+    }
+
+    onOrgLeft?.()
+    return {}
+  }
+
+  const handleArchiveOrg = async (): Promise<{ error?: string }> => {
+    const res = await fetch(`/api/organizations/${organizationId}/archive`, {
+      method: 'POST',
+    })
+
+    if (!res.ok) {
+      const json = await res.json()
+      return { error: json.error ?? 'Failed to archive organization' }
+    }
+
+    onOrgArchived?.()
+    return {}
+  }
+
   return (
     <OrgSettingsFormFields
       org={org}
@@ -348,6 +518,8 @@ export function OrgSettings({ organizationId }: { organizationId: string }) {
       isOwner={isOwner}
       isPending={isPending}
       onUpdateOrg={isOwner ? handleUpdateOrg : undefined}
+      onLeaveOrg={!isOwner ? handleLeaveOrg : undefined}
+      onArchiveOrg={isOwner ? handleArchiveOrg : undefined}
     />
   )
 }

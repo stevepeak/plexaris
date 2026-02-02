@@ -144,3 +144,24 @@ Created `/settings/organization` page for editing org details and viewing member
 - **Storybook stories** (`components/org-settings-form.stories.tsx`) with OwnerView, MemberView, HorecaOrg, and Loading variants
 
 Screenshots: `screenshots/org-settings.png`
+
+## 2026-02-02 — account-management
+
+Added leave org, archive org, and archive account flows:
+
+- **Schema update**: Added `archivedAt` column to the `user` table for soft-delete support. Generated and applied migration `0003_wide_makkari.sql`
+- **API route** `POST /api/organizations/[id]/leave` — leave an organization (members only; owners must archive instead)
+- **API route** `POST /api/organizations/[id]/archive` — soft-delete an organization (owners only), sets `status = 'archived'` and `archivedAt` timestamp
+- **API route** `POST /api/account/archive` — archive the current user's account (must archive owned orgs first), removes all memberships, soft-deletes user, revokes all sessions
+- **`/api/organizations/mine`** updated to filter out archived organizations (by `status` and `archivedAt`)
+- **Organization settings** (`/settings/organization`) updated with a "Danger zone" card:
+  - **Owners** see "Archive organization" button with AlertDialog confirmation
+  - **Members** see "Leave organization" button with AlertDialog confirmation
+  - Both actions redirect to `/dashboard` after completion and clear the active org from localStorage
+- **Profile settings** (`/settings/profile`) updated with a "Danger zone" card:
+  - "Archive account" button with AlertDialog confirmation
+  - Shows error if user still owns organizations
+  - Redirects to `/login` after successful archival
+- **Storybook stories** updated for `OrgSettingsFormFields` (OwnerView and MemberView now include danger zone actions) and `ProfileFormFields` (Default now includes archive account)
+
+Screenshots: `screenshots/account-management.png`, `screenshots/account-management-org-settings.png`, `screenshots/account-management-archive-org-dialog.png`, `screenshots/account-management-profile-settings.png`, `screenshots/account-management-archive-account-dialog.png`

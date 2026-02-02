@@ -14,4 +14,4 @@ Work on this epic.
 - [x] **user-invitation** — Invite users by email to join an organization. Accept/reject flow. <!-- passes: true -->
 - [x] **user-profile** — Create `/settings/profile` page for editing name, email, password. <!-- passes: true -->
 - [x] **org-settings** — Create `/settings/organization` page for editing org details, viewing members. <!-- passes: true -->
-- [ ] **account-management** — Leave org, archive org, archive account flows. <!-- passes: false -->
+- [x] **account-management** — Leave org, archive org, archive account flows. <!-- passes: true -->

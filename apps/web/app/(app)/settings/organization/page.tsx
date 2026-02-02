@@ -2,6 +2,8 @@
 
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useCallback } from 'react'
 
 import { OrgSettings } from '@/components/org-settings-form'
 import { useActiveOrg } from '@/components/org-switcher'
@@ -9,7 +11,18 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function OrgSettingsPage() {
+  const router = useRouter()
   const { activeOrg, isPending } = useActiveOrg()
+
+  const handleOrgLeft = useCallback(() => {
+    localStorage.removeItem('plexaris:activeOrgId')
+    router.push('/dashboard')
+  }, [router])
+
+  const handleOrgArchived = useCallback(() => {
+    localStorage.removeItem('plexaris:activeOrgId')
+    router.push('/dashboard')
+  }, [router])
 
   return (
     <div className="min-h-screen bg-background">
@@ -31,7 +44,11 @@ export default function OrgSettingsPage() {
             <Skeleton className="h-48 w-full" />
           </div>
         ) : activeOrg ? (
-          <OrgSettings organizationId={activeOrg.id} />
+          <OrgSettings
+            organizationId={activeOrg.id}
+            onOrgLeft={handleOrgLeft}
+            onOrgArchived={handleOrgArchived}
+          />
         ) : (
           <p className="text-sm text-muted-foreground">
             No organization selected.

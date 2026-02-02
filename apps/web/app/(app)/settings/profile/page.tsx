@@ -2,6 +2,7 @@
 
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 
 import { ProfileFormFields } from '@/components/profile-form'
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/auth-client'
 
 export default function ProfileSettingsPage() {
+  const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
 
   const handleUpdateName = useCallback(
@@ -40,6 +42,18 @@ export default function ProfileSettingsPage() {
     [],
   )
 
+  const handleArchiveAccount = useCallback(async (): Promise<{
+    error?: string
+  }> => {
+    const res = await fetch('/api/account/archive', { method: 'POST' })
+    if (!res.ok) {
+      const json = await res.json()
+      return { error: json.error ?? 'Failed to archive account' }
+    }
+    router.push('/login')
+    return {}
+  }, [router])
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -60,6 +74,7 @@ export default function ProfileSettingsPage() {
           isPending={isPending}
           onUpdateName={handleUpdateName}
           onChangePassword={handleChangePassword}
+          onArchiveAccount={handleArchiveAccount}
         />
       </main>
     </div>

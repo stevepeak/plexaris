@@ -1,4 +1,4 @@
-import { createDb, eq, schema } from '@app/db'
+import { and, createDb, eq, isNull, ne, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
@@ -27,7 +27,13 @@ export async function GET(request: Request) {
       schema.organization,
       eq(schema.membership.organizationId, schema.organization.id),
     )
-    .where(eq(schema.membership.userId, session.user.id))
+    .where(
+      and(
+        eq(schema.membership.userId, session.user.id),
+        ne(schema.organization.status, 'archived'),
+        isNull(schema.organization.archivedAt),
+      ),
+    )
 
   return NextResponse.json({ organizations: rows })
 }

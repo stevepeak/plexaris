@@ -22,6 +22,13 @@
       "when": 1770059120746,
       "tag": "0002_yielding_captain_marvel",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770060890317,
+      "tag": "0003_wide_makkari",
+      "breakpoints": true
     }
   ]
 }

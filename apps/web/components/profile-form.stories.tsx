@@ -22,6 +22,7 @@ export const Default: Story = {
       isPending={false}
       onUpdateName={noop}
       onChangePassword={noop}
+      onArchiveAccount={noop}
     />
   ),
 }
