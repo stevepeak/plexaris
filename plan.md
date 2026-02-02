@@ -30,8 +30,8 @@ Work on these epics:
 - [x] **04-03 Supplier product dashboard**: Build product list view in supplier dashboard showing all products with name, price, unit, category, status. Add "Add Product" button.
   - passes: true
 
-- [ ] **04-04 Product add/edit form**: Build product form (name, description, price, unit selector, category selector). Used for both create and edit. Include Storybook story.
-  - passes: false
+- [x] **04-04 Product add/edit form**: Build product form (name, description, price, unit selector, category selector). Used for both create and edit. Include Storybook story.
+  - passes: true
 
 - [ ] **04-05 Product archive/restore**: Add archive button with confirmation dialog to product list. Show archived products in separate tab. Add restore functionality.
   - passes: false

@@ -94,3 +94,16 @@ Added a product list view to the supplier dashboard.
 Tested with "Bakkerij de Gouden Korst" supplier org — verified product table displays 2 seeded products (Croissant and Artisan Sourdough Bread) with correct prices, categories, and status badges. Add Product button visible for owner.
 
 Screenshot: `screenshots/04-03-supplier-product-dashboard.png`
+
+### 04-04 Product add/edit form
+
+Built a reusable product form component used for both creating and editing products.
+
+- **ProductForm component**: Created `components/product-form.tsx` — a presentational form component with fields for name (required text input), description (textarea), price (EUR number input), unit (select: piece, kg, liter, box, bag, bunch), and category (select: Bread, Pastry, Dairy, Meat, Fish, Produce, Beverages, Ingredients, Other). Adapts title and submit button text based on whether a product is passed (edit mode) or not (add mode). Includes back arrow button, cancel button, loading spinner on submit, and error display. Pre-populates all fields when editing an existing product.
+- **Dashboard integration**: Updated the dashboard page to manage a `productView` state that switches between list, add form, and edit form views. Clicking "Add Product" shows the empty form. Clicking a product row in the table opens the edit form pre-filled with that product's data. On successful create/edit, returns to the product list which auto-refreshes. Cancel returns to the list without changes.
+- **ProductList update**: Added `onEditProduct` callback prop to `ProductList`. Product table rows are clickable for owners, showing a pointer cursor and triggering the edit flow.
+- **Storybook**: Full coverage with stories for add product, edit product, edit minimal product, loading, with error, and no cancel button states.
+
+Tested with "Bakkerij de Gouden Korst" supplier org — verified add form displays correctly, created "Volkoren Brood" product with all fields populated, verified it appears in the list, clicked to edit, renamed to "Volkoren Brood (Groot)", confirmed update persisted.
+
+Screenshots: `screenshots/04-04-product-form-add.png`, `screenshots/04-04-product-form-edit.png`, `screenshots/04-04-product-form.png`

@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { InviteMembers } from '@/components/invite-members'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { PendingInvitations } from '@/components/pending-invitations'
+import { ProductForm } from '@/components/product-form'
 import { ProductList } from '@/components/product-list'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -45,24 +46,27 @@ export default function DashboardPage() {
     isPending: orgsPending,
   } = useActiveOrg(refreshKey)
 
-  const [products, setProducts] = useState<
-    {
-      id: string
-      name: string
-      description: string | null
-      price: string | null
-      unit: string | null
-      category: string | null
-      status: string
-      images: string[]
-      createdAt: string
-      updatedAt: string
-      archivedAt: string | null
-    }[]
-  >([])
-  const [productsPending, setProductsPending] = useState(false)
+  type Product = {
+    id: string
+    name: string
+    description: string | null
+    price: string | null
+    unit: string | null
+    category: string | null
+    status: string
+    images: string[]
+    createdAt: string
+    updatedAt: string
+    archivedAt: string | null
+  }
 
-  useEffect(() => {
+  const [products, setProducts] = useState<Product[]>([])
+  const [productsPending, setProductsPending] = useState(false)
+  const [productView, setProductView] = useState<
+    'list' | 'add' | { editing: Product }
+  >('list')
+
+  const refreshProducts = useCallback(() => {
     if (!activeOrg || activeOrg.type !== 'supplier') {
       setProducts([])
       return
@@ -73,6 +77,57 @@ export default function DashboardPage() {
       .then((data) => setProducts(data.products ?? []))
       .finally(() => setProductsPending(false))
   }, [activeOrg])
+
+  useEffect(() => {
+    setProductView('list')
+    refreshProducts()
+  }, [refreshProducts])
+
+  const handleCreateProduct = async (data: {
+    name: string
+    description: string
+    price: string
+    unit: string
+    category: string
+  }): Promise<{ error?: string }> => {
+    if (!activeOrg) return { error: 'No organization selected' }
+    const res = await fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...data, organizationId: activeOrg.id }),
+    })
+    if (!res.ok) {
+      const json = await res.json()
+      return { error: json.error ?? 'Failed to create product' }
+    }
+    refreshProducts()
+    setProductView('list')
+    return {}
+  }
+
+  const handleUpdateProduct = async (
+    productId: string,
+    data: {
+      name: string
+      description: string
+      price: string
+      unit: string
+      category: string
+    },
+  ): Promise<{ error?: string }> => {
+    const res = await fetch(`/api/products/${productId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) {
+      const json = await res.json()
+      return { error: json.error ?? 'Failed to update product' }
+    }
+    refreshProducts()
+    setProductView('list')
+    return {}
+  }
 
   const handleInvitationAccepted = useCallback(() => {
     setRefreshKey((k) => k + 1)
@@ -195,13 +250,29 @@ export default function DashboardPage() {
           />
         )}
 
-        {activeOrg?.type === 'supplier' && (
-          <ProductList
-            products={products}
-            isPending={productsPending}
-            isOwner={activeOrg.role === 'owner'}
-          />
-        )}
+        {activeOrg?.type === 'supplier' &&
+          (productView === 'add' ? (
+            <ProductForm
+              onSubmit={handleCreateProduct}
+              onCancel={() => setProductView('list')}
+            />
+          ) : productView !== 'list' && 'editing' in productView ? (
+            <ProductForm
+              product={productView.editing}
+              onSubmit={(data) =>
+                handleUpdateProduct(productView.editing.id, data)
+              }
+              onCancel={() => setProductView('list')}
+            />
+          ) : (
+            <ProductList
+              products={products}
+              isPending={productsPending}
+              isOwner={activeOrg.role === 'owner'}
+              onAddProduct={() => setProductView('add')}
+              onEditProduct={(p) => setProductView({ editing: p })}
+            />
+          ))}
       </main>
     </div>
   )

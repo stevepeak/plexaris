@@ -63,11 +63,13 @@ export function ProductList({
   isPending,
   isOwner,
   onAddProduct,
+  onEditProduct,
 }: {
   products: Product[]
   isPending: boolean
   isOwner: boolean
   onAddProduct?: () => void
+  onEditProduct?: (product: Product) => void
 }) {
   if (isPending) {
     return (
@@ -127,7 +129,17 @@ export function ProductList({
             </TableHeader>
             <TableBody>
               {products.map((product) => (
-                <TableRow key={product.id}>
+                <TableRow
+                  key={product.id}
+                  className={
+                    isOwner && onEditProduct ? 'cursor-pointer' : undefined
+                  }
+                  onClick={
+                    isOwner && onEditProduct
+                      ? () => onEditProduct(product)
+                      : undefined
+                  }
+                >
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {product.category ?? '-'}
