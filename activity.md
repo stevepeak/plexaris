@@ -49,3 +49,17 @@ Updated middleware to handle all auth redirects server-side:
 - Removed client-side `useSession` + `useEffect` redirect pattern from home page, eliminating the "Redirecting..." flash
 
 Screenshots: `screenshots/auth-redirects.png`
+
+## 2026-02-02 — org-schema
+
+Added `organization`, `membership`, and `invitation` tables to the database schema:
+
+- **`organization`** table with columns: id, name, type (supplier/horeca), status (unclaimed/claimed/archived), description, logoUrl, phone, email, address, deliveryAddress, createdAt, updatedAt, archivedAt (soft delete)
+- **`membership`** table linking users to organizations with role (owner/member), unique constraint on (userId, organizationId)
+- **`invitation`** table for pending org invitations with token (unique), expiresAt, and acceptedAt
+- Created Drizzle schema in `packages/db/src/org-schema.ts` and exported from `packages/db/src/schema.ts`
+- Generated migration `0001_flawless_paper_doll.sql` and applied it to the database
+- All foreign keys reference `user.id` and `organization.id` as appropriate
+- Verified all 7 tables exist in the database: user, session, account, verification, organization, membership, invitation
+
+Screenshots: `screenshots/org-schema.png`
