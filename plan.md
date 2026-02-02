@@ -24,8 +24,8 @@ Work on these epics:
 - [x] **04-01 Product schema**: Add `product` table to DB schema (id, organizationId, name, description, price, unit, category, status, images JSON, createdAt, updatedAt, archivedAt). Generate and run migration.
   - passes: true
 
-- [ ] **04-02 Product CRUD API**: Build API routes for products — `POST /api/products` (create), `GET /api/products?organizationId=` (list), `GET /api/products/[id]` (detail), `PATCH /api/products/[id]` (update), `POST /api/products/[id]/archive` (archive).
-  - passes: false
+- [x] **04-02 Product CRUD API**: Build API routes for products — `POST /api/products` (create), `GET /api/products?organizationId=` (list), `GET /api/products/[id]` (detail), `PATCH /api/products/[id]` (update), `POST /api/products/[id]/archive` (archive).
+  - passes: true
 
 - [ ] **04-03 Supplier product dashboard**: Build product list view in supplier dashboard showing all products with name, price, unit, category, status. Add "Add Product" button.
   - passes: false

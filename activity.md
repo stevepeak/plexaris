@@ -68,3 +68,17 @@ Added `product` table to the database schema with Drizzle ORM.
 - **Verified**: Product table created in PostgreSQL with correct column types, constraints, and defaults. App dashboard loads without errors after migration.
 
 Screenshot: `screenshots/04-01-product-schema.png`
+
+### 04-02 Product CRUD API
+
+Built full CRUD API routes for products.
+
+- **POST /api/products**: Creates a new product. Requires authentication and owner role on the specified organization. Accepts `organizationId`, `name`, `description`, `price`, `unit`, `category`, and `images`. Returns 201 with the created product (default status `draft`).
+- **GET /api/products?organizationId=**: Lists non-archived products for an organization. Public endpoint (no auth required). Returns products ordered by newest first. Returns 400 if `organizationId` is missing, 404 if the organization doesn't exist.
+- **GET /api/products/[id]**: Returns a single product by ID. Public endpoint. Returns 404 if not found.
+- **PATCH /api/products/[id]**: Updates a product. Requires authentication and owner role on the product's organization. Supports partial updates — only provided fields are changed. Returns 404 if product not found, 403 if not an owner.
+- **POST /api/products/[id]/archive**: Toggles archive state. If the product is active, sets `status` to `archived` and populates `archivedAt`. If already archived, restores it to `draft` status and clears `archivedAt`. Requires authentication and owner role.
+
+Tested all endpoints with "Bakkerij de Gouden Korst" supplier org — verified create (201), list (200), detail (200), update (200), archive (200), restore (200), 404 for missing products, and 400 for missing query params.
+
+Screenshot: `screenshots/04-02-product-crud-api.png`
