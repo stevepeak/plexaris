@@ -53,8 +53,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Authenticated users on auth routes: check if they have orgs
+  // Authenticated users on auth routes: honour redirect param or check orgs
   if (isAuthRoute && isAuthenticated) {
+    const redirect = request.nextUrl.searchParams.get('redirect')
+    if (redirect?.startsWith('/claim/')) {
+      return NextResponse.redirect(new URL(redirect, request.url))
+    }
     const hasOrgs = await userHasOrganizations(request)
     return NextResponse.redirect(
       new URL(hasOrgs ? '/dashboard' : '/onboarding', request.url),

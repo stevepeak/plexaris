@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,8 @@ import { authClient } from '@/lib/auth-client'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirect = searchParams.get('redirect')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -40,8 +42,12 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/dashboard')
+    router.push(redirect ?? '/dashboard')
   }
+
+  const signupHref = redirect
+    ? `/signup?redirect=${encodeURIComponent(redirect)}`
+    : '/signup'
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -60,6 +66,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="you@example.com"
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -71,6 +78,7 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 placeholder="Your password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -88,7 +96,7 @@ export default function LoginPage() {
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}
             <Link
-              href="/signup"
+              href={signupHref}
               className="text-primary underline-offset-4 hover:underline"
             >
               Sign up

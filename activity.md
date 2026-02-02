@@ -10,3 +10,18 @@ Added `GET /api/claim/[token]` and `POST /api/claim/[token]` API routes for supp
 Tested with seeded data: created an unclaimed "Beukappeltarten B.V." supplier org with a claim token, verified GET preview, POST claim, and re-use prevention (used tokens return 404).
 
 Screenshot: `screenshots/03-01-claim-api-endpoint.png`
+
+### 03-02 Claim page UI
+
+Built `/claim/[token]` page with full claim flow:
+
+- **Preview state**: Fetches org details via `GET /api/claim/[token]` and displays name, type badge, description, contact email/phone, and address. Shows loading skeleton while fetching.
+- **Auth handling**: If the user is authenticated, shows a "Claim organization" button. If unauthenticated, shows a sign-in-required alert with links to sign up or log in, both passing a `redirect` query param so the user returns to the claim page after auth.
+- **Claim flow**: Clicking "Claim organization" calls `POST /api/claim/[token]`, then shows a success card with green checkmark and "Go to dashboard" button.
+- **Error states**: Handles 404 (token not found/used), 410 (expired), and 409 (already claimed) with descriptive error cards and a "Go home" button.
+- **Redirect support**: Updated login and signup pages to honour a `redirect` query parameter. Updated middleware to redirect authenticated users on auth routes to `/claim/*` paths when the redirect param is present.
+- **Component extraction**: Extracted `ClaimCard` presentational component with full Storybook coverage (loading, preview authenticated/unauthenticated, claiming, claimed, error not found/expired/already claimed, minimal details).
+
+Tested with seeded data: created "Bakkerij de Gouden Korst" supplier org, verified preview display, successful claim, and error on re-use.
+
+Screenshots: `screenshots/03-02-claim-page-preview.png`, `screenshots/03-02-claim-page-success.png`, `screenshots/03-02-claim-page-error.png`

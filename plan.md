@@ -10,8 +10,8 @@ Work on these epics:
 - [x] **03-01 Claim API endpoint**: Build `POST /api/claim/[token]` that validates token, checks expiry/usage, returns org preview for GET and processes claim for POST (creates membership, marks token used, sets org status to claimed).
   - passes: true
 
-- [ ] **03-02 Claim page UI**: Build `/claim/[token]` page that shows org preview (name, description, address), handles auth (redirect to signup/login if unauthenticated, then return), and calls claim API on confirmation.
-  - passes: false
+- [x] **03-02 Claim page UI**: Build `/claim/[token]` page that shows org preview (name, description, address), handles auth (redirect to signup/login if unauthenticated, then return), and calls claim API on confirmation.
+  - passes: true
 
 - [ ] **03-03 Supplier profile page**: Build `/supplier/[id]` public read-only profile page showing org name, description, logo, contact info, address, and placeholder for products list.
   - passes: false
