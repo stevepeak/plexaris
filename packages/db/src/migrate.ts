@@ -12,9 +12,8 @@ async function runMigrations() {
   console.log('🔄 Running migrations...', process.env.DATABASE_URL)
 
   // Create connection for migrations
-  // eslint-disable-next-line no-process-env
   const migrationClient = postgres(
-    process.env.DATABASE_URL || 'postgres://postgres@localhost:5432/plexaris',
+    process.env.DATABASE_URL || 'postgres://postgres@localhost:5432/plexaris', // eslint-disable-line no-process-env
     { max: 1 },
   )
 
