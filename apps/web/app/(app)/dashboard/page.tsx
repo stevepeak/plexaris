@@ -3,6 +3,7 @@
 import { LogOut, Mail, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -29,6 +30,12 @@ function getInitials(name: string | undefined): string {
 export default function DashboardPage() {
   const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
+  const {
+    organizations,
+    activeOrg,
+    switchOrg,
+    isPending: orgsPending,
+  } = useActiveOrg()
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -39,7 +46,16 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-          <span className="text-lg font-semibold">Plexaris</span>
+          <div className="flex items-center gap-4">
+            <span className="text-lg font-semibold">Plexaris</span>
+            <Separator orientation="vertical" className="h-6" />
+            <OrgSwitcher
+              organizations={organizations}
+              activeOrg={activeOrg}
+              onSwitch={switchOrg}
+              isPending={orgsPending}
+            />
+          </div>
           {isPending ? (
             <Skeleton className="h-8 w-8 rounded-full" />
           ) : (

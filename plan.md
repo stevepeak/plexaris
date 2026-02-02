@@ -10,7 +10,7 @@ Work on this epic.
 - [x] **auth-redirects** — Update middleware: unauthenticated users go to `/login` (not `/`), authenticated users on `/login`/`/signup` go to `/dashboard`. Home page `/` redirects based on auth state. <!-- passes: true -->
 - [x] **org-schema** — Add `organizations` and `memberships` tables to DB schema per the data model. Generate and apply migration. <!-- passes: true -->
 - [x] **org-creation** — Create organization creation flow after signup (choose Supplier or Horeca, enter business details). <!-- passes: true -->
-- [ ] **org-switcher** — Add organization switcher in dashboard header for users with multiple orgs. <!-- passes: false -->
+- [x] **org-switcher** — Add organization switcher in dashboard header for users with multiple orgs. <!-- passes: true -->
 - [ ] **user-invitation** — Invite users by email to join an organization. Accept/reject flow. <!-- passes: false -->
 - [ ] **user-profile** — Create `/settings/profile` page for editing name, email, password. <!-- passes: false -->
 - [ ] **org-settings** — Create `/settings/organization` page for editing org details, viewing members. <!-- passes: false -->

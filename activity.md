@@ -78,3 +78,17 @@ Created organization creation flow after signup:
 - Full flow: signup → onboarding (type select → details form → submit) → dashboard
 
 Screenshots: `screenshots/org-creation.png`
+
+## 2026-02-02 — org-switcher
+
+Added organization switcher to the dashboard header:
+
+- **`OrgSwitcher` component** (`components/org-switcher.tsx`) with dropdown menu showing all user organizations, active org indicator (checkmark), org type and role labels, and "Create organization" link
+- **`useActiveOrg` hook** fetches orgs from `/api/organizations/mine`, persists active org selection in localStorage (`plexaris:activeOrgId`), and restores it on reload
+- **Dashboard header** updated with org switcher between "Plexaris" branding and user profile, separated by a vertical divider
+- **Trigger button** displays active org name, type badge, building icon, and chevron indicator
+- **Dropdown items** show org name, type, role, and checkmark for the currently active org
+- **"Create organization"** option at the bottom navigates to `/onboarding`
+- **Storybook story** (`components/org-switcher.stories.tsx`) with Default (multiple orgs), SingleOrg, and Loading variants
+
+Screenshots: `screenshots/org-switcher.png`, `screenshots/org-switcher-open.png`
