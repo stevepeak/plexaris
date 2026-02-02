@@ -18,7 +18,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@kyoto/eslint-config": "workspace:*",
+    "@plexaris/eslint-config": "workspace:*",
     "@types/node": "catalog:",
     "tsconfig": "workspace:*",
     "typescript": "catalog:"

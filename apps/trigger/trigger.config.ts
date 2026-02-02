@@ -11,7 +11,7 @@ import { setupTelemetry } from './src/telemetry'
 export default defineConfig({
   // Your project ref (you can see it on the Project settings page in the dashboard)
   // eslint-disable-next-line no-process-env
-  project: process.env.TRIGGER_PROJECT_ID || 'proj_krmnzhlblfvcussrwlyu',
+  project: process.env.TRIGGER_PROJECT_ID || '',
   // The paths for your trigger folders
   dirs: ['./src/tasks'],
   build: {
@@ -20,7 +20,7 @@ export default defineConfig({
     extensions: [
       esbuildPlugin(
         sentryEsbuildPlugin({
-          org: 'kyoto',
+          org: 'plexaris',
           project: 'trigger',
           // Find this auth token in settings -> developer settings -> auth tokens
           // eslint-disable-next-line no-process-env

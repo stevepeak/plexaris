@@ -58,7 +58,7 @@ async function startSdk(): Promise<Tracer | undefined> {
       return undefined
     }
 
-    tracer = trace.getTracer('kyoto-agents')
+    tracer = trace.getTracer('plexaris-agents')
     return tracer
   })()
 

@@ -1,11 +1,11 @@
-# Kyoto Template
+# Plexaris Template
 
 A modern, type-safe monorepo template for building full-stack applications with Next.js, tRPC, Drizzle ORM, and Trigger.dev.
 
 ```sh
 入   |
 京   |
-行   |   Kyoto - Vibe git template
+行   |   Plexaris - Vibe git template
 改   |
 善   |
 ```
@@ -26,7 +26,7 @@ A modern, type-safe monorepo template for building full-stack applications with 
 
    ```bash
    # Use GitHub's "Use this template" button, or:
-   gh repo create my-app --template stevepeak/kyoto-template
+   gh repo create my-app --template stevepeak/plexaris-template
    ```
 
 2. **Clone your new repository:**
@@ -104,7 +104,7 @@ A modern, type-safe monorepo template for building full-stack applications with 
 ## 📦 Project Structure
 
 ```
-kyoto-template/
+plexaris-template/
 ├── apps/
 │   ├── web/              # Next.js 16 web application
 │   │   ├── app/          # App Router pages and routes

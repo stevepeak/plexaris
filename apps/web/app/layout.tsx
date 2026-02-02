@@ -7,15 +7,15 @@ import { TRPCProvider } from './providers/trpc-provider'
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Kyoto',
-    default: 'Kyoto',
+    template: '%s | Plexaris',
+    default: 'Plexaris',
   },
   description: 'A modern Next.js application template',
   icons: {
     icon: '/icon.svg',
   },
   openGraph: {
-    title: 'Kyoto',
+    title: 'Plexaris',
     description: 'A modern Next.js application template',
     type: 'website',
   },

@@ -28,9 +28,6 @@ import { type ChangeEvent } from 'react'
 ## Packages
 - use package.json workspaces catalog for installing new dependancies
 
-## Project Management
-- If using the Linear MCP, the team is "kyoto"
-
 ## Current dev status
 
 Current status: `in development`

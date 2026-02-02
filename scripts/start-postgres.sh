@@ -5,7 +5,7 @@ set -e
 POSTGRES_VERSION="16.9.0"
 POSTGRES_PORT=5432
 POSTGRES_USER=postgres
-POSTGRES_DB=kyoto
+POSTGRES_DB=plexaris
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 POSTGRES_DATA_DIR="$PROJECT_ROOT/.postgres-data"

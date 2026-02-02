@@ -16,7 +16,7 @@
   "devDependencies": {
     "trigger.dev": "^4.3.0",
     "@babel/preset-typescript": "^7.28.5",
-    "@kyoto/eslint-config": "workspace:*",
+    "@plexaris/eslint-config": "workspace:*",
     "@sentry/esbuild-plugin": "^4.6.0",
     "@trigger.dev/build": "^4.3.0",
     "@types/node": "catalog:",

@@ -1,10 +1,10 @@
 {
-  "name": "kyoto-vibe-git-template",
-  "repository": "stevepeak/kyoto-template",
+  "name": "plexaris-vibe-git-template",
+  "repository": "stevepeak/plexaris-template",
   "type": "module",
   "version": "0.0.0",
   "private": true,
-  "description": "Kyoto",
+  "description": "Plexaris",
   "workspaces": {
     "packages": [
       "apps/*",
