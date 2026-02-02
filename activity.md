@@ -76,3 +76,24 @@ The task:
 - `apps/trigger/src/index.ts` — export the new task
 
 **Screenshot:** `screenshots/generate-claim-tokens-task.png` (dashboard showing app is running)
+
+### Create CSV export for outreach
+
+Built a Trigger.dev task (`export-outreach-csv`) in `apps/trigger/src/tasks/export-outreach-csv.ts` that exports unclaimed supplier profiles with their claim tokens to CSV format for the outreach team.
+
+The task:
+
+1. Joins the `claim_token` table with `organization` to find unclaimed suppliers with unused tokens
+2. Builds a CSV string with columns: `company_name`, `email`, `claim_url`
+3. Constructs claim URLs from a configurable base URL and the token (defaults to `https://leftman.com/claim/{token}`)
+4. Handles CSV escaping for fields containing commas, quotes, or newlines
+5. Returns the CSV string and total row count
+
+**Payload options:** Optional `claimBaseUrl` to override the default claim URL base.
+
+**Changes:**
+
+- `apps/trigger/src/tasks/export-outreach-csv.ts` — new CSV export task
+- `apps/trigger/src/index.ts` — export the new task
+
+**Screenshot:** `screenshots/export-outreach-csv-task.png` (dashboard showing app is running)
