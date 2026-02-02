@@ -33,7 +33,7 @@ function storeOrgId(id: string) {
   localStorage.setItem(ACTIVE_ORG_KEY, id)
 }
 
-export function useActiveOrg() {
+export function useActiveOrg(refreshKey?: number) {
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [activeOrg, setActiveOrg] = useState<Organization | null>(null)
   const [isPending, setIsPending] = useState(true)
@@ -57,7 +57,7 @@ export function useActiveOrg() {
       }
     }
     void fetchOrgs()
-  }, [])
+  }, [refreshKey])
 
   const switchOrg = useCallback((org: Organization) => {
     setActiveOrg(org)

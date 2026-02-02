@@ -2,8 +2,11 @@
 
 import { LogOut, Mail, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useCallback, useState } from 'react'
 
+import { InviteMembers } from '@/components/invite-members'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
+import { PendingInvitations } from '@/components/pending-invitations'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -30,12 +33,17 @@ function getInitials(name: string | undefined): string {
 export default function DashboardPage() {
   const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
+  const [refreshKey, setRefreshKey] = useState(0)
   const {
     organizations,
     activeOrg,
     switchOrg,
     isPending: orgsPending,
-  } = useActiveOrg()
+  } = useActiveOrg(refreshKey)
+
+  const handleInvitationAccepted = useCallback(() => {
+    setRefreshKey((k) => k + 1)
+  }, [])
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -73,7 +81,9 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+        <PendingInvitations onAccepted={handleInvitationAccepted} />
+
         {isPending ? (
           <Card>
             <CardHeader>
@@ -125,6 +135,13 @@ export default function DashboardPage() {
               </Button>
             </CardContent>
           </Card>
+        )}
+
+        {activeOrg && (
+          <InviteMembers
+            organizationId={activeOrg.id}
+            isOwner={activeOrg.role === 'owner'}
+          />
         )}
       </main>
     </div>

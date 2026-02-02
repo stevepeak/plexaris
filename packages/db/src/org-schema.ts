@@ -40,9 +40,14 @@ export const invitation = pgTable('invitation', {
   organizationId: text('organization_id')
     .notNull()
     .references(() => organization.id),
+  invitedBy: text('invited_by')
+    .notNull()
+    .references(() => user.id),
   email: text('email').notNull(),
+  role: text('role').notNull().default('member'), // 'owner' or 'member'
   token: text('token').notNull().unique(),
   expiresAt: timestamp('expires_at').notNull(),
   acceptedAt: timestamp('accepted_at'),
+  rejectedAt: timestamp('rejected_at'),
   createdAt: timestamp('created_at').notNull(),
 })

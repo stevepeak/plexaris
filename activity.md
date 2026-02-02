@@ -92,3 +92,22 @@ Added organization switcher to the dashboard header:
 - **Storybook story** (`components/org-switcher.stories.tsx`) with Default (multiple orgs), SingleOrg, and Loading variants
 
 Screenshots: `screenshots/org-switcher.png`, `screenshots/org-switcher-open.png`
+
+## 2026-02-02 — user-invitation
+
+Added user invitation flow to invite members by email and accept/reject from the dashboard:
+
+- **Schema update**: Added `invited_by`, `role`, and `rejected_at` columns to the `invitation` table. Generated and applied migration `0002_yielding_captain_marvel.sql`
+- **Exported `isNull`** from `@app/db` for null-checking queries
+- **API route** `POST /api/invitations` — create an invitation (org owners only), with checks for duplicate members and pending invites
+- **API route** `GET /api/invitations?organizationId=xxx` — list all invitations for an org (members can view)
+- **API route** `GET /api/invitations/pending` — list pending invitations for the current user's email
+- **API route** `POST /api/invitations/[id]/accept` — accept an invitation (creates membership, marks invite accepted)
+- **API route** `POST /api/invitations/[id]/reject` — reject an invitation (marks invite rejected)
+- **`InviteMembers` component** (`components/invite-members.tsx`) with invite dialog, invitation list, status badges (pending/accepted/rejected/expired), and success banner
+- **`PendingInvitations` component** (`components/pending-invitations.tsx`) with accept/reject buttons per invitation, org name/type display, and auto-refresh on action
+- **Dashboard** updated to show pending invitations at the top and org invitation management at the bottom
+- **`useActiveOrg` hook** updated to accept a `refreshKey` parameter for re-fetching orgs after accepting an invitation
+- **Storybook stories** for `InviteMembersList` (WithInvitations, Empty, MemberView, Loading) and `PendingInvitationsList` (WithInvitations, SingleInvitation)
+
+Screenshots: `screenshots/user-invitation.png`
