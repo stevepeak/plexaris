@@ -1,6 +1,13 @@
 'use client'
 
-import { Building2, LogOut, Mail, Settings, User } from 'lucide-react'
+import {
+  Building2,
+  LogOut,
+  Mail,
+  Settings,
+  ShoppingCart,
+  User,
+} from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
@@ -172,6 +179,34 @@ export default function DashboardPage() {
 
       <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
         <PendingInvitations onAccepted={handleInvitationAccepted} />
+
+        {activeOrg?.type === 'horeca' && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5" />
+                    Orders
+                  </CardTitle>
+                  <CardDescription>
+                    Place and manage orders from your suppliers
+                  </CardDescription>
+                </div>
+                <Button asChild>
+                  <Link href="/order/new">New Order</Link>
+                </Button>
+              </div>
+            </CardHeader>
+            <Separator />
+            <CardContent className="flex items-center justify-center py-8">
+              <p className="text-sm text-muted-foreground">
+                No orders yet. Start a new order to browse products from your
+                suppliers.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {isPending ? (
           <Card>

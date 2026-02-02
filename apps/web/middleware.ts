@@ -4,7 +4,13 @@ type Session = {
   session: { id: string; userId: string } | null
 }
 
-const protectedRoutes = ['/dashboard', '/settings', '/profile', '/onboarding']
+const protectedRoutes = [
+  '/dashboard',
+  '/settings',
+  '/profile',
+  '/onboarding',
+  '/order',
+]
 const authRoutes = ['/login', '/signup']
 
 export async function middleware(request: NextRequest) {
