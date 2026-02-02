@@ -1,16 +1,26 @@
 'use client'
 
-import { AuthCard } from './components/auth-card'
-import { TriggerCard } from './components/trigger-card'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+
+import { authClient } from '@/lib/auth-client'
 
 export default function HomePage() {
+  const router = useRouter()
+  const { data: session, isPending } = authClient.useSession()
+
+  useEffect(() => {
+    if (isPending) return
+    if (session) {
+      router.replace('/dashboard')
+    } else {
+      router.replace('/login')
+    }
+  }, [session, isPending, router])
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
-      <h1 className="text-4xl font-bold">Hello World</h1>
-      <div className="flex flex-col gap-6 md:flex-row md:items-start">
-        <AuthCard />
-        <TriggerCard />
-      </div>
-    </main>
+    <div className="flex min-h-screen items-center justify-center">
+      <p className="text-muted-foreground">Redirecting...</p>
+    </div>
   )
 }
