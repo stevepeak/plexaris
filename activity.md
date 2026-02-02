@@ -32,3 +32,27 @@ Built a Trigger.dev task (`scrape-horecava`) in `apps/trigger/src/tasks/scrape-h
 - `apps/trigger/src/index.ts` — export the new task
 
 **Screenshot:** `screenshots/horecava-scraper-task.png` (dashboard showing app is running)
+
+### Create supplier seeding task
+
+Built a Trigger.dev task (`seed-suppliers`) in `apps/trigger/src/tasks/seed-suppliers.ts` that takes scraped exhibitor data and inserts unclaimed supplier organization records into the database.
+
+The task:
+
+1. Accepts an array of exhibitors (matching the scraper's output shape) as payload
+2. For each exhibitor, checks for duplicates by matching on company name + type `supplier` (plus email when available)
+3. Creates an organization record with `type: 'supplier'`, `status: 'unclaimed'`, mapping exhibitor fields to the org schema
+4. Processes exhibitors in batches of 50 with per-record error handling
+5. Returns statistics: `{ created, skipped, failed }`
+
+**Deduplication:** Matches on `name` + `type='supplier'` + `email` (when present) to prevent duplicate orgs on re-runs.
+
+**Changes:**
+
+- `apps/trigger/src/tasks/seed-suppliers.ts` — new seeding task
+- `apps/trigger/src/index.ts` — export the new task
+- `apps/trigger/package.json` — added `@app/db` workspace dependency
+
+**Note:** Run `bun install` to link the `@app/db` workspace dependency in the trigger app's node_modules.
+
+**Screenshot:** `screenshots/seed-suppliers-task.png` (dashboard showing app is running)

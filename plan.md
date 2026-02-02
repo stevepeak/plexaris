@@ -10,8 +10,8 @@ Work on this epic.
 - [x] **Create Horecava exhibitor scraper task** — Build a Trigger.dev task in `apps/trigger/src/tasks/` that scrapes the Horecava exhibitors page, extracts company name, email, phone, website, and description for each exhibitor.
   - passes: true
 
-- [ ] **Create supplier seeding task** — Build a Trigger.dev task that takes scraped exhibitor data and inserts unclaimed supplier organization records into the database, with deduplication on company name + email.
-  - passes: false
+- [x] **Create supplier seeding task** — Build a Trigger.dev task that takes scraped exhibitor data and inserts unclaimed supplier organization records into the database, with deduplication on company name + email.
+  - passes: true
 
 - [ ] **Create claim token generation task** — Build a Trigger.dev task that generates unique claim tokens (UUID, 90-day expiry) for all unclaimed supplier organizations and stores them in the `claim_token` table.
   - passes: false

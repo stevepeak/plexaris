@@ -3,6 +3,7 @@
     "@ai-sdk/openai": "catalog:",
     "@app/agents": "workspace:*",
     "@app/config": "workspace:*",
+    "@app/db": "workspace:*",
     "@opentelemetry/api": "catalog:",
     "@opentelemetry/sdk-node": "catalog:",
     "@sentry/node": "catalog:",
