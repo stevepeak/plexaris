@@ -1,17 +1,20 @@
-@docs/01-authentication.md
+@docs/02-supplier-data-import.md
 
 Work on this epic.
 
 ## Tasks
 
-- [x] **signup-page** — Create `/signup` page with registration form (name, email, password) and "Enter Demo User" button. After signup, redirect to `/dashboard`. <!-- passes: true -->
-- [x] **login-page** — Create `/login` page with login form (email, password) and link to signup. After login, redirect to `/dashboard`. <!-- passes: true -->
-- [x] **dashboard-page** — Create `/dashboard` page showing authenticated user info with sign-out. Protected route. <!-- passes: true -->
-- [x] **auth-redirects** — Update middleware: unauthenticated users go to `/login` (not `/`), authenticated users on `/login`/`/signup` go to `/dashboard`. Home page `/` redirects based on auth state. <!-- passes: true -->
-- [x] **org-schema** — Add `organizations` and `memberships` tables to DB schema per the data model. Generate and apply migration. <!-- passes: true -->
-- [x] **org-creation** — Create organization creation flow after signup (choose Supplier or Horeca, enter business details). <!-- passes: true -->
-- [x] **org-switcher** — Add organization switcher in dashboard header for users with multiple orgs. <!-- passes: true -->
-- [x] **user-invitation** — Invite users by email to join an organization. Accept/reject flow. <!-- passes: true -->
-- [x] **user-profile** — Create `/settings/profile` page for editing name, email, password. <!-- passes: true -->
-- [x] **org-settings** — Create `/settings/organization` page for editing org details, viewing members. <!-- passes: true -->
-- [x] **account-management** — Leave org, archive org, archive account flows. <!-- passes: true -->
+- [x] **Add `claim_token` table to database schema** — Create the `claim_token` table in `packages/db/src/org-schema.ts` per the spec in `docs/database.md`, generate and apply the Drizzle migration. Fields: id, organizationId (FK), email, token (unique), expiresAt, usedAt, createdAt.
+  - passes: true
+
+- [ ] **Create Horecava exhibitor scraper task** — Build a Trigger.dev task in `apps/trigger/src/tasks/` that scrapes the Horecava exhibitors page, extracts company name, email, phone, website, and description for each exhibitor.
+  - passes: false
+
+- [ ] **Create supplier seeding task** — Build a Trigger.dev task that takes scraped exhibitor data and inserts unclaimed supplier organization records into the database, with deduplication on company name + email.
+  - passes: false
+
+- [ ] **Create claim token generation task** — Build a Trigger.dev task that generates unique claim tokens (UUID, 90-day expiry) for all unclaimed supplier organizations and stores them in the `claim_token` table.
+  - passes: false
+
+- [ ] **Create CSV export for outreach** — Build a Trigger.dev task (or utility script) that exports unclaimed supplier profiles with their claim tokens to CSV format (columns: company name, email, claim URL) for the outreach team.
+  - passes: false
