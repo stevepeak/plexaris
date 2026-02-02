@@ -35,7 +35,7 @@ export async function GET(
       id: organization.id,
       name: organization.name,
       type: organization.type,
-      status: organization.status,
+      claimed: organization.claimed,
       description: organization.description,
       logoUrl: organization.logoUrl,
       phone: organization.phone,

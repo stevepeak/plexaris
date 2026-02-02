@@ -50,7 +50,7 @@ export async function GET(
       id: organization.id,
       name: organization.name,
       type: organization.type,
-      status: organization.status,
+      claimed: organization.claimed,
       description: organization.description,
       logoUrl: organization.logoUrl,
       phone: organization.phone,
@@ -109,7 +109,7 @@ export async function POST(
     )
   }
 
-  if (organization.status === 'claimed') {
+  if (organization.claimed) {
     return NextResponse.json(
       { error: 'Organization has already been claimed' },
       { status: 409 },
@@ -120,7 +120,6 @@ export async function POST(
 
   // Create membership — claiming user becomes owner
   await db.insert(schema.membership).values({
-    id: crypto.randomUUID(),
     userId: session.user.id,
     organizationId: organization.id,
     role: 'owner',
@@ -134,10 +133,10 @@ export async function POST(
     .set({ usedAt: now })
     .where(eq(schema.claimToken.id, claim.id))
 
-  // Update organization status to claimed
+  // Update organization to claimed
   await db
     .update(schema.organization)
-    .set({ status: 'claimed', updatedAt: now })
+    .set({ claimed: true, updatedAt: now })
     .where(eq(schema.organization.id, organization.id))
 
   const updatedOrg = await db.query.organization.findFirst({

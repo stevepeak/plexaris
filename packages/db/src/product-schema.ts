@@ -1,10 +1,17 @@
-import { jsonb, numeric, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import {
+  jsonb,
+  numeric,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core'
 
 import { organization } from './org-schema'
 
 export const product = pgTable('product', {
-  id: text('id').primaryKey(),
-  organizationId: text('organization_id')
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id')
     .notNull()
     .references(() => organization.id),
   name: text('name').notNull(),

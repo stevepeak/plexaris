@@ -1,4 +1,4 @@
-import { and, createDb, eq, isNull, ne, schema } from '@app/db'
+import { and, createDb, eq, isNull, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
       id: schema.organization.id,
       name: schema.organization.name,
       type: schema.organization.type,
-      status: schema.organization.status,
+      claimed: schema.organization.claimed,
       role: schema.membership.role,
     })
     .from(schema.membership)
@@ -30,7 +30,6 @@ export async function GET(request: Request) {
     .where(
       and(
         eq(schema.membership.userId, session.user.id),
-        ne(schema.organization.status, 'archived'),
         isNull(schema.organization.archivedAt),
       ),
     )

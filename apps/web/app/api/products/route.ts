@@ -43,25 +43,22 @@ export async function POST(request: Request) {
   }
 
   const now = new Date()
-  const productId = crypto.randomUUID()
 
-  await db.insert(schema.product).values({
-    id: productId,
-    organizationId,
-    name: name.trim(),
-    description: description || null,
-    price: price != null ? String(price) : null,
-    unit: unit || null,
-    category: category || null,
-    status: 'draft',
-    images: images || [],
-    createdAt: now,
-    updatedAt: now,
-  })
-
-  const product = await db.query.product.findFirst({
-    where: eq(schema.product.id, productId),
-  })
+  const [product] = await db
+    .insert(schema.product)
+    .values({
+      organizationId,
+      name: name.trim(),
+      description: description || null,
+      price: price != null ? String(price) : null,
+      unit: unit || null,
+      category: category || null,
+      status: 'draft',
+      images: images || [],
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()
 
   return NextResponse.json({ product }, { status: 201 })
 }

@@ -98,6 +98,7 @@ export function AuthCard() {
             <input
               id="name"
               type="text"
+              autoComplete="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -117,6 +118,7 @@ export function AuthCard() {
           <input
             id="email"
             type="email"
+            autoComplete="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -135,6 +137,9 @@ export function AuthCard() {
           <input
             id="password"
             type="password"
+            autoComplete={
+              mode === 'signin' ? 'current-password' : 'new-password'
+            }
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

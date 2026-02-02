@@ -12,7 +12,7 @@ interface SupplierProfile {
   id: string
   name: string
   type: string
-  status: string
+  claimed: boolean
   description: string | null
   logoUrl: string | null
   phone: string | null
@@ -188,9 +188,7 @@ export function SupplierProfileCard({
             <CardTitle className="text-2xl">{supplier.name}</CardTitle>
             <div className="flex gap-2">
               <Badge variant="secondary">{supplier.type}</Badge>
-              {supplier.status === 'unclaimed' && (
-                <Badge variant="outline">Unclaimed</Badge>
-              )}
+              {!supplier.claimed && <Badge variant="outline">Unclaimed</Badge>}
             </div>
           </div>
         </div>

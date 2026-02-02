@@ -60,10 +60,9 @@ export const seedSuppliersTask = task({
           const now = new Date()
 
           await db.insert(schema.organization).values({
-            id: crypto.randomUUID(),
             name: exhibitor.name,
             type: 'supplier',
-            status: 'unclaimed',
+            claimed: false,
             description:
               exhibitor.longDescription ?? exhibitor.description ?? null,
             logoUrl: exhibitor.logo ?? null,

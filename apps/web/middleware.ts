@@ -65,14 +65,6 @@ export async function middleware(request: NextRequest) {
     )
   }
 
-  // Authenticated users on onboarding who already have orgs go to dashboard
-  if (isOnboarding && isAuthenticated) {
-    const hasOrgs = await userHasOrganizations(request)
-    if (hasOrgs) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
-  }
-
   // Authenticated users on non-onboarding protected routes without orgs go to onboarding
   if (isProtectedRoute && !isOnboarding && isAuthenticated) {
     const hasOrgs = await userHasOrganizations(request)

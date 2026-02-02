@@ -29,7 +29,7 @@ export const exportOutreachCsvTask = task({
       .where(
         and(
           eq(schema.organization.type, 'supplier'),
-          eq(schema.organization.status, 'unclaimed'),
+          eq(schema.organization.claimed, false),
           isNull(schema.claimToken.usedAt),
         ),
       )

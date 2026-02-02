@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-export type PendingInvitation = {
+type PendingInvitation = {
   id: string
   email: string
   role: string

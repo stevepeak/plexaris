@@ -13,7 +13,10 @@ async function runMigrations() {
 
   // Create connection for migrations
   // eslint-disable-next-line no-process-env
-  const migrationClient = postgres(process.env.DATABASE_URL ?? '', { max: 1 })
+  const migrationClient = postgres(
+    process.env.DATABASE_URL || 'postgres://postgres@localhost:5432/plexaris',
+    { max: 1 },
+  )
 
   try {
     await migrate(drizzle(migrationClient), {

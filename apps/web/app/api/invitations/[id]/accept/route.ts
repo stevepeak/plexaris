@@ -46,7 +46,6 @@ export async function POST(
   // Create membership
   const now = new Date()
   await db.insert(schema.membership).values({
-    id: crypto.randomUUID(),
     userId: session.user.id,
     organizationId: invitation.organizationId,
     role: invitation.role,

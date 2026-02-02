@@ -1,6 +1,8 @@
 import { logger, task } from '@trigger.dev/sdk'
 import { z } from 'zod'
 
+import { seedSuppliersTask } from './seed-suppliers'
+
 const BASE_URL = 'https://www.horecava.nl'
 const LIST_API = `${BASE_URL}/api/events/75/exhibitors`
 const DETAIL_PATH = '/en/exhibitors'
@@ -147,8 +149,12 @@ function sleep(ms: number): Promise<void> {
 
 export const scrapeHorecavaTask = task({
   id: 'scrape-horecava',
-  run: async (): Promise<{ exhibitors: Exhibitor[]; total: number }> => {
-    logger.log('Starting Horecava exhibitor scrape')
+  run: async (payload?: {
+    seed?: boolean
+  }): Promise<{ exhibitors: Exhibitor[]; total: number }> => {
+    const seed = payload?.seed ?? true
+
+    logger.log('Starting Horecava exhibitor scrape', { seed })
 
     // Step 1: Fetch the full exhibitor list from the API
     const listItems = await fetchExhibitorList()
@@ -164,11 +170,12 @@ export const scrapeHorecavaTask = task({
         batch.map((item) => fetchExhibitorDetail(item.slug)),
       )
 
+      const batchExhibitors: Exhibitor[] = []
       for (let j = 0; j < batch.length; j++) {
         const item = batch[j]
         const detail = details[j]
 
-        exhibitors.push({
+        batchExhibitors.push({
           id: item.id,
           slug: item.slug,
           name: item.name,
@@ -181,6 +188,19 @@ export const scrapeHorecavaTask = task({
           countryCode: item.countryCode ?? null,
           logo: item.logo ?? null,
           stands: item.stands ?? [],
+        })
+      }
+
+      exhibitors.push(...batchExhibitors)
+
+      if (seed) {
+        const result = await seedSuppliersTask
+          .triggerAndWait({ exhibitors: batchExhibitors })
+          .unwrap()
+        logger.log('Seeded batch', {
+          created: result.created,
+          skipped: result.skipped,
+          failed: result.failed,
         })
       }
 

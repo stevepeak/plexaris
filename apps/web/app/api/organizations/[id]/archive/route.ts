@@ -36,11 +36,10 @@ export async function POST(
     )
   }
 
-  // Soft-delete: set status to archived and archivedAt timestamp
+  // Soft-delete: set archivedAt timestamp
   await db
     .update(schema.organization)
     .set({
-      status: 'archived',
       archivedAt: new Date(),
       updatedAt: new Date(),
     })

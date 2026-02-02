@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 
-export type Invitation = {
+type Invitation = {
   id: string
   email: string
   role: string
@@ -131,6 +131,7 @@ export function InviteMembersList({
                       id="invite-email"
                       type="email"
                       placeholder="colleague@company.com"
+                      autoComplete="off"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required

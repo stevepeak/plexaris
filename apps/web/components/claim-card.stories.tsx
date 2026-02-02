@@ -20,7 +20,7 @@ const sampleOrg = {
   id: '1',
   name: 'Bakkerij de Gouden Korst',
   type: 'supplier',
-  status: 'unclaimed',
+  claimed: false,
   description:
     'Artisan bakery specializing in sourdough breads and traditional Dutch pastries. Supplying fresh baked goods to hotels and restaurants since 1987.',
   logoUrl: null,
@@ -164,7 +164,7 @@ export const MinimalDetails: Story = {
           id: '2',
           name: 'Simple Supplies B.V.',
           type: 'supplier',
-          status: 'unclaimed',
+          claimed: false,
           description: null,
           logoUrl: null,
           phone: null,

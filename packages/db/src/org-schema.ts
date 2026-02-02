@@ -1,12 +1,27 @@
-import { pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from 'drizzle-orm/pg-core'
 
 import { user } from './auth-schema'
 
+export const organizationTypeEnum = pgEnum('organization_type', [
+  'supplier',
+  'horeca',
+])
+
+export const membershipRoleEnum = pgEnum('membership_role', ['owner', 'member'])
+
 export const organization = pgTable('organization', {
-  id: text('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
-  type: text('type').notNull(), // 'supplier' or 'horeca'
-  status: text('status').notNull().default('unclaimed'), // 'unclaimed', 'claimed', 'archived'
+  type: organizationTypeEnum('type').notNull(),
+  claimed: boolean('claimed').notNull().default(false),
   description: text('description'),
   logoUrl: text('logo_url'),
   phone: text('phone'),
@@ -22,14 +37,14 @@ export const organization = pgTable('organization', {
 export const membership = pgTable(
   'membership',
   {
-    id: text('id').primaryKey(),
+    id: uuid('id').primaryKey().defaultRandom(),
     userId: text('user_id')
       .notNull()
       .references(() => user.id),
-    organizationId: text('organization_id')
+    organizationId: uuid('organization_id')
       .notNull()
       .references(() => organization.id),
-    role: text('role').notNull().default('member'), // 'owner' or 'member'
+    role: membershipRoleEnum('role').notNull().default('member'),
     createdAt: timestamp('created_at').notNull(),
     updatedAt: timestamp('updated_at').notNull(),
   },
@@ -37,8 +52,8 @@ export const membership = pgTable(
 )
 
 export const claimToken = pgTable('claim_token', {
-  id: text('id').primaryKey(),
-  organizationId: text('organization_id')
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id')
     .notNull()
     .references(() => organization.id),
   email: text('email').notNull(),
@@ -49,15 +64,15 @@ export const claimToken = pgTable('claim_token', {
 })
 
 export const invitation = pgTable('invitation', {
-  id: text('id').primaryKey(),
-  organizationId: text('organization_id')
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id')
     .notNull()
     .references(() => organization.id),
   invitedBy: text('invited_by')
     .notNull()
     .references(() => user.id),
   email: text('email').notNull(),
-  role: text('role').notNull().default('member'), // 'owner' or 'member'
+  role: membershipRoleEnum('role').notNull().default('member'),
   token: text('token').notNull().unique(),
   expiresAt: timestamp('expires_at').notNull(),
   acceptedAt: timestamp('accepted_at'),

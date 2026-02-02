@@ -18,7 +18,7 @@ type Organization = {
   id: string
   name: string
   type: 'supplier' | 'horeca'
-  status: string
+  claimed: boolean
   role: 'owner' | 'member'
 }
 

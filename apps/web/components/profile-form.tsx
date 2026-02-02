@@ -144,6 +144,7 @@ export function ProfileFormFields({
               <Input
                 id="name"
                 type="text"
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -151,7 +152,13 @@ export function ProfileFormFields({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} disabled />
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                disabled
+              />
               <p className="text-xs text-muted-foreground">
                 Email cannot be changed
               </p>
@@ -197,6 +204,7 @@ export function ProfileFormFields({
               <Input
                 id="currentPassword"
                 type="password"
+                autoComplete="current-password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
@@ -209,6 +217,7 @@ export function ProfileFormFields({
                   id="newPassword"
                   type="password"
                   placeholder="Min. 8 characters"
+                  autoComplete="new-password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
@@ -220,6 +229,7 @@ export function ProfileFormFields({
                 <Input
                   id="confirmPassword"
                   type="password"
+                  autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required

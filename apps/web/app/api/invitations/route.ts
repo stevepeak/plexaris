@@ -83,18 +83,18 @@ export async function POST(request: Request) {
   const now = new Date()
   const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-  const invitation = {
-    id: crypto.randomUUID(),
-    organizationId,
-    invitedBy: session.user.id,
-    email,
-    role: inviteRole,
-    token: crypto.randomUUID(),
-    expiresAt,
-    createdAt: now,
-  }
-
-  await db.insert(schema.invitation).values(invitation)
+  const [invitation] = await db
+    .insert(schema.invitation)
+    .values({
+      organizationId,
+      invitedBy: session.user.id,
+      email,
+      role: inviteRole,
+      token: crypto.randomUUID(),
+      expiresAt,
+      createdAt: now,
+    })
+    .returning()
 
   return NextResponse.json({ invitation }, { status: 201 })
 }

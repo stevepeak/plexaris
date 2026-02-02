@@ -26,34 +26,29 @@ export async function POST(request: Request) {
   }
 
   const now = new Date()
-  const orgId = crypto.randomUUID()
-  const membershipId = crypto.randomUUID()
 
-  await db.insert(schema.organization).values({
-    id: orgId,
-    name,
-    type,
-    status: 'claimed',
-    description: description || null,
-    phone: phone || null,
-    email: email || null,
-    address: address || null,
-    deliveryAddress: deliveryAddress || null,
-    createdAt: now,
-    updatedAt: now,
-  })
+  const [org] = await db
+    .insert(schema.organization)
+    .values({
+      name,
+      type,
+      claimed: true,
+      description: description || null,
+      phone: phone || null,
+      email: email || null,
+      address: address || null,
+      deliveryAddress: deliveryAddress || null,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()
 
   await db.insert(schema.membership).values({
-    id: membershipId,
     userId: session.user.id,
-    organizationId: orgId,
+    organizationId: org.id,
     role: 'owner',
     createdAt: now,
     updatedAt: now,
-  })
-
-  const org = await db.query.organization.findFirst({
-    where: eq(schema.organization.id, orgId),
   })
 
   return NextResponse.json({ organization: org }, { status: 201 })

@@ -19,7 +19,7 @@ interface OrganizationPreview {
   id: string
   name: string
   type: string
-  status: string
+  claimed: boolean
   description: string | null
   logoUrl: string | null
   phone: string | null

@@ -50,6 +50,13 @@
       "when": 1770066158299,
       "tag": "0006_small_doctor_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1770130000000,
+      "tag": "0007_schema_refactor",
+      "breakpoints": true
     }
   ]
 }
