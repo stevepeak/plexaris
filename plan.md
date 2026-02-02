@@ -1,20 +1,40 @@
-@docs/02-supplier-data-import.md
+Work on these epics:
 
-Work on this epic.
+- @docs/03-supplier-profiles.md
+- @docs/04-product-catalog.md
 
 ## Tasks
 
-- [x] **Add `claim_token` table to database schema** — Create the `claim_token` table in `packages/db/src/org-schema.ts` per the spec in `docs/database.md`, generate and apply the Drizzle migration. Fields: id, organizationId (FK), email, token (unique), expiresAt, usedAt, createdAt.
+### Epic 03 — Supplier Profiles & Claiming
+
+- [x] **03-01 Claim API endpoint**: Build `POST /api/claim/[token]` that validates token, checks expiry/usage, returns org preview for GET and processes claim for POST (creates membership, marks token used, sets org status to claimed).
   - passes: true
 
-- [x] **Create Horecava exhibitor scraper task** — Build a Trigger.dev task in `apps/trigger/src/tasks/` that scrapes the Horecava exhibitors page, extracts company name, email, phone, website, and description for each exhibitor.
-  - passes: true
+- [ ] **03-02 Claim page UI**: Build `/claim/[token]` page that shows org preview (name, description, address), handles auth (redirect to signup/login if unauthenticated, then return), and calls claim API on confirmation.
+  - passes: false
 
-- [x] **Create supplier seeding task** — Build a Trigger.dev task that takes scraped exhibitor data and inserts unclaimed supplier organization records into the database, with deduplication on company name + email.
-  - passes: true
+- [ ] **03-03 Supplier profile page**: Build `/supplier/[id]` public read-only profile page showing org name, description, logo, contact info, address, and placeholder for products list.
+  - passes: false
 
-- [x] **Create claim token generation task** — Build a Trigger.dev task that generates unique claim tokens (UUID, 90-day expiry) for all unclaimed supplier organizations and stores them in the `claim_token` table.
-  - passes: true
+- [ ] **03-04 Supplier profile edit**: Add edit functionality to org settings for supplier orgs — editable fields: name, description, logo URL, phone, email, address, delivery areas. Owner-only access.
+  - passes: false
 
-- [x] **Create CSV export for outreach** — Build a Trigger.dev task (or utility script) that exports unclaimed supplier profiles with their claim tokens to CSV format (columns: company name, email, claim URL) for the outreach team.
-  - passes: true
+### Epic 04 — Product Catalog
+
+- [ ] **04-01 Product schema**: Add `product` table to DB schema (id, organizationId, name, description, price, unit, category, status, images JSON, createdAt, updatedAt, archivedAt). Generate and run migration.
+  - passes: false
+
+- [ ] **04-02 Product CRUD API**: Build API routes for products — `POST /api/products` (create), `GET /api/products?organizationId=` (list), `GET /api/products/[id]` (detail), `PATCH /api/products/[id]` (update), `POST /api/products/[id]/archive` (archive).
+  - passes: false
+
+- [ ] **04-03 Supplier product dashboard**: Build product list view in supplier dashboard showing all products with name, price, unit, category, status. Add "Add Product" button.
+  - passes: false
+
+- [ ] **04-04 Product add/edit form**: Build product form (name, description, price, unit selector, category selector). Used for both create and edit. Include Storybook story.
+  - passes: false
+
+- [ ] **04-05 Product archive/restore**: Add archive button with confirmation dialog to product list. Show archived products in separate tab. Add restore functionality.
+  - passes: false
+
+- [ ] **04-06 Public product display**: Show products on supplier profile page (`/supplier/[id]`). Product cards with name, description, price, unit. Filter by category.
+  - passes: false
