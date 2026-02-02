@@ -1,6 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react"
-import { Popover, PopoverContent, PopoverTrigger } from "./popover"
+import  { type Meta, type StoryObj } from "@storybook/react"
+
 import { Button } from "./button"
+import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 
 const meta: Meta<typeof Popover> = {
   title: "ui/Popover",

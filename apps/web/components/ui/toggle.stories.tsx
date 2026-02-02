@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react"
+import  { type Meta, type StoryObj } from "@storybook/react"
+
 import { Toggle } from "./toggle"
 
 const meta: Meta<typeof Toggle> = {

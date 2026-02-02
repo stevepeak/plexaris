@@ -1,10 +1,11 @@
-import type { Meta, StoryObj } from "@storybook/react"
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Form } from "./form"
-import { Input } from "./input"
-import { Button } from "./button"
+import { zodResolver } from "@hookform/resolvers/zod"
+import  { type Meta, type StoryObj } from "@storybook/react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+
+import { Button } from "./button"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./form"
+import { Input } from "./input"
 
 const meta: Meta = {
   title: "ui/Form",

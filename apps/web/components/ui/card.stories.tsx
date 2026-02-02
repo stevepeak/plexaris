@@ -1,6 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./card"
+import  { type Meta, type StoryObj } from "@storybook/react"
+
 import { Button } from "./button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./card"
 
 const meta: Meta<typeof Card> = {
   title: "ui/Card",

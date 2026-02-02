@@ -1,7 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react"
-import { Toaster } from "./sonner"
-import { Button } from "./button"
+import  { type Meta, type StoryObj } from "@storybook/react"
 import { toast } from "sonner"
+
+import { Button } from "./button"
+import { Toaster } from "./sonner"
 
 const meta: Meta<typeof Toaster> = {
   title: "ui/Sonner",

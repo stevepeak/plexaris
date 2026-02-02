@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react"
+import  { type Meta, type StoryObj } from "@storybook/react"
+
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "./command"
 
 const meta: Meta<typeof Command> = {
