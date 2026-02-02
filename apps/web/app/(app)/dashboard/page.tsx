@@ -3,11 +3,12 @@
 import { Building2, LogOut, Mail, Settings, User } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { InviteMembers } from '@/components/invite-members'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { PendingInvitations } from '@/components/pending-invitations'
+import { ProductList } from '@/components/product-list'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -43,6 +44,35 @@ export default function DashboardPage() {
     switchOrg,
     isPending: orgsPending,
   } = useActiveOrg(refreshKey)
+
+  const [products, setProducts] = useState<
+    {
+      id: string
+      name: string
+      description: string | null
+      price: string | null
+      unit: string | null
+      category: string | null
+      status: string
+      images: string[]
+      createdAt: string
+      updatedAt: string
+      archivedAt: string | null
+    }[]
+  >([])
+  const [productsPending, setProductsPending] = useState(false)
+
+  useEffect(() => {
+    if (!activeOrg || activeOrg.type !== 'supplier') {
+      setProducts([])
+      return
+    }
+    setProductsPending(true)
+    void fetch(`/api/products?organizationId=${activeOrg.id}`)
+      .then((res) => (res.ok ? res.json() : { products: [] }))
+      .then((data) => setProducts(data.products ?? []))
+      .finally(() => setProductsPending(false))
+  }, [activeOrg])
 
   const handleInvitationAccepted = useCallback(() => {
     setRefreshKey((k) => k + 1)
@@ -161,6 +191,14 @@ export default function DashboardPage() {
         {activeOrg && (
           <InviteMembers
             organizationId={activeOrg.id}
+            isOwner={activeOrg.role === 'owner'}
+          />
+        )}
+
+        {activeOrg?.type === 'supplier' && (
+          <ProductList
+            products={products}
+            isPending={productsPending}
             isOwner={activeOrg.role === 'owner'}
           />
         )}

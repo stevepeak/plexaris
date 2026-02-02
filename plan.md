@@ -27,8 +27,8 @@ Work on these epics:
 - [x] **04-02 Product CRUD API**: Build API routes for products — `POST /api/products` (create), `GET /api/products?organizationId=` (list), `GET /api/products/[id]` (detail), `PATCH /api/products/[id]` (update), `POST /api/products/[id]/archive` (archive).
   - passes: true
 
-- [ ] **04-03 Supplier product dashboard**: Build product list view in supplier dashboard showing all products with name, price, unit, category, status. Add "Add Product" button.
-  - passes: false
+- [x] **04-03 Supplier product dashboard**: Build product list view in supplier dashboard showing all products with name, price, unit, category, status. Add "Add Product" button.
+  - passes: true
 
 - [ ] **04-04 Product add/edit form**: Build product form (name, description, price, unit selector, category selector). Used for both create and edit. Include Storybook story.
   - passes: false

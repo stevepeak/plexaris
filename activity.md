@@ -82,3 +82,15 @@ Built full CRUD API routes for products.
 Tested all endpoints with "Bakkerij de Gouden Korst" supplier org — verified create (201), list (200), detail (200), update (200), archive (200), restore (200), 404 for missing products, and 400 for missing query params.
 
 Screenshot: `screenshots/04-02-product-crud-api.png`
+
+### 04-03 Supplier product dashboard
+
+Added a product list view to the supplier dashboard.
+
+- **ProductList component**: Created `components/product-list.tsx` — a presentational component that displays products in a table with Name, Category, Price, and Status columns. Shows loading skeleton while fetching, empty state with icon when no products exist, and an "Add Product" button for owners. Prices are formatted as EUR with unit suffix (e.g., "€ 2,75 / piece"). Status badges use appropriate variants: default (active), secondary (draft), outline (archived).
+- **Dashboard integration**: Updated the dashboard page to fetch and display products when the active organization is a supplier. Uses the existing `GET /api/products?organizationId=` API endpoint. The product list only appears for supplier-type organizations and refreshes when switching orgs.
+- **Storybook**: Full coverage with stories for loading, with products, empty owner, empty member, member view, and no prices states.
+
+Tested with "Bakkerij de Gouden Korst" supplier org — verified product table displays 2 seeded products (Croissant and Artisan Sourdough Bread) with correct prices, categories, and status badges. Add Product button visible for owner.
+
+Screenshot: `screenshots/04-03-supplier-product-dashboard.png`
