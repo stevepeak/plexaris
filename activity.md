@@ -25,3 +25,16 @@ Built `/claim/[token]` page with full claim flow:
 Tested with seeded data: created "Bakkerij de Gouden Korst" supplier org, verified preview display, successful claim, and error on re-use.
 
 Screenshots: `screenshots/03-02-claim-page-preview.png`, `screenshots/03-02-claim-page-success.png`, `screenshots/03-02-claim-page-error.png`
+
+### 03-03 Supplier profile page
+
+Built `/supplier/[id]` public read-only profile page for suppliers.
+
+- **API route**: Added `GET /api/supplier/[id]` that returns supplier details (name, type, status, description, logo URL, phone, email, address) without authentication. Returns 404 for non-existent orgs or non-supplier orgs.
+- **SupplierProfileCard component**: Presentational component with three states — loading (skeleton), loaded (full profile), and error. Shows org name with type badge, description, contact information section (email, phone, address with icons), and a products placeholder section.
+- **Page**: `/supplier/[id]` client page that fetches from the API and renders the card. Centered layout matching the claim page pattern.
+- **Storybook**: Full coverage with stories for loading, full profile, unclaimed profile, minimal profile (no optional fields), and error state.
+
+Tested with seeded "Bakkerij de Gouden Korst" supplier org — verified profile display with all fields and error handling for invalid IDs.
+
+Screenshot: `screenshots/03-03-supplier-profile-page.png`
