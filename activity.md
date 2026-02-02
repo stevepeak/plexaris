@@ -36,3 +36,16 @@ Improved the dashboard page with authenticated user info and sign-out:
 - **Protected route** via middleware — unauthenticated access to `/dashboard` redirects to `/login`
 
 Screenshots: `screenshots/dashboard-page.png`
+
+## 2026-02-02 — auth-redirects
+
+Updated middleware to handle all auth redirects server-side:
+
+- **Middleware** now intercepts `/` (home page) in addition to protected and auth routes
+- Unauthenticated users visiting `/` or any protected route (`/dashboard`, `/settings`, `/profile`) are redirected to `/login`
+- Authenticated users visiting `/login` or `/signup` are redirected to `/dashboard`
+- Authenticated users visiting `/` are redirected to `/dashboard`
+- **Home page** (`app/page.tsx`) simplified to a server component with a fallback `redirect('/login')` — all real redirect logic lives in middleware
+- Removed client-side `useSession` + `useEffect` redirect pattern from home page, eliminating the "Redirecting..." flash
+
+Screenshots: `screenshots/auth-redirects.png`

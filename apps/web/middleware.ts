@@ -10,18 +10,16 @@ const authRoutes = ['/login', '/signup']
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Check if route needs protection
+  const isHomePage = pathname === '/'
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route),
   )
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
 
-  // Skip middleware for non-protected routes
-  if (!isProtectedRoute && !isAuthRoute) {
+  if (!isHomePage && !isProtectedRoute && !isAuthRoute) {
     return NextResponse.next()
   }
 
-  // Get session from better-auth using native fetch
   const response = await fetch(
     `${request.nextUrl.origin}/api/auth/get-session`,
     {
@@ -35,13 +33,22 @@ export async function middleware(request: NextRequest) {
     ? await response.json()
     : { session: null }
 
-  // Redirect unauthenticated users from protected routes to login
-  if (isProtectedRoute && !session?.session) {
+  const isAuthenticated = !!session?.session
+
+  // Home page redirects based on auth state
+  if (isHomePage) {
+    return NextResponse.redirect(
+      new URL(isAuthenticated ? '/dashboard' : '/login', request.url),
+    )
+  }
+
+  // Unauthenticated users on protected routes go to /login
+  if (isProtectedRoute && !isAuthenticated) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Redirect authenticated users from auth routes to dashboard
-  if (isAuthRoute && session?.session) {
+  // Authenticated users on auth routes go to /dashboard
+  if (isAuthRoute && isAuthenticated) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
