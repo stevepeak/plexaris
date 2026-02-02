@@ -7,8 +7,8 @@ Work on this epic.
 - [x] **Add `claim_token` table to database schema** — Create the `claim_token` table in `packages/db/src/org-schema.ts` per the spec in `docs/database.md`, generate and apply the Drizzle migration. Fields: id, organizationId (FK), email, token (unique), expiresAt, usedAt, createdAt.
   - passes: true
 
-- [ ] **Create Horecava exhibitor scraper task** — Build a Trigger.dev task in `apps/trigger/src/tasks/` that scrapes the Horecava exhibitors page, extracts company name, email, phone, website, and description for each exhibitor.
-  - passes: false
+- [x] **Create Horecava exhibitor scraper task** — Build a Trigger.dev task in `apps/trigger/src/tasks/` that scrapes the Horecava exhibitors page, extracts company name, email, phone, website, and description for each exhibitor.
+  - passes: true
 
 - [ ] **Create supplier seeding task** — Build a Trigger.dev task that takes scraped exhibitor data and inserts unclaimed supplier organization records into the database, with deduplication on company name + email.
   - passes: false
