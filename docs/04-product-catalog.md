@@ -20,7 +20,7 @@ The product catalog is the core of the marketplace. Suppliers add and manage pro
 
 - Add product form: name, description, price, unit (kg, piece, box, etc.), images
 - Product categories/tags
-- Edit and delete products
+- Edit and archive products
 - Products visible in search after adding
 - Supplier dashboard shows all their products
 
@@ -54,16 +54,17 @@ The product catalog is the core of the marketplace. Suppliers add and manage pro
 
 ---
 
-### US-022: Supplier Product Deletion
+### US-022: Supplier Product Archiving
 
-> As a supplier, I want to delete my products so I can remove items I no longer sell.
+> As a supplier, I want to archive my products so I can remove items I no longer sell from the active catalog while preserving data relationships to previously sold items.
 
 **Acceptance Criteria:**
 
-- Delete button on each product in supplier dashboard
-- Confirmation prompt before deletion
-- Product removed from catalog and search results
-- Historical order data retained (product references preserved in past orders)
+- Archive button on each product in supplier dashboard
+- Confirmation prompt before archiving
+- Archived product removed from catalog and search results
+- Archived product remains accessible in order history and reporting
+- Supplier can view and restore archived products from their dashboard
 
 ---
 
@@ -75,4 +76,4 @@ The product catalog is the core of the marketplace. Suppliers add and manage pro
 - **Image storage:** Cloud storage for product images, support multiple images per product
 - **Categories:** Predefined category list for MVP (bakery, dairy, meat, produce, beverages, etc.)
 - **Units:** Standardized unit types (kg, piece, box, liter, case)
-- **Soft delete:** Products are soft-deleted to preserve order history references
+- **Archiving:** Products are archived (never deleted) to preserve order history references and data relationships

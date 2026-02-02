@@ -8,7 +8,7 @@
 
 ## Overview
 
-Before suppliers can claim profiles or Horeca can browse products, the platform needs supplier data. This phase covers scraping Horecava exhibitors to pre-populate supplier profiles and generating claim tokens for outreach. This is an operational/admin task that seeds the marketplace.
+Before suppliers can claim profiles or Horeca can browse products, the platform needs supplier data. This phase covers scraping Horecava exhibitors to pre-populate **unclaimed Supplier organizations** and generating claim tokens for outreach. This is an operational/admin task that seeds the marketplace. Each scraped entry becomes an Organization record with type `supplier` and status `unclaimed`, ready to be claimed by a real user (see 03-supplier-profiles).
 
 ## User Stories
 
@@ -35,8 +35,8 @@ Before suppliers can claim profiles or Horeca can browse products, the platform 
 ## Technical Considerations
 
 - **Scraping approach:** Server-side script (Node.js or Python), can be run manually or as a one-time job
-- **Data storage:** Supplier profiles table with `status: unclaimed | claimed`
-- **Claim tokens:** UUID or short hash, stored alongside supplier profile, linked to outreach emails
+- **Data storage:** Creates Organization records with `type: supplier`, `status: unclaimed | claimed`
+- **Claim tokens:** UUID or short hash, stored alongside the organization record, linked to outreach emails
 - **Outreach integration:** Export to CSV with columns: company name, email, claim URL
 - **Rate limiting:** Respect Horecava's robots.txt and rate limits
 - **Deduplication:** Match on company name + email to avoid duplicates from re-runs

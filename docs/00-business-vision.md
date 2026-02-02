@@ -103,15 +103,18 @@ The MVP is broken into eight implementation phases, each with its own PRD:
 - How to handle delivery scheduling?
 - Supplier catalog bulk upload support?
 
+## Architecture Note
+
+User accounts are separated from business entities (organizations). A user is a person; an organization is a Supplier or Horeca business. Users register once, then create or join organizations. This enables multi-user teams, multi-location businesses, and organization switching from day one. See `01-authentication.md` for the full data model.
+
 ## Phase 2 (Post-MVP)
 
-| Feature               | Description                      |
-| --------------------- | -------------------------------- |
-| Employee invites      | Multi-user per Horeca business   |
-| Role management       | Owner/Manager/Employee roles     |
-| Shared org cart       | Organization-level cart          |
-| Recurring orders      | Scheduled reorders               |
-| Inventory integration | Connect to POS/inventory systems |
-| Price comparison      | Compare across suppliers         |
-| Supplier ratings      | Reviews and ratings system       |
-| Automated routing     | Auto-route orders to suppliers   |
+| Feature               | Description                         |
+| --------------------- | ----------------------------------- |
+| Granular roles        | Manager/Employee roles beyond owner |
+| Shared org cart       | Organization-level cart             |
+| Recurring orders      | Scheduled reorders                  |
+| Inventory integration | Connect to POS/inventory systems    |
+| Price comparison      | Compare across suppliers            |
+| Supplier ratings      | Reviews and ratings system          |
+| Automated routing     | Auto-route orders to suppliers      |

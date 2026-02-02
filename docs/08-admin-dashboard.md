@@ -38,8 +38,8 @@ The admin dashboard gives the Plexaris team operational control over the marketp
 - Admin dashboard with list of all Horeca accounts
 - Admin dashboard with list of all Supplier accounts
 - Search and filter accounts
-- Delete option for each account (soft delete)
-- Confirmation prompt before deletion
+- Archive option for each account (data retained for records)
+- Confirmation prompt before archiving
 - Audit log of admin actions (who did what, when)
 
 ---
@@ -50,5 +50,5 @@ The admin dashboard gives the Plexaris team operational control over the marketp
 - **Order notification email:** Triggered by the same Stripe webhook that confirms payment (shared with US-017 confirmation email)
 - **Email formatting:** Clear sections for order details, buyer info, and per-supplier info so the admin can forward relevant parts to each supplier
 - **Audit log:** Simple append-only table recording admin actions (action type, target, timestamp, admin user)
-- **Account list:** Paginated, searchable, with status indicators (active, claimed, unclaimed, deleted)
+- **Account list:** Paginated, searchable, with status indicators (active, claimed, unclaimed, archived)
 - **Future:** This dashboard will expand to include order management, analytics, supplier onboarding tools, and automated routing controls in Phase 2

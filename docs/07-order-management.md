@@ -43,7 +43,7 @@ Once Horeca users are placing orders, they need visibility into their order hist
 ## Technical Considerations
 
 - **Order history query:** Ordered by date descending, with pagination
-- **Reorder logic:** Copy all items from a past order into current cart; handle cases where products have been deleted or prices changed (show notice to user)
+- **Reorder logic:** Copy all items from a past order into current cart; handle cases where products have been archived or prices changed (show notice to user)
 - **Frequency calculation:** Count product occurrences across all orders, weighted by recency
 - **Price change handling:** When reordering, use current product prices, not historical prices; notify user if prices differ from their last order
 - **Dashboard placement:** Frequently ordered products widget on the Horeca home/dashboard page
