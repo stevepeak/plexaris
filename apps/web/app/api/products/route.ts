@@ -1,4 +1,4 @@
-import { and, createDb, eq, isNull, schema } from '@app/db'
+import { and, createDb, eq, isNotNull, isNull, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
@@ -90,11 +90,14 @@ export async function GET(request: Request) {
     )
   }
 
-  // Return non-archived products by default
+  const showArchived = searchParams.get('archived') === 'true'
+
   const products = await db.query.product.findMany({
     where: and(
       eq(schema.product.organizationId, organizationId),
-      isNull(schema.product.archivedAt),
+      showArchived
+        ? isNotNull(schema.product.archivedAt)
+        : isNull(schema.product.archivedAt),
     ),
     orderBy: (product, { desc }) => [desc(product.createdAt)],
   })

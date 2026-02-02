@@ -107,3 +107,20 @@ Built a reusable product form component used for both creating and editing produ
 Tested with "Bakkerij de Gouden Korst" supplier org — verified add form displays correctly, created "Volkoren Brood" product with all fields populated, verified it appears in the list, clicked to edit, renamed to "Volkoren Brood (Groot)", confirmed update persisted.
 
 Screenshots: `screenshots/04-04-product-form-add.png`, `screenshots/04-04-product-form-edit.png`, `screenshots/04-04-product-form.png`
+
+### 04-05 Product archive/restore
+
+Added archive and restore functionality to the product list.
+
+- **API update**: Extended `GET /api/products` to accept an `archived=true` query parameter. When set, returns only archived products (where `archivedAt` is not null) instead of active ones.
+- **ProductList component**: Refactored into two sub-components:
+  - `ProductTable`: Renders the product table with an actions column. For active products, shows an archive icon button that opens a confirmation dialog. For archived products, shows a restore icon button.
+  - `ProductList`: The outer component that conditionally renders tabs (Active/Archived) when there are archived products, or just the active table when there are none. Tab headers show product counts. Tabs only appear for owners.
+- **Confirmation dialog**: Archive action shows an `AlertDialog` with the product name, warning that archived products won't be visible to customers, and offering Cancel/Archive buttons.
+- **Restore**: Clicking the restore icon on an archived product immediately restores it to `draft` status (no confirmation needed). Uses the existing `POST /api/products/[id]/archive` toggle endpoint.
+- **Dashboard integration**: Updated the dashboard to fetch both active and archived products in parallel. Added `handleArchiveRestore` handler that calls the archive toggle API and refreshes both lists.
+- **Storybook**: Updated stories with new `archivedProducts` prop. Added `WithArchivedProducts` story showing the tabbed view with both active and archived products.
+
+Tested with "Bakkerij de Gouden Korst" supplier org — archived "Croissant", verified it moved to the Archived tab with status badge, restored it back to active list with draft status.
+
+Screenshots: `screenshots/04-05-archive-dialog.png`, `screenshots/04-05-archived-tab.png`, `screenshots/04-05-product-archive-restore.png`

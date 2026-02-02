@@ -1,7 +1,18 @@
 'use client'
 
-import { Package, Plus } from 'lucide-react'
+import { Archive, ArchiveRestore, Package, Plus } from 'lucide-react'
+import { useState } from 'react'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,8 +31,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-type Product = {
+export type Product = {
   id: string
   name: string
   description: string | null
@@ -58,18 +70,161 @@ function formatPrice(price: string | null, unit: string | null) {
   return formatted
 }
 
+function ProductTable({
+  products,
+  isOwner,
+  isArchived,
+  onEditProduct,
+  onArchiveProduct,
+  onRestoreProduct,
+}: {
+  products: Product[]
+  isOwner: boolean
+  isArchived: boolean
+  onEditProduct?: (product: Product) => void
+  onArchiveProduct?: (product: Product) => void
+  onRestoreProduct?: (product: Product) => void
+}) {
+  const [archiveConfirm, setArchiveConfirm] = useState<Product | null>(null)
+
+  if (products.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <Package className="h-12 w-12 text-muted-foreground/50" />
+        <p className="mt-4 text-sm text-muted-foreground">
+          {isArchived
+            ? 'No archived products.'
+            : isOwner
+              ? 'Add your first product to get started.'
+              : 'This supplier has no products yet.'}
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Price</TableHead>
+            <TableHead>Status</TableHead>
+            {isOwner && <TableHead className="w-[80px]" />}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {products.map((product) => (
+            <TableRow
+              key={product.id}
+              className={
+                isOwner && onEditProduct && !isArchived
+                  ? 'cursor-pointer'
+                  : undefined
+              }
+              onClick={
+                isOwner && onEditProduct && !isArchived
+                  ? () => onEditProduct(product)
+                  : undefined
+              }
+            >
+              <TableCell className="font-medium">{product.name}</TableCell>
+              <TableCell className="text-muted-foreground">
+                {product.category ?? '-'}
+              </TableCell>
+              <TableCell>{formatPrice(product.price, product.unit)}</TableCell>
+              <TableCell>
+                <Badge variant={statusBadgeVariant(product.status)}>
+                  {product.status}
+                </Badge>
+              </TableCell>
+              {isOwner && (
+                <TableCell>
+                  {isArchived ? (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onRestoreProduct?.(product)
+                      }}
+                      title="Restore product"
+                    >
+                      <ArchiveRestore className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setArchiveConfirm(product)
+                      }}
+                      title="Archive product"
+                    >
+                      <Archive className="h-4 w-4" />
+                    </Button>
+                  )}
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      <AlertDialog
+        open={archiveConfirm !== null}
+        onOpenChange={(open) => {
+          if (!open) setArchiveConfirm(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive product</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to archive &ldquo;{archiveConfirm?.name}
+              &rdquo;? Archived products won&apos;t be visible to customers. You
+              can restore it later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (archiveConfirm) {
+                  onArchiveProduct?.(archiveConfirm)
+                  setArchiveConfirm(null)
+                }
+              }}
+            >
+              Archive
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  )
+}
+
 export function ProductList({
   products,
+  archivedProducts,
   isPending,
   isOwner,
   onAddProduct,
   onEditProduct,
+  onArchiveProduct,
+  onRestoreProduct,
 }: {
   products: Product[]
+  archivedProducts: Product[]
   isPending: boolean
   isOwner: boolean
   onAddProduct?: () => void
   onEditProduct?: (product: Product) => void
+  onArchiveProduct?: (product: Product) => void
+  onRestoreProduct?: (product: Product) => void
 }) {
   if (isPending) {
     return (
@@ -108,54 +263,42 @@ export function ProductList({
         </div>
       </CardHeader>
       <CardContent>
-        {products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Package className="h-12 w-12 text-muted-foreground/50" />
-            <p className="mt-4 text-sm text-muted-foreground">
-              {isOwner
-                ? 'Add your first product to get started.'
-                : 'This supplier has no products yet.'}
-            </p>
-          </div>
+        {isOwner && archivedProducts.length > 0 ? (
+          <Tabs defaultValue="active">
+            <TabsList>
+              <TabsTrigger value="active">
+                Active ({products.length})
+              </TabsTrigger>
+              <TabsTrigger value="archived">
+                Archived ({archivedProducts.length})
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="active">
+              <ProductTable
+                products={products}
+                isOwner={isOwner}
+                isArchived={false}
+                onEditProduct={onEditProduct}
+                onArchiveProduct={onArchiveProduct}
+              />
+            </TabsContent>
+            <TabsContent value="archived">
+              <ProductTable
+                products={archivedProducts}
+                isOwner={isOwner}
+                isArchived
+                onRestoreProduct={onRestoreProduct}
+              />
+            </TabsContent>
+          </Tabs>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => (
-                <TableRow
-                  key={product.id}
-                  className={
-                    isOwner && onEditProduct ? 'cursor-pointer' : undefined
-                  }
-                  onClick={
-                    isOwner && onEditProduct
-                      ? () => onEditProduct(product)
-                      : undefined
-                  }
-                >
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {product.category ?? '-'}
-                  </TableCell>
-                  <TableCell>
-                    {formatPrice(product.price, product.unit)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={statusBadgeVariant(product.status)}>
-                      {product.status}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <ProductTable
+            products={products}
+            isOwner={isOwner}
+            isArchived={false}
+            onEditProduct={onEditProduct}
+            onArchiveProduct={onArchiveProduct}
+          />
         )}
       </CardContent>
     </Card>

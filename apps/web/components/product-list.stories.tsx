@@ -1,6 +1,6 @@
 import { type Meta, type StoryObj } from '@storybook/react'
 
-import { ProductList } from './product-list'
+import { type Product, ProductList } from './product-list'
 
 const meta: Meta<typeof ProductList> = {
   title: 'ProductList',
@@ -12,7 +12,7 @@ const meta: Meta<typeof ProductList> = {
 export default meta
 type Story = StoryObj<typeof ProductList>
 
-const sampleProducts = [
+const sampleProducts: Product[] = [
   {
     id: '1',
     name: 'Sourdough Bread',
@@ -80,9 +80,39 @@ const sampleProducts = [
   },
 ]
 
+const archivedProducts: Product[] = [
+  {
+    id: '6',
+    name: 'Raisin Bread',
+    description: 'Seasonal raisin bread',
+    price: '5.25',
+    unit: 'piece',
+    category: 'Bread',
+    status: 'archived',
+    images: [],
+    createdAt: '2026-01-10T10:00:00Z',
+    updatedAt: '2026-01-16T10:00:00Z',
+    archivedAt: '2026-01-16T10:00:00Z',
+  },
+  {
+    id: '7',
+    name: 'Holiday Stollen',
+    description: 'Traditional German Christmas bread',
+    price: '12.50',
+    unit: 'piece',
+    category: 'Pastry',
+    status: 'archived',
+    images: [],
+    createdAt: '2025-12-01T10:00:00Z',
+    updatedAt: '2026-01-05T10:00:00Z',
+    archivedAt: '2026-01-05T10:00:00Z',
+  },
+]
+
 export const Loading: Story = {
   args: {
     products: [],
+    archivedProducts: [],
     isPending: true,
     isOwner: true,
   },
@@ -91,15 +121,30 @@ export const Loading: Story = {
 export const WithProducts: Story = {
   args: {
     products: sampleProducts,
+    archivedProducts: [],
     isPending: false,
     isOwner: true,
     onAddProduct: () => undefined,
+    onArchiveProduct: () => undefined,
+  },
+}
+
+export const WithArchivedProducts: Story = {
+  args: {
+    products: sampleProducts,
+    archivedProducts,
+    isPending: false,
+    isOwner: true,
+    onAddProduct: () => undefined,
+    onArchiveProduct: () => undefined,
+    onRestoreProduct: () => undefined,
   },
 }
 
 export const EmptyOwner: Story = {
   args: {
     products: [],
+    archivedProducts: [],
     isPending: false,
     isOwner: true,
     onAddProduct: () => undefined,
@@ -109,6 +154,7 @@ export const EmptyOwner: Story = {
 export const EmptyMember: Story = {
   args: {
     products: [],
+    archivedProducts: [],
     isPending: false,
     isOwner: false,
   },
@@ -117,6 +163,7 @@ export const EmptyMember: Story = {
 export const MemberView: Story = {
   args: {
     products: sampleProducts,
+    archivedProducts: [],
     isPending: false,
     isOwner: false,
   },
@@ -152,8 +199,10 @@ export const NoPrices: Story = {
         archivedAt: null,
       },
     ],
+    archivedProducts: [],
     isPending: false,
     isOwner: true,
     onAddProduct: () => undefined,
+    onArchiveProduct: () => undefined,
   },
 }

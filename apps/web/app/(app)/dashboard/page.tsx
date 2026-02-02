@@ -9,7 +9,7 @@ import { InviteMembers } from '@/components/invite-members'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { PendingInvitations } from '@/components/pending-invitations'
 import { ProductForm } from '@/components/product-form'
-import { ProductList } from '@/components/product-list'
+import { type Product, ProductList } from '@/components/product-list'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -46,21 +46,8 @@ export default function DashboardPage() {
     isPending: orgsPending,
   } = useActiveOrg(refreshKey)
 
-  type Product = {
-    id: string
-    name: string
-    description: string | null
-    price: string | null
-    unit: string | null
-    category: string | null
-    status: string
-    images: string[]
-    createdAt: string
-    updatedAt: string
-    archivedAt: string | null
-  }
-
   const [products, setProducts] = useState<Product[]>([])
+  const [archivedProducts, setArchivedProducts] = useState<Product[]>([])
   const [productsPending, setProductsPending] = useState(false)
   const [productView, setProductView] = useState<
     'list' | 'add' | { editing: Product }
@@ -69,13 +56,18 @@ export default function DashboardPage() {
   const refreshProducts = useCallback(() => {
     if (!activeOrg || activeOrg.type !== 'supplier') {
       setProducts([])
+      setArchivedProducts([])
       return
     }
     setProductsPending(true)
-    void fetch(`/api/products?organizationId=${activeOrg.id}`)
-      .then((res) => (res.ok ? res.json() : { products: [] }))
-      .then((data) => setProducts(data.products ?? []))
-      .finally(() => setProductsPending(false))
+    void Promise.all([
+      fetch(`/api/products?organizationId=${activeOrg.id}`)
+        .then((res) => (res.ok ? res.json() : { products: [] }))
+        .then((data) => setProducts(data.products ?? [])),
+      fetch(`/api/products?organizationId=${activeOrg.id}&archived=true`)
+        .then((res) => (res.ok ? res.json() : { products: [] }))
+        .then((data) => setArchivedProducts(data.products ?? [])),
+    ]).finally(() => setProductsPending(false))
   }, [activeOrg])
 
   useEffect(() => {
@@ -127,6 +119,11 @@ export default function DashboardPage() {
     refreshProducts()
     setProductView('list')
     return {}
+  }
+
+  const handleArchiveRestore = async (product: Product) => {
+    await fetch(`/api/products/${product.id}/archive`, { method: 'POST' })
+    refreshProducts()
   }
 
   const handleInvitationAccepted = useCallback(() => {
@@ -267,10 +264,13 @@ export default function DashboardPage() {
           ) : (
             <ProductList
               products={products}
+              archivedProducts={archivedProducts}
               isPending={productsPending}
               isOwner={activeOrg.role === 'owner'}
               onAddProduct={() => setProductView('add')}
               onEditProduct={(p) => setProductView({ editing: p })}
+              onArchiveProduct={handleArchiveRestore}
+              onRestoreProduct={handleArchiveRestore}
             />
           ))}
       </main>

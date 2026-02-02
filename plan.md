@@ -33,8 +33,8 @@ Work on these epics:
 - [x] **04-04 Product add/edit form**: Build product form (name, description, price, unit selector, category selector). Used for both create and edit. Include Storybook story.
   - passes: true
 
-- [ ] **04-05 Product archive/restore**: Add archive button with confirmation dialog to product list. Show archived products in separate tab. Add restore functionality.
-  - passes: false
+- [x] **04-05 Product archive/restore**: Add archive button with confirmation dialog to product list. Show archived products in separate tab. Add restore functionality.
+  - passes: true
 
 - [ ] **04-06 Public product display**: Show products on supplier profile page (`/supplier/[id]`). Product cards with name, description, price, unit. Filter by category.
   - passes: false
