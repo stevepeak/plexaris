@@ -24,3 +24,15 @@ Verified and improved the login page:
 - Tested error handling: invalid credentials display "Invalid email or password" message
 
 Screenshots: `screenshots/login-page.png`
+
+## 2026-02-02 — dashboard-page
+
+Improved the dashboard page with authenticated user info and sign-out:
+
+- **Header bar** with "Plexaris" branding, user name, and avatar with initials fallback
+- **User profile card** showing avatar, name, email with icons, and welcome message
+- **Sign-out button** that clears the session and redirects to `/login`
+- **Skeleton loading state** while session data is being fetched
+- **Protected route** via middleware — unauthenticated access to `/dashboard` redirects to `/login`
+
+Screenshots: `screenshots/dashboard-page.png`
