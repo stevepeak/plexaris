@@ -41,7 +41,7 @@ export default function SignupPage() {
       return
     }
 
-    router.push('/dashboard')
+    router.push('/onboarding')
   }
 
   const handleDemoUser = async () => {
@@ -59,7 +59,7 @@ export default function SignupPage() {
     })
 
     if (!signInResult.error) {
-      router.push('/dashboard')
+      router.push('/onboarding')
       return
     }
 
@@ -76,7 +76,7 @@ export default function SignupPage() {
       return
     }
 
-    router.push('/dashboard')
+    router.push('/onboarding')
   }
 
   return (

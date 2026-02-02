@@ -63,3 +63,18 @@ Added `organization`, `membership`, and `invitation` tables to the database sche
 - Verified all 7 tables exist in the database: user, session, account, verification, organization, membership, invitation
 
 Screenshots: `screenshots/org-schema.png`
+
+## 2026-02-02 — org-creation
+
+Created organization creation flow after signup:
+
+- **`/onboarding`** page with two-step flow: (1) choose org type (Supplier or Horeca), (2) enter business details
+- **Type selection** step with descriptive cards for Supplier and Horeca, each with icon and description
+- **Details form** with fields: business name (required), description, phone, contact email, business address, and delivery address (Horeca only)
+- **API route** `POST /api/organizations` creates organization with status `claimed` and membership with role `owner` in a single request
+- **API route** `GET /api/organizations/mine` returns the current user's organizations (used by middleware)
+- **Middleware** updated to check org membership: authenticated users without orgs are redirected to `/onboarding`, users with orgs on `/onboarding` are redirected to `/dashboard`
+- **Signup page** updated to redirect to `/onboarding` after account creation
+- Full flow: signup → onboarding (type select → details form → submit) → dashboard
+
+Screenshots: `screenshots/org-creation.png`
