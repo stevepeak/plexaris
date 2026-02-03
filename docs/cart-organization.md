@@ -275,6 +275,7 @@ useSortable({ id: folder.id, data: { type: 'folder' } })
 ### Drag Item Out of Folder
 
 - `onDragOver` detects root boundary
+  const [layoutMode, setLayoutMode] = useState<CartLayoutMode>('flat')
 - Moves item from `folderContents[folderId]` to `rootOrder`
 
 ### Reorder Folders
@@ -291,17 +292,24 @@ function useCartState(initialItems?: CartItem[]) {
   const [state, setState] = useState<CartState>()
   const [activeId, setActiveId] = useState<string | null>(null)
 
+  // Auto-grouping (active when layoutMode is a 'by-*' mode)
+  const groups: Array<{ key: string; label: string; items: CartItem[] }>
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>()
+  function toggleGroupCollapse(groupKey: string): void
+
   // Item actions
   function updateQuantity(itemId: string, delta: number): void
   function removeItem(itemId: string): void
 
-  // Folder actions
+  // Folder actions (only active when layoutMode === 'folders')
   function addFolder(): string // returns new folder id
+  function groupSubtotal(groupKey: string): number
+  function groupItemCount(groupKey: string): number
   function renameFolder(folderId: string, name: string): void
   function toggleFolderCollapse(folderId: string): void
   function removeFolder(folderId: string): void
 
-  // DnD handlers
+  // DnD handlers (only active when layoutMode === 'folders')
   function handleDragStart(event: DragStartEvent): void
   function handleDragOver(event: DragOverEvent): void
   function handleDragEnd(event: DragEndEvent): void
@@ -334,22 +342,41 @@ function useCartState(initialItems?: CartItem[]) {
 ## Implementation Order
 
 1. Install @dnd-kit packages
-2. `cart-item.tsx` + stories — extract presentational item from order-cart
-3. `cart-folder.tsx` + stories — folder header component
-4. `use-cart-state.ts` — state hook with all logic + DnD handlers
-5. `sortable-cart-item.tsx` — useSortable wrapper
-6. `sortable-cart-folder.tsx` — useSortable + Collapsible + inner SortableContext
-7. Refactor `order-cart.tsx` — wire up DndContext + all sub-components
-8. Update `order-cart.stories.tsx` — WithFolders, CollapsedFolders, EmptyFolder, MixedItems
-9. `bun run fix && bun run knip:fix` then `bun run ci`
+2. `cart-item.tsx` + stories — extract presentational item with clickable name + supplier badge (`onOpenProduct`, `onOpenSupplier` callbacks)
+3. `cart-layout-menu.tsx` + stories — layout mode dropdown with dynamic icon
+4. `cart-group-header.tsx` + stories — auto-group collapsible header
+5. `cart-folder.tsx` + stories — folder header component
+6. `use-cart-state.ts` — state hook with all logic + DnD handlers + layout mode + auto-grouping
+7. `sortable-cart-item.tsx` — useSortable wrapper
+8. `sortable-cart-folder.tsx` — useSortable + Collapsible + inner SortableContext
+9. Refactor `order-cart.tsx` — wire up DndContext + layout modes + all sub-components; accept `onOpenProduct`/`onOpenSupplier` props
+10. Update `order/new/page.tsx` — pass `onOpenProduct`/`onOpenSupplier` to `OrderCart`
+11. Update `order-cart.stories.tsx` — Flat, WithFolders, CollapsedFolders, EmptyFolder, MixedItems, GroupedBySupplier, GroupedByCategory, GroupedByTeamMember
+12. `bun run fix && bun run knip:fix` then `bun run ci`
+
+## OrderCart Props
+
+```typescript
+interface OrderCartProps {
+  initialItems?: CartItem[]
+  onOpenProduct?: (productId: string, productName: string) => void
+  onOpenSupplier?: (supplierId: string, supplierName: string) => void
+}
+```
 
 ## Verification
 
 - **Storybook**: all stories render correctly
 - **Dev app** (localhost:3000): navigate to order page and test:
-  - Create folder, rename it, collapse/expand
-  - Drag items into folder, out of folder, between folders
-  - Drag folders to reorder
-  - Delete folder (items return to root)
-  - Quantity +/- and delete still work during/after DnD
+  - Click item name in cart → product tab opens in center panel
+  - Click supplier badge in cart → supplier tab opens in center panel
+  - Switch layout modes via dropdown menu; icon updates to match
+  - Flat mode: plain list, no grouping
+  - Folders mode: create folder, rename, collapse/expand, DnD
+  - By Supplier: items auto-grouped under supplier headers
+  - By Category: items auto-grouped under category headers
+  - By Team Member: items auto-grouped under team member headers
+  - Items without a grouping field appear in "Ungrouped" section
+  - Switching modes preserves cart contents
+  - Quantity +/- and delete still work in all modes
 - **CI**: `bun run ci` passes

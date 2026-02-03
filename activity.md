@@ -29,3 +29,27 @@ Created `apps/web/components/order/cart-item.stories.tsx` with 5 stories:
 Verified: TypeScript compiles without errors. All 5 stories registered in Storybook index.json and iframe renders HTTP 200.
 
 Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.
+
+### Task 3: Create cart-layout-menu.tsx + cart-layout-menu.stories.tsx
+
+Created `apps/web/components/order/cart-layout-menu.tsx` — a dropdown menu component for switching cart layout modes. Features:
+
+- Exported `CartLayoutMode` type union: `'flat' | 'folders' | 'by-supplier' | 'by-category' | 'by-team-member'`
+- Dynamic trigger button icon that changes to reflect the active layout mode (List, FolderOpen, Store, Tag, Users)
+- `DropdownMenuRadioGroup` with two sections:
+  - "Organize" label with Flat (List icon) and Folders (FolderOpen icon) options
+  - "Group by" label with Supplier (Store icon), Category (Tag icon), and Team Member (Users icon) options
+- Props: `value` (current mode) and `onValueChange` callback
+- Uses shadcn `DropdownMenu` components with `align="end"` positioning
+
+Created `apps/web/components/order/cart-layout-menu.stories.tsx` with 5 stories:
+
+- `Default` — interactive menu starting in flat mode
+- `FoldersMode` — interactive menu starting in folders mode
+- `BySupplier` — interactive menu starting in by-supplier mode
+- `ByCategory` — interactive menu starting in by-category mode
+- `ByTeamMember` — interactive menu starting in by-team-member mode
+
+Verified: TypeScript compiles without errors (tsc exit code 0). All 5 stories registered in Storybook index.json and iframe renders HTTP 200.
+
+Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.

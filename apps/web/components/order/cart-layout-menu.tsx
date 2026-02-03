@@ -1,0 +1,93 @@
+import {
+  FolderOpen,
+  List,
+  Store,
+  Tag,
+  Users,
+  type LucideIcon,
+} from 'lucide-react'
+
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+export type CartLayoutMode =
+  | 'flat'
+  | 'folders'
+  | 'by-supplier'
+  | 'by-category'
+  | 'by-team-member'
+
+interface LayoutOption {
+  value: CartLayoutMode
+  label: string
+  icon: LucideIcon
+}
+
+const organizeOptions: LayoutOption[] = [
+  { value: 'flat', label: 'Flat', icon: List },
+  { value: 'folders', label: 'Folders', icon: FolderOpen },
+]
+
+const groupByOptions: LayoutOption[] = [
+  { value: 'by-supplier', label: 'Supplier', icon: Store },
+  { value: 'by-category', label: 'Category', icon: Tag },
+  { value: 'by-team-member', label: 'Team Member', icon: Users },
+]
+
+const iconMap: Record<CartLayoutMode, LucideIcon> = {
+  flat: List,
+  folders: FolderOpen,
+  'by-supplier': Store,
+  'by-category': Tag,
+  'by-team-member': Users,
+}
+
+export interface CartLayoutMenuProps {
+  value: CartLayoutMode
+  onValueChange: (mode: CartLayoutMode) => void
+}
+
+export function CartLayoutMenu({ value, onValueChange }: CartLayoutMenuProps) {
+  const ActiveIcon = iconMap[value]
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-7 w-7">
+          <ActiveIcon className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuLabel>Organize</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuRadioGroup
+          value={value}
+          onValueChange={(v) => onValueChange(v as CartLayoutMode)}
+        >
+          {organizeOptions.map((option) => (
+            <DropdownMenuRadioItem key={option.value} value={option.value}>
+              <option.icon className="mr-2 h-4 w-4" />
+              {option.label}
+            </DropdownMenuRadioItem>
+          ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel>Group by</DropdownMenuLabel>
+          {groupByOptions.map((option) => (
+            <DropdownMenuRadioItem key={option.value} value={option.value}>
+              <option.icon className="mr-2 h-4 w-4" />
+              {option.label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
