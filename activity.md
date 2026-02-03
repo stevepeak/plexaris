@@ -177,3 +177,22 @@ Each story wraps folders in a `DndContext` + `SortableContext` with `PointerSens
 Verified: only TypeScript errors are TS2307 "Cannot find module" for `@dnd-kit/*` — packages declared in package.json but not yet installed (`bun install` required). No other type errors in the component or stories. All 5 stories registered in Storybook index.json and iframe renders HTTP 200.
 
 Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.
+
+### Task 9: Refactor order-cart.tsx — wire up DndContext + layout modes + all sub-components
+
+Refactored `apps/web/components/order/order-cart.tsx` to replace the inline state management with the `useCartState` hook and wire up all previously created sub-components. Changes:
+
+- Replaced inline `CartItem` interface and `useState<CartItem[]>` with `useCartState` hook from `@/hooks/use-cart-state`
+- Updated `DEMO_ITEMS` to use `CartItemData` with new fields (`supplierId`, `category`, `assignee`) for full layout mode support
+- Added `onOpenProduct` and `onOpenSupplier` optional props to `OrderCartProps` (matching the spec for click-through to center panel tabs)
+- Added cart header controls:
+  - `CartLayoutMenu` dropdown for switching between flat, folders, by-supplier, by-category, by-team-member modes
+  - `FolderPlus` button (only visible in folders mode) for creating new folders
+- Implemented three rendering modes:
+  - **Flat mode**: Plain `CartItem` list with `Separator` dividers and keyboard-nav selection highlighting
+  - **Folders mode**: Full `DndContext` + `SortableContext` orchestration with `SortableCartFolder` and `SortableCartItem` components, `DragOverlay` for drag previews, `PointerSensor` (distance: 5) and `KeyboardSensor` with `sortableKeyboardCoordinates`, `closestCorners` collision detection
+  - **Grouped modes** (by-supplier, by-category, by-team-member): `CartGroupHeader` collapsible groups with indented `CartItem` children
+- Preserved existing `OrderCartHandle` imperative handle (focusNext/Prev, delete/increment/decrementSelected) using `useCartState` methods
+- All item callbacks (updateQuantity, removeItem, onOpenProduct, onOpenSupplier) passed through to sub-components
+
+Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json HTTP 200 and dev server HTTP 307 (auth redirect).
