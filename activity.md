@@ -196,3 +196,15 @@ Refactored `apps/web/components/order/order-cart.tsx` to replace the inline stat
 - All item callbacks (updateQuantity, removeItem, onOpenProduct, onOpenSupplier) passed through to sub-components
 
 Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json HTTP 200 and dev server HTTP 307 (auth redirect).
+
+### Task 10: Update order/new/page.tsx — pass onOpenProduct/onOpenSupplier to OrderCart
+
+Updated `apps/web/app/(app)/order/new/page.tsx` to pass the `onOpenProduct` and `onOpenSupplier` callbacks to the `OrderCart` component. Changes:
+
+- Added `onOpenProduct={handleOpenProduct}` and `onOpenSupplier={handleOpenSupplier}` props to the `<OrderCart>` component on line 342
+- The `handleOpenProduct` and `handleOpenSupplier` functions were already defined in the page (lines 264–270) — they call `openTab` with the appropriate `TabItem` type (`product` or `supplier`), which opens a tab in the center panel's `ContentViewer`
+- This completes the click-through integration: clicking an item name in the cart opens a product tab, and clicking a supplier badge opens a supplier tab
+
+Verified: TypeScript compiles without errors for `page.tsx`. The only type errors in the project are in `order-cart.stories.tsx` (missing `supplierId` field in demo data — addressed in task 11).
+
+Screenshot: browser was locked by another process; no screenshot taken. Verified via dev server HTTP 307 (auth redirect).

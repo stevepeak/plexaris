@@ -339,7 +339,11 @@ export default function NewOrderPage() {
 
         {panels.order && (
           <div className="w-[320px] shrink-0 border-l">
-            <OrderCart ref={cartRef} />
+            <OrderCart
+              ref={cartRef}
+              onOpenProduct={handleOpenProduct}
+              onOpenSupplier={handleOpenSupplier}
+            />
           </div>
         )}
 
