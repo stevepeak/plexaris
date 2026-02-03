@@ -103,3 +103,25 @@ Created `apps/web/components/order/cart-folder.stories.tsx` with 5 stories:
 Verified: TypeScript compiles without errors (turbo typecheck 8/8 tasks successful). All 5 stories registered in Storybook index.json and iframe renders HTTP 200.
 
 Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.
+
+### Task 6: Create use-cart-state.ts
+
+Created `apps/web/hooks/use-cart-state.ts` — the central state management hook for the cart system. Features:
+
+- Exported types: `CartFolder`, `CartState`, `CartGroup`
+- Normalized state model: `items` (Record), `folders` (Record), `rootOrder` (interleaved ids), `folderContents` (folder id → item ids)
+- Layout mode state (`CartLayoutMode`) with `setLayoutMode` setter
+- `activeId` state for tracking the currently dragged element
+- Item actions: `updateQuantity` (removes item when quantity reaches 0), `removeItem`
+- Folder actions: `addFolder` (returns new id), `renameFolder`, `toggleFolderCollapse`, `removeFolder` (splices contained items back into rootOrder at folder position)
+- Auto-grouping: computes `groups` array (sorted alphabetically, with "Ungrouped" at end) when layout mode is `by-supplier`, `by-category`, or `by-team-member`
+- Group collapse tracking: `collapsedGroups` (Set) with `toggleGroupCollapse`
+- DnD handlers (folders mode): `handleDragStart`, `handleDragOver` (cross-container moves), `handleDragEnd` (same-container reorder)
+- Computed values: `allItems`, `itemCount`, `subtotal`, `folderSubtotal(id)`, `folderItemCount(id)`, `groupSubtotal(key)`, `groupItemCount(key)`
+- All callbacks wrapped in `useCallback`; computed values use `useMemo`
+- Imports `arrayMove` from `@dnd-kit/sortable` and DnD event types from `@dnd-kit/core`
+- Re-uses `CartItemData` from `cart-item.tsx` and `CartLayoutMode` from `cart-layout-menu.tsx`
+
+Verified: only TypeScript errors are TS2307 "Cannot find module" for `@dnd-kit/sortable` and `@dnd-kit/core` — packages declared in package.json but not yet installed (`bun install` required). No other type errors in the hook code.
+
+Screenshot: browser was locked by another process; no screenshot taken. This is a state-only hook with no visual output.
