@@ -15,7 +15,7 @@ export function OrderChat() {
 
       <div className="flex flex-1 items-center justify-center p-4">
         <p className="text-sm text-muted-foreground">
-          Ask about products, prices, or place an order...
+          Ask about products, prices, or ingredients in shepards pie
         </p>
       </div>
 

@@ -4,12 +4,14 @@ import {
   count,
   desc,
   eq,
+  ilike,
   inArray,
   type InferSelectModel,
   isNotNull,
   isNull,
   ne,
   notInArray,
+  or,
   sql,
 } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/postgres-js'
@@ -27,12 +29,14 @@ export {
   count,
   desc,
   eq,
+  ilike,
   inArray,
   type InferSelectModel,
   isNotNull,
   isNull,
   ne,
   notInArray,
+  or,
   sql,
 }
 

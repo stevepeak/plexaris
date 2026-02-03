@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import {
+  type BrowseProduct,
   type Category,
   CategorySidebar,
 } from '@/components/order/category-sidebar'
@@ -39,9 +40,68 @@ export default function NewOrderPage() {
     switchOrg,
     isPending: orgsPending,
   } = useActiveOrg()
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null,
+  const [activeCategory, setActiveCategory] = useState<Category | null>(null)
+  const [search, setSearch] = useState('')
+  const [products, setProducts] = useState<BrowseProduct[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
+
+  const fetchProducts = useCallback(
+    async (category: Category | null, searchText: string) => {
+      if (!category && !searchText) return
+
+      setIsLoading(true)
+      try {
+        const params = new URLSearchParams()
+        if (category && category !== 'All products') {
+          params.set('category', category)
+        }
+        if (searchText) {
+          params.set('search', searchText)
+        }
+
+        const res = await fetch(`/api/products/browse?${params.toString()}`)
+        if (res.ok) {
+          const data = await res.json()
+          setProducts(data.products)
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [],
   )
+
+  useEffect(() => {
+    if (!activeCategory && !search) {
+      setProducts([])
+      return
+    }
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+
+    debounceRef.current = setTimeout(
+      () => {
+        void fetchProducts(activeCategory, search)
+      },
+      search ? 300 : 0,
+    )
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+    }
+  }, [activeCategory, search, fetchProducts])
+
+  function handleNavigate(category: Category | null) {
+    setActiveCategory(category)
+    if (!category) {
+      setSearch('')
+    }
+  }
 
   return (
     <div className="flex h-screen flex-col">
@@ -81,8 +141,12 @@ export default function NewOrderPage() {
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
           <CategorySidebar
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
+            activeCategory={activeCategory}
+            onNavigate={handleNavigate}
+            search={search}
+            onSearchChange={setSearch}
+            products={products}
+            isLoading={isLoading}
           />
         </ResizablePanel>
         <ResizableHandle withHandle />
