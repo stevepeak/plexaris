@@ -150,3 +150,30 @@ Each story wraps items in a `DndContext` + `SortableContext` with `PointerSensor
 Verified: only TypeScript errors are TS2307 "Cannot find module" for `@dnd-kit/*` — packages declared in package.json but not yet installed (`bun install` required). No other type errors in the component or stories. All 5 stories registered in Storybook index.json and iframe renders HTTP 200.
 
 Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.
+
+### Task 8: Create sortable-cart-folder.tsx + sortable-cart-folder.stories.tsx
+
+Created `apps/web/components/order/sortable-cart-folder.tsx` — a `useSortable` wrapper around `CartFolder` for drag-and-drop folder reordering in folders mode. Features:
+
+- Exported `SortableCartFolderProps` extending `CartFolderProps` with `itemIds` prop (ordered item ids for inner SortableContext)
+- Uses `useSortable` hook with `data: { type: 'folder' }` matching the DnD handler expectations in `use-cart-state.ts`
+- `GripVertical` drag handle using `setActivatorNodeRef` + `listeners` — keeps chevron, rename, delete, and collapse interactive
+- CSS transform + transition applied via `CSS.Transform.toString` from `@dnd-kit/utilities`
+- `isDragging` state applies `opacity-50 z-10` to the dragged element
+- Inner `SortableContext` with `verticalListSortingStrategy` wrapping children for item reordering within the folder
+- `EmptyDropZone` component using `useDroppable` — renders "Drag items here" placeholder when folder has zero items, with `bg-accent` highlight on hover
+- Passes all `CartFolderProps` through to the inner `CartFolder` (including Collapsible open/close)
+
+Created `apps/web/components/order/sortable-cart-folder.stories.tsx` with 5 stories:
+
+- `Default` — expanded sortable folder with 2 sortable items and drag handles
+- `Collapsed` — same folder starting collapsed (only header + grip visible)
+- `EmptyFolder` — folder with zero items showing "Drag items here" drop zone
+- `LongName` — folder with a long truncated name
+- `MultipleFolders` — two sortable folders rendered together ("Dairy Order" + "Bakery Order")
+
+Each story wraps folders in a `DndContext` + `SortableContext` with `PointerSensor` (distance: 5) for realistic rendering.
+
+Verified: only TypeScript errors are TS2307 "Cannot find module" for `@dnd-kit/*` — packages declared in package.json but not yet installed (`bun install` required). No other type errors in the component or stories. All 5 stories registered in Storybook index.json and iframe renders HTTP 200.
+
+Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.

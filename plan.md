@@ -11,7 +11,7 @@ Work on epics:
 - [x] 5. Create `cart-folder.tsx` + `cart-folder.stories.tsx` — folder header component — passes: true
 - [x] 6. Create `use-cart-state.ts` — state hook with all logic + DnD handlers + layout mode + auto-grouping — passes: true
 - [x] 7. Create `sortable-cart-item.tsx` — useSortable wrapper — passes: true
-- [ ] 8. Create `sortable-cart-folder.tsx` — useSortable + Collapsible + inner SortableContext — passes: false
+- [x] 8. Create `sortable-cart-folder.tsx` — useSortable + Collapsible + inner SortableContext — passes: true
 - [ ] 9. Refactor `order-cart.tsx` — wire up DndContext + layout modes + all sub-components; accept `onOpenProduct`/`onOpenSupplier` props — passes: false
 - [ ] 10. Update `order/new/page.tsx` — pass `onOpenProduct`/`onOpenSupplier` to `OrderCart` — passes: false
 - [ ] 11. Update `order-cart.stories.tsx` — add stories for all layout modes — passes: false
