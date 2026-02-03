@@ -125,3 +125,28 @@ Created `apps/web/hooks/use-cart-state.ts` — the central state management hook
 Verified: only TypeScript errors are TS2307 "Cannot find module" for `@dnd-kit/sortable` and `@dnd-kit/core` — packages declared in package.json but not yet installed (`bun install` required). No other type errors in the hook code.
 
 Screenshot: browser was locked by another process; no screenshot taken. This is a state-only hook with no visual output.
+
+### Task 7: Create sortable-cart-item.tsx
+
+Created `apps/web/components/order/sortable-cart-item.tsx` — a `useSortable` wrapper around `CartItem` for drag-and-drop in folders mode. Features:
+
+- Extends `CartItemProps` with `containerId` prop (folder id or undefined for root-level items)
+- Uses `useSortable` hook with `data: { type: 'item', containerId }` matching the DnD handler expectations in `use-cart-state.ts`
+- `GripVertical` drag handle using `setActivatorNodeRef` + `listeners` — keeps quantity buttons, delete, and clickable name/badge interactive
+- CSS transform + transition applied via `CSS.Transform.toString` from `@dnd-kit/utilities`
+- `isDragging` state applies `opacity-50 z-10` to the dragged element
+- Passes all remaining `CartItemProps` through to the inner `CartItem`
+
+Created `apps/web/components/order/sortable-cart-item.stories.tsx` with 5 stories:
+
+- `Default` — single sortable item at root level
+- `InFolder` — item with `containerId` set and `pl-4` indentation
+- `MultipleItems` — three sortable items in a list with drag handles
+- `Selected` — sortable item with accent background
+- `NoCallbacks` — sortable item without event handlers
+
+Each story wraps items in a `DndContext` + `SortableContext` with `PointerSensor` (distance: 5) for realistic rendering.
+
+Verified: only TypeScript errors are TS2307 "Cannot find module" for `@dnd-kit/*` — packages declared in package.json but not yet installed (`bun install` required). No other type errors in the component or stories. All 5 stories registered in Storybook index.json and iframe renders HTTP 200.
+
+Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.
