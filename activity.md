@@ -78,3 +78,28 @@ Created `apps/web/components/order/cart-group-header.stories.tsx` with 5 stories
 Verified: TypeScript compiles without errors (turbo typecheck 8/8 tasks successful). All 5 stories registered in Storybook index.json and iframe renders HTTP 200.
 
 Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.
+
+### Task 5: Create cart-folder.tsx + cart-folder.stories.tsx
+
+Created `apps/web/components/order/cart-folder.tsx` — a folder header component for the folders layout mode. Features:
+
+- Exported `CartFolderProps` interface with `id`, `name`, `itemCount`, `subtotal`, `open`, `onOpenChange`, `onRename`, `onDelete`, and `children`
+- Collapsible folder using shadcn `Collapsible` / `CollapsibleTrigger` / `CollapsibleContent`
+- Chevron icon (`ChevronRight`) that rotates 90deg when expanded via `transition-transform`
+- Inline rename on double-click: swaps folder name `span` for a compact `Input` (`h-6 text-xs`), commits on Enter/blur, reverts on Escape
+- Item count `Badge` (secondary variant)
+- Subtotal display (`$X.XX` format, muted foreground)
+- Delete button (`Trash2` icon, ghost variant, `hover:text-destructive`)
+- `children` slot for rendering indented `CartItem` components inside the folder
+
+Created `apps/web/components/order/cart-folder.stories.tsx` with 5 stories:
+
+- `Default` — expanded folder with 2 items, interactive rename + collapse
+- `Collapsed` — same folder starting collapsed (only header visible)
+- `EmptyFolder` — folder with zero items
+- `LongName` — folder with a long truncated name
+- `MultipleFolders` — two folders rendered together ("Dairy Order" + "Bakery Order")
+
+Verified: TypeScript compiles without errors (turbo typecheck 8/8 tasks successful). All 5 stories registered in Storybook index.json and iframe renders HTTP 200.
+
+Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.
