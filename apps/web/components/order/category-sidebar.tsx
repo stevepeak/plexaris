@@ -88,7 +88,14 @@ export interface BrowseProduct {
   isFavorited?: boolean
 }
 
+export interface BrowseSupplier {
+  id: string
+  name: string
+  description: string | null
+}
+
 interface CategorySidebarProps {
+  searchInputRef?: React.RefObject<HTMLInputElement | null>
   activeSection: BrowseSection | null
   onSectionChange: (section: BrowseSection | null) => void
   activeCategory: string | null
@@ -96,11 +103,14 @@ interface CategorySidebarProps {
   search: string
   onSearchChange: (value: string) => void
   products?: BrowseProduct[]
+  suppliers?: BrowseSupplier[]
   isLoading?: boolean
   onProductClick?: (product: BrowseProduct) => void
+  onSupplierClick?: (supplier: BrowseSupplier) => void
 }
 
 export function CategorySidebar({
+  searchInputRef,
   activeSection,
   onSectionChange,
   activeCategory,
@@ -108,8 +118,10 @@ export function CategorySidebar({
   search,
   onSearchChange,
   products,
+  suppliers,
   isLoading,
   onProductClick,
+  onSupplierClick,
 }: CategorySidebarProps) {
   if (activeSection === null) {
     return (
@@ -117,11 +129,17 @@ export function CategorySidebar({
         <div className="relative border-b px-3 py-2">
           <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            ref={searchInputRef}
             placeholder="Search..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="border-0 pl-7 shadow-none focus-visible:ring-0"
+            className="border-0 pl-7 pr-8 shadow-none focus-visible:ring-0"
           />
+          {!search && (
+            <kbd className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 rounded border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+              S
+            </kbd>
+          )}
         </div>
 
         {search && (isLoading || (products && products.length > 0)) ? (
@@ -163,11 +181,17 @@ export function CategorySidebar({
       <div className="relative border-b px-3 py-2">
         <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
+          ref={searchInputRef}
           placeholder="Search..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="border-0 pl-7 shadow-none focus-visible:ring-0"
+          className="border-0 pl-7 pr-8 shadow-none focus-visible:ring-0"
         />
+        {!search && (
+          <kbd className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 rounded border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+            S
+          </kbd>
+        )}
       </div>
 
       <div className="flex items-center gap-1 border-b px-3 py-2 text-sm">
@@ -196,8 +220,32 @@ export function CategorySidebar({
         )}
       </div>
 
-      {activeCategory ||
-      (search && (isLoading || (products && products.length > 0))) ? (
+      {activeSection === 'suppliers' ? (
+        <ScrollArea className="flex-1">
+          {isLoading ? (
+            <div className="flex flex-col gap-3 p-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex flex-col gap-1.5">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : suppliers && suppliers.length > 0 ? (
+            <SupplierList
+              suppliers={suppliers}
+              onSupplierClick={onSupplierClick}
+            />
+          ) : (
+            <div className="flex flex-1 items-center justify-center p-4">
+              <p className="text-center text-sm text-muted-foreground">
+                No suppliers found
+              </p>
+            </div>
+          )}
+        </ScrollArea>
+      ) : activeCategory ||
+        (search && (isLoading || (products && products.length > 0))) ? (
         <ScrollArea className="flex-1">
           {isLoading ? (
             <div className="flex flex-col gap-3 p-3">
@@ -272,6 +320,37 @@ function ProductList({
           {product.isFavorited && (
             <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
           )}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function SupplierList({
+  suppliers,
+  onSupplierClick,
+}: {
+  suppliers: BrowseSupplier[]
+  onSupplierClick?: (supplier: BrowseSupplier) => void
+}) {
+  return (
+    <div className="flex flex-col gap-1 p-2">
+      {suppliers.map((supplier) => (
+        <button
+          key={supplier.id}
+          type="button"
+          className="flex items-start gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+          onClick={() => onSupplierClick?.(supplier)}
+        >
+          <Store className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+          <div className="min-w-0 flex-1">
+            <div className="font-medium">{supplier.name}</div>
+            {supplier.description && (
+              <div className="line-clamp-1 text-xs text-muted-foreground">
+                {supplier.description}
+              </div>
+            )}
+          </div>
         </button>
       ))}
     </div>

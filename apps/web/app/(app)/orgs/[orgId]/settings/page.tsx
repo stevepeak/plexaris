@@ -2,8 +2,10 @@
 
 import { LogOut, Settings } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { useCallback, useEffect } from 'react'
 
+import { OrgSettings } from '@/components/org-settings-form'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -31,8 +33,9 @@ function getInitials(name: string | undefined): string {
     .slice(0, 2)
 }
 
-export default function DashboardPage() {
+export default function OrgSettingsPage() {
   const router = useRouter()
+  const { orgId } = useParams<{ orgId: string }>()
   const { data: session, isPending } = authClient.useSession()
   const {
     organizations,
@@ -40,6 +43,25 @@ export default function DashboardPage() {
     switchOrg,
     isPending: orgsPending,
   } = useActiveOrg()
+
+  // Sync URL orgId with active org state
+  useEffect(() => {
+    if (orgsPending || !organizations.length) return
+    const urlOrg = organizations.find((o) => o.id === orgId)
+    if (urlOrg && activeOrg?.id !== orgId) {
+      switchOrg(urlOrg)
+    }
+  }, [orgId, organizations, activeOrg?.id, switchOrg, orgsPending])
+
+  const handleOrgLeft = useCallback(() => {
+    localStorage.removeItem('plexaris:activeOrgId')
+    router.push('/dashboard')
+  }, [router])
+
+  const handleOrgArchived = useCallback(() => {
+    localStorage.removeItem('plexaris:activeOrgId')
+    router.push('/dashboard')
+  }, [router])
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -102,7 +124,25 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-8" />
+      <main className="mx-auto max-w-4xl px-4 py-8">
+        <h1 className="mb-6 text-lg font-semibold">Organization settings</h1>
+        {orgsPending ? (
+          <div className="space-y-6">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-48 w-full" />
+          </div>
+        ) : activeOrg ? (
+          <OrgSettings
+            organizationId={activeOrg.id}
+            onOrgLeft={handleOrgLeft}
+            onOrgArchived={handleOrgArchived}
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No organization selected.
+          </p>
+        )}
+      </main>
     </div>
   )
 }

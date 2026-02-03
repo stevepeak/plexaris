@@ -104,7 +104,10 @@ export function OrgSwitcher({
         {organizations.map((org) => (
           <DropdownMenuItem
             key={org.id}
-            onClick={() => onSwitch(org)}
+            onClick={() => {
+              onSwitch(org)
+              router.push(`/orgs/${org.id}`)
+            }}
             className="flex items-center justify-between"
           >
             <div className="flex items-center gap-2">

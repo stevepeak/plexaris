@@ -1,7 +1,7 @@
 'use client'
 
-import { Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Camera, Loader2, Trash2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 import {
   AlertDialog,
@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -26,18 +27,32 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 
+function getInitials(name: string | undefined): string {
+  if (!name) return '?'
+  return name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
 export function ProfileFormFields({
   name: initialName,
   email,
+  image,
   isPending,
   onUpdateName,
+  onUpdateImage,
   onChangePassword,
   onArchiveAccount,
 }: {
   name: string
   email: string
+  image?: string | null
   isPending: boolean
   onUpdateName?: (name: string) => Promise<{ error?: string }>
+  onUpdateImage?: (file: File | null) => Promise<{ error?: string }>
   onChangePassword?: (
     currentPassword: string,
     newPassword: string,
@@ -51,6 +66,54 @@ export function ProfileFormFields({
   const [nameLoading, setNameLoading] = useState(false)
   const [nameError, setNameError] = useState<string | null>(null)
   const [nameSuccess, setNameSuccess] = useState<string | null>(null)
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(image ?? null)
+  const [imageLoading, setImageLoading] = useState(false)
+  const [imageError, setImageError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setImagePreview(image ?? null)
+  }, [image])
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Preview immediately
+    const url = URL.createObjectURL(file)
+    setImagePreview(url)
+
+    if (onUpdateImage) {
+      setImageLoading(true)
+      setImageError(null)
+      const result = await onUpdateImage(file)
+      if (result.error) {
+        setImageError(result.error)
+        setImagePreview(image ?? null)
+      }
+      setImageLoading(false)
+    }
+
+    // Reset input so re-selecting same file triggers change
+    e.target.value = ''
+  }
+
+  const handleRemoveImage = async () => {
+    if (onUpdateImage) {
+      setImageLoading(true)
+      setImageError(null)
+      const result = await onUpdateImage(null)
+      if (result.error) {
+        setImageError(result.error)
+      } else {
+        setImagePreview(null)
+      }
+      setImageLoading(false)
+    } else {
+      setImagePreview(null)
+    }
+  }
 
   const [archiveLoading, setArchiveLoading] = useState(false)
   const [archiveError, setArchiveError] = useState<string | null>(null)
@@ -138,6 +201,61 @@ export function ProfileFormFields({
         </CardHeader>
         <Separator />
         <CardContent className="pt-6">
+          <div className="mb-6 flex items-center gap-4">
+            <div className="relative">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={imagePreview ?? undefined} alt={name} />
+                <AvatarFallback className="text-xl">
+                  {getInitials(name || initialName)}
+                </AvatarFallback>
+              </Avatar>
+              {imageLoading && (
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40">
+                  <Loader2 className="h-5 w-5 animate-spin text-white" />
+                </div>
+              )}
+            </div>
+            <div className="grid gap-1.5">
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={imageLoading}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Camera className="mr-2 h-4 w-4" />
+                  {imagePreview ? 'Change photo' : 'Upload photo'}
+                </Button>
+                {imagePreview && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={imageLoading}
+                    onClick={handleRemoveImage}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Remove
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                JPG, PNG or WebP. Max 2MB.
+              </p>
+              {imageError && (
+                <p className="text-sm text-destructive">{imageError}</p>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </div>
+
           <form onSubmit={handleUpdateName} className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>

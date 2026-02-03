@@ -22,12 +22,16 @@ interface PanelToggleBarProps {
   onToggle: (panel: keyof PanelState) => void
 }
 
-const TOGGLES: { key: keyof PanelState; icon: typeof Search; label: string }[] =
-  [
-    { key: 'search', icon: Search, label: 'Search' },
-    { key: 'order', icon: ShoppingCart, label: 'Your Order' },
-    { key: 'chat', icon: MessageSquare, label: 'Chat' },
-  ]
+const TOGGLES: {
+  key: keyof PanelState
+  icon: typeof Search
+  label: string
+  shortcut: string
+}[] = [
+  { key: 'search', icon: Search, label: 'Search', shortcut: 'S' },
+  { key: 'order', icon: ShoppingCart, label: 'Cart', shortcut: 'K' },
+  { key: 'chat', icon: MessageSquare, label: 'Chat', shortcut: 'C' },
+]
 
 export function PanelToggleBar({ panels, onToggle }: PanelToggleBarProps) {
   const value = TOGGLES.filter((t) => panels[t.key]).map((t) => t.key)
@@ -61,7 +65,12 @@ export function PanelToggleBar({ panels, onToggle }: PanelToggleBarProps) {
                 <toggle.icon className="h-4 w-4" />
               </ToggleGroupItem>
             </TooltipTrigger>
-            <TooltipContent side="bottom">{toggle.label}</TooltipContent>
+            <TooltipContent side="bottom">
+              {toggle.label}{' '}
+              <kbd className="ml-1 rounded border px-1 font-mono text-[10px]">
+                {toggle.shortcut}
+              </kbd>
+            </TooltipContent>
           </Tooltip>
         ))}
       </ToggleGroup>

@@ -27,6 +27,21 @@ export const Default: Story = {
   ),
 }
 
+export const WithAvatar: Story = {
+  render: () => (
+    <ProfileFormFields
+      name="Demo User"
+      email="demo@plexaris.com"
+      image="https://github.com/shadcn.png"
+      isPending={false}
+      onUpdateName={noop}
+      onUpdateImage={async () => ({})}
+      onChangePassword={noop}
+      onArchiveAccount={noop}
+    />
+  ),
+}
+
 export const Loading: Story = {
   render: () => <ProfileFormFields name="" email="" isPending={true} />,
 }

@@ -6,16 +6,18 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { type BrowseSection } from '@/components/order/browse-home'
 import {
   type BrowseProduct,
+  type BrowseSupplier,
   CategorySidebar,
 } from '@/components/order/category-sidebar'
 import { ContentViewer } from '@/components/order/content-viewer'
-import { OrderCart } from '@/components/order/order-cart'
+import { OrderCart, type OrderCartHandle } from '@/components/order/order-cart'
 import { OrderChat } from '@/components/order/order-chat'
 import {
   type PanelState,
   PanelToggleBar,
 } from '@/components/order/panel-toggle-bar'
 import { type TabItem, tabKey } from '@/components/order/types'
+import { useOrderHotkeys } from '@/components/order/use-order-hotkeys'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -45,6 +47,7 @@ export default function NewOrderPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [products, setProducts] = useState<BrowseProduct[]>([])
+  const [suppliers, setSuppliers] = useState<BrowseSupplier[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
 
@@ -59,9 +62,28 @@ export default function NewOrderPage() {
     chat: false,
   })
 
-  function handleTogglePanel(panel: keyof PanelState) {
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const cartRef = useRef<OrderCartHandle>(null)
+
+  const handleTogglePanel = useCallback((panel: keyof PanelState) => {
     setPanels((prev) => ({ ...prev, [panel]: !prev[panel] }))
-  }
+  }, [])
+
+  const handleNavigateHome = useCallback(() => {
+    setActiveSection(null)
+    setActiveCategory(null)
+    setSearch('')
+  }, [])
+
+  useOrderHotkeys({
+    panels,
+    onTogglePanel: handleTogglePanel,
+    tabs,
+    setActiveTabKey,
+    searchInputRef,
+    cartRef,
+    onNavigateHome: handleNavigateHome,
+  })
 
   const openTab = useCallback((tab: TabItem) => {
     const key = tabKey(tab)
@@ -142,11 +164,48 @@ export default function NewOrderPage() {
     }
   }, [activeOrg?.id])
 
+  const fetchSuppliers = useCallback(async (searchText?: string) => {
+    setIsLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (searchText) {
+        params.set('search', searchText)
+      }
+      const res = await fetch(`/api/suppliers/browse?${params.toString()}`)
+      if (res.ok) {
+        const data = await res.json()
+        setSuppliers(data.suppliers)
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     // Handle favorites section separately
     if (activeSection === 'favorites') {
       void fetchFavorites()
       return
+    }
+
+    // Handle suppliers section
+    if (activeSection === 'suppliers') {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+
+      debounceRef.current = setTimeout(
+        () => {
+          void fetchSuppliers(search || undefined)
+        },
+        search ? 300 : 0,
+      )
+
+      return () => {
+        if (debounceRef.current) {
+          clearTimeout(debounceRef.current)
+        }
+      }
     }
 
     if (!activeCategory && !search) {
@@ -176,6 +235,7 @@ export default function NewOrderPage() {
     search,
     fetchProducts,
     fetchFavorites,
+    fetchSuppliers,
     favoriteVersion,
   ])
 
@@ -183,6 +243,7 @@ export default function NewOrderPage() {
     setActiveSection(section)
     setActiveCategory(null)
     setSearch('')
+    setSuppliers([])
   }
 
   function handleNavigate(category: string | null) {
@@ -194,6 +255,10 @@ export default function NewOrderPage() {
 
   function handleProductClick(product: BrowseProduct) {
     openTab({ type: 'product', id: product.id, label: product.name })
+  }
+
+  function handleSupplierClick(supplier: BrowseSupplier) {
+    openTab({ type: 'supplier', id: supplier.id, label: supplier.name })
   }
 
   function handleOpenSupplier(supplierId: string, supplierName: string) {
@@ -209,7 +274,9 @@ export default function NewOrderPage() {
       <header className="border-b">
         <div className="flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <span className="text-lg font-semibold">Plexaris</span>
+            <Link href="/dashboard" className="text-lg font-semibold">
+              Plexaris
+            </Link>
             <Separator orientation="vertical" className="h-6" />
             <OrgSwitcher
               organizations={organizations}
@@ -241,6 +308,7 @@ export default function NewOrderPage() {
         {panels.search && (
           <div className="w-[280px] shrink-0 border-r">
             <CategorySidebar
+              searchInputRef={searchInputRef}
               activeSection={activeSection}
               onSectionChange={handleSectionChange}
               activeCategory={activeCategory}
@@ -248,8 +316,10 @@ export default function NewOrderPage() {
               search={search}
               onSearchChange={setSearch}
               products={products}
+              suppliers={suppliers}
               isLoading={isLoading}
               onProductClick={handleProductClick}
+              onSupplierClick={handleSupplierClick}
             />
           </div>
         )}
@@ -269,7 +339,7 @@ export default function NewOrderPage() {
 
         {panels.order && (
           <div className="w-[320px] shrink-0 border-l">
-            <OrderCart />
+            <OrderCart ref={cartRef} />
           </div>
         )}
 

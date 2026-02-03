@@ -41,14 +41,15 @@ export default function OnboardingPage() {
       body: JSON.stringify({ name: name.trim(), type: orgType }),
     })
 
+    const data = await response.json()
+
     if (!response.ok) {
-      const data = await response.json()
       setError(data.error ?? 'Failed to create organization')
       setIsLoading(false)
       return
     }
 
-    router.push('/dashboard')
+    router.push(`/orgs/${data.organization.id}`)
   }
 
   return (

@@ -23,7 +23,7 @@ export function TabBar({ tabs, activeTabKey, onSelect, onClose }: TabBarProps) {
   return (
     <ScrollArea className="border-b">
       <div className="flex">
-        {tabs.map((tab) => {
+        {tabs.map((tab, index) => {
           const key = tabKey(tab)
           const isActive = key === activeTabKey
           const Icon = TAB_ICONS[tab.type]
@@ -42,7 +42,14 @@ export function TabBar({ tabs, activeTabKey, onSelect, onClose }: TabBarProps) {
                 className="flex items-center gap-1.5"
                 onClick={() => onSelect(key)}
               >
-                <Icon className="h-3.5 w-3.5" />
+                <span className="relative flex h-3.5 w-3.5 items-center justify-center">
+                  <Icon className="h-3.5 w-3.5 group-hover:opacity-0" />
+                  {index < 9 && (
+                    <kbd className="absolute inset-0 flex items-center justify-center rounded border text-[10px] font-mono text-muted-foreground opacity-0 group-hover:opacity-100">
+                      {index + 1}
+                    </kbd>
+                  )}
+                </span>
                 <span className="max-w-[120px] truncate">{tab.label}</span>
               </button>
               <button

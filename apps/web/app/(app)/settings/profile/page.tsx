@@ -1,17 +1,35 @@
 'use client'
 
-import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 
+import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { ProfileFormFields } from '@/components/profile-form'
-import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
+
+function getInitials(name: string | undefined): string {
+  if (!name) return '?'
+  return name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
 
 export default function ProfileSettingsPage() {
   const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
+  const {
+    organizations,
+    activeOrg,
+    switchOrg,
+    isPending: orgsPending,
+  } = useActiveOrg()
 
   const handleUpdateName = useCallback(
     async (name: string): Promise<{ error?: string }> => {
@@ -57,20 +75,37 @@ export default function ProfileSettingsPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-4xl items-center gap-4 px-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/dashboard">
-              <ArrowLeft className="h-4 w-4" />
+        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="text-lg font-semibold">
+              Plexaris
             </Link>
-          </Button>
-          <span className="text-lg font-semibold">Profile settings</span>
+            <Separator orientation="vertical" className="h-6" />
+            <OrgSwitcher
+              organizations={organizations}
+              activeOrg={activeOrg}
+              onSwitch={switchOrg}
+              isPending={orgsPending}
+            />
+          </div>
+          {isPending ? (
+            <Skeleton className="h-8 w-8 rounded-full" />
+          ) : (
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="text-xs">
+                {getInitials(session?.user.name)}
+              </AvatarFallback>
+            </Avatar>
+          )}
         </div>
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8">
+        <h1 className="mb-6 text-lg font-semibold">Profile settings</h1>
         <ProfileFormFields
           name={session?.user.name ?? ''}
           email={session?.user.email ?? ''}
+          image={session?.user.image}
           isPending={isPending}
           onUpdateName={handleUpdateName}
           onChangePassword={handleChangePassword}

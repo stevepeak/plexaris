@@ -14,7 +14,7 @@ const SECTIONS = [
     label: 'Favorites',
     description: 'Frequently ordered items',
     icon: Star,
-    borderColor: 'border-l-amber-400',
+    borderColor: 'border-amber-400',
     iconColor: 'text-amber-500',
   },
   {
@@ -22,7 +22,7 @@ const SECTIONS = [
     label: 'Products',
     description: 'Browse all products',
     icon: Package,
-    borderColor: 'border-l-blue-400',
+    borderColor: 'border-blue-400',
     iconColor: 'text-blue-500',
   },
   {
@@ -30,7 +30,7 @@ const SECTIONS = [
     label: 'Suppliers',
     description: 'Shop by supplier',
     icon: Store,
-    borderColor: 'border-l-green-400',
+    borderColor: 'border-green-400',
     iconColor: 'text-green-500',
   },
   {
@@ -38,7 +38,7 @@ const SECTIONS = [
     label: 'Recipes',
     description: 'Order by recipe',
     icon: ChefHat,
-    borderColor: 'border-l-purple-400',
+    borderColor: 'border-purple-400',
     iconColor: 'text-purple-500',
   },
 ] satisfies {
@@ -56,7 +56,7 @@ export function BrowseHome({ onSelect }: BrowseHomeProps) {
       {SECTIONS.map((section) => (
         <Card
           key={section.key}
-          className={`cursor-pointer border-l-4 p-3 transition-colors hover:bg-accent ${section.borderColor}`}
+          className={`cursor-pointer p-3 transition-colors hover:bg-accent ${section.borderColor}`}
           onClick={() => onSelect(section.key)}
         >
           <section.icon className={`h-5 w-5 ${section.iconColor}`} />

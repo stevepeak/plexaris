@@ -10,6 +10,7 @@ const protectedRoutes = [
   '/profile',
   '/onboarding',
   '/order',
+  '/orgs',
 ]
 const authRoutes = ['/login', '/signup']
 
