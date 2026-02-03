@@ -53,3 +53,28 @@ Created `apps/web/components/order/cart-layout-menu.stories.tsx` with 5 stories:
 Verified: TypeScript compiles without errors (tsc exit code 0). All 5 stories registered in Storybook index.json and iframe renders HTTP 200.
 
 Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.
+
+### Task 4: Create cart-group-header.tsx + cart-group-header.stories.tsx
+
+Created `apps/web/components/order/cart-group-header.tsx` — an auto-group collapsible header for by-supplier / by-category / by-team-member layout modes. Features:
+
+- Exported `CartGroupHeaderProps` interface with `label`, `itemCount`, `subtotal`, `open`, `onOpenChange`, and `children`
+- Collapsible group using shadcn `Collapsible` / `CollapsibleTrigger` / `CollapsibleContent`
+- Chevron icon (`ChevronRight`) that rotates 90deg when expanded via `transition-transform`
+- Group label (truncated, left-aligned, font-medium)
+- Item count `Badge` (secondary variant)
+- Subtotal display (`$X.XX` format, muted foreground)
+- Full-width trigger with `hover:bg-accent` for interactive feedback
+- `children` slot for rendering indented `CartItem` components inside the group
+
+Created `apps/web/components/order/cart-group-header.stories.tsx` with 5 stories:
+
+- `Default` — expanded group with 2 items ("Green Valley" supplier)
+- `Collapsed` — same group starting collapsed (only header visible)
+- `Ungrouped` — group labeled "Ungrouped" for items missing the grouping field
+- `SingleItem` — group with a single item
+- `MultipleGroups` — two groups rendered together ("Green Valley" + "Baker Bros")
+
+Verified: TypeScript compiles without errors (turbo typecheck 8/8 tasks successful). All 5 stories registered in Storybook index.json and iframe renders HTTP 200.
+
+Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.
