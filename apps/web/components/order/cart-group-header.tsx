@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
 
-export interface CartGroupHeaderProps {
+interface CartGroupHeaderProps {
   label: string
   itemCount: number
   subtotal: number

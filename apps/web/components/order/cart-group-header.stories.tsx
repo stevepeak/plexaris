@@ -1,6 +1,5 @@
-import { useState } from 'react'
-
 import { type Meta, type StoryObj } from '@storybook/react'
+import { useState } from 'react'
 
 import { CartGroupHeader } from './cart-group-header'
 import { CartItem, type CartItemData } from './cart-item'

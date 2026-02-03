@@ -1,10 +1,10 @@
 import {
   FolderOpen,
   List,
+  type LucideIcon,
   Store,
   Tag,
   Users,
-  type LucideIcon,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -50,7 +50,7 @@ const iconMap: Record<CartLayoutMode, LucideIcon> = {
   'by-team-member': Users,
 }
 
-export interface CartLayoutMenuProps {
+interface CartLayoutMenuProps {
   value: CartLayoutMode
   onValueChange: (mode: CartLayoutMode) => void
 }

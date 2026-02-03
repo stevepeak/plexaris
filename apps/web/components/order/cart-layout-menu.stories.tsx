@@ -1,6 +1,5 @@
-import { useState } from 'react'
-
 import { type Meta, type StoryObj } from '@storybook/react'
+import { useState } from 'react'
 
 import { CartLayoutMenu, type CartLayoutMode } from './cart-layout-menu'
 

@@ -230,3 +230,30 @@ Rewrote `apps/web/components/order/order-cart.stories.tsx` with 8 stories coveri
 Verified: All 8 stories registered in Storybook index.json and all iframe URLs return HTTP 200.
 
 Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.
+
+### Task 12: Run `bun run fix && bun run knip:fix` then `bun run ci`
+
+Fixed 8 ESLint errors across 4 story files:
+
+- `cart-item.stories.tsx`, `cart-folder.stories.tsx`, `sortable-cart-item.stories.tsx`, `sortable-cart-folder.stories.tsx`
+- Changed decorator parameter from `(Story) => <Story />` to `(story) => {story()}` to comply with `@typescript-eslint/naming-convention` (camelCase requirement)
+- Changed `const noop = () => {}` to `const noop = () => undefined` to comply with `@typescript-eslint/no-empty-function`
+
+Ran `bun run knip:fix` which removed 5 unused exported interface types:
+
+- `CartGroupHeaderProps` from `cart-group-header.tsx`
+- `CartLayoutMenuProps` from `cart-layout-menu.tsx`
+- `OrderCartProps` from `order-cart.tsx`
+- `SortableCartFolderProps` from `sortable-cart-folder.tsx`
+- `SortableCartItemProps` from `sortable-cart-item.tsx`
+
+Installed `@dnd-kit/core`, `@dnd-kit/sortable`, and `@dnd-kit/utilities` packages (were declared in package.json but not yet installed).
+
+Ran `bun run ci` — all steps pass:
+
+- `typecheck`: 8/8 packages successful
+- `lint`: 8/8 packages successful (ESLint + Prettier)
+- `knip`: no unused exports
+- `build`: Next.js compiled successfully, 19/19 static pages generated
+
+Screenshot: browser was locked by another process; no screenshot taken. Verified web app (HTTP 307 auth redirect) and Storybook (HTTP 200) are running.

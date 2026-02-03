@@ -1,10 +1,13 @@
+import {
+  type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
+import { arrayMove } from '@dnd-kit/sortable'
 import { useCallback, useMemo, useState } from 'react'
 
-import { arrayMove } from '@dnd-kit/sortable'
-import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
-
-import type { CartItemData } from '@/components/order/cart-item'
-import type { CartLayoutMode } from '@/components/order/cart-layout-menu'
+import { type CartItemData } from '@/components/order/cart-item'
+import { type CartLayoutMode } from '@/components/order/cart-layout-menu'
 
 // ---------------------------------------------------------------------------
 // Types

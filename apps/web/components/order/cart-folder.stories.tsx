@@ -1,6 +1,5 @@
-import { useState } from 'react'
-
 import { type Meta, type StoryObj } from '@storybook/react'
+import { useState } from 'react'
 
 import { TooltipProvider } from '@/components/ui/tooltip'
 
@@ -11,11 +10,7 @@ const meta: Meta<typeof CartFolder> = {
   title: 'order/CartFolder',
   component: CartFolder,
   decorators: [
-    (Story) => (
-      <TooltipProvider delayDuration={300}>
-        <Story />
-      </TooltipProvider>
-    ),
+    (story) => <TooltipProvider delayDuration={300}>{story()}</TooltipProvider>,
   ],
 }
 export default meta
@@ -44,7 +39,7 @@ const folderItems: CartItemData[] = [
   },
 ]
 
-const noop = () => {}
+const noop = () => undefined
 
 function InteractiveFolder({
   name = 'New Folder',

@@ -80,7 +80,7 @@ export interface OrderCartHandle {
   decrementSelected: () => void
 }
 
-export interface OrderCartProps {
+interface OrderCartProps {
   initialItems?: CartItemData[]
   initialLayoutMode?: CartLayoutMode
   onOpenProduct?: (productId: string, productName: string) => void

@@ -1,5 +1,3 @@
-import { GripVertical } from 'lucide-react'
-
 import { useDroppable } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -7,10 +5,11 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { GripVertical } from 'lucide-react'
 
 import { CartFolder, type CartFolderProps } from './cart-folder'
 
-export interface SortableCartFolderProps extends CartFolderProps {
+interface SortableCartFolderProps extends CartFolderProps {
   /** Ordered item ids inside this folder, used for inner SortableContext */
   itemIds: string[]
 }

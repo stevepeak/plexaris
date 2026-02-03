@@ -8,11 +8,7 @@ const meta: Meta<typeof CartItem> = {
   title: 'order/CartItem',
   component: CartItem,
   decorators: [
-    (Story) => (
-      <TooltipProvider delayDuration={300}>
-        <Story />
-      </TooltipProvider>
-    ),
+    (story) => <TooltipProvider delayDuration={300}>{story()}</TooltipProvider>,
   ],
 }
 export default meta
@@ -29,7 +25,7 @@ const sampleItem: CartItemData = {
   category: 'Dairy',
 }
 
-const noop = () => {}
+const noop = () => undefined
 
 export const Default: Story = {
   render: () => (

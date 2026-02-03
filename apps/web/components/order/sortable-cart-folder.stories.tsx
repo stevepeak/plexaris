@@ -1,13 +1,11 @@
-import { useState } from 'react'
-
-import { type Meta, type StoryObj } from '@storybook/react'
-
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { type Meta, type StoryObj } from '@storybook/react'
+import { useState } from 'react'
 
 import { TooltipProvider } from '@/components/ui/tooltip'
 
-import type { CartItemData } from './cart-item'
+import { type CartItemData } from './cart-item'
 import { SortableCartFolder } from './sortable-cart-folder'
 import { SortableCartItem } from './sortable-cart-item'
 
@@ -15,11 +13,7 @@ const meta: Meta<typeof SortableCartFolder> = {
   title: 'order/SortableCartFolder',
   component: SortableCartFolder,
   decorators: [
-    (Story) => (
-      <TooltipProvider delayDuration={300}>
-        <Story />
-      </TooltipProvider>
-    ),
+    (story) => <TooltipProvider delayDuration={300}>{story()}</TooltipProvider>,
   ],
 }
 export default meta
@@ -48,7 +42,7 @@ const folderItems: CartItemData[] = [
   },
 ]
 
-const noop = () => {}
+const noop = () => undefined
 
 function SortableWrapper({
   children,

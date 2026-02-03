@@ -1,6 +1,6 @@
 import { type Meta, type StoryObj } from '@storybook/react'
 
-import type { CartItemData } from './cart-item'
+import { type CartItemData } from './cart-item'
 import { OrderCart } from './order-cart'
 
 const SAMPLE_ITEMS: CartItemData[] = [

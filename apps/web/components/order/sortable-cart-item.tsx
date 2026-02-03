@@ -1,11 +1,10 @@
-import { GripVertical } from 'lucide-react'
-
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { GripVertical } from 'lucide-react'
 
 import { CartItem, type CartItemProps } from './cart-item'
 
-export interface SortableCartItemProps extends CartItemProps {
+interface SortableCartItemProps extends CartItemProps {
   /** The folder id this item belongs to, or undefined for root-level items */
   containerId?: string
 }
