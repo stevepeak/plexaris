@@ -5,22 +5,58 @@ import { auth } from '@/lib/auth'
 
 const db = createDb()
 
-// GET /api/products/[id] — Get product detail
+// GET /api/products/[id] — Get product detail with supplier info
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
 
-  const product = await db.query.product.findFirst({
-    where: eq(schema.product.id, id),
-  })
+  const rows = await db
+    .select({
+      id: schema.product.id,
+      name: schema.product.name,
+      description: schema.product.description,
+      price: schema.product.price,
+      unit: schema.product.unit,
+      category: schema.product.category,
+      status: schema.product.status,
+      images: schema.product.images,
+      organizationId: schema.product.organizationId,
+      createdAt: schema.product.createdAt,
+      updatedAt: schema.product.updatedAt,
+      supplierId: schema.organization.id,
+      supplierName: schema.organization.name,
+    })
+    .from(schema.product)
+    .innerJoin(
+      schema.organization,
+      eq(schema.product.organizationId, schema.organization.id),
+    )
+    .where(eq(schema.product.id, id))
+    .limit(1)
 
-  if (!product) {
+  const row = rows[0]
+  if (!row) {
     return NextResponse.json({ error: 'Product not found' }, { status: 404 })
   }
 
-  return NextResponse.json({ product })
+  return NextResponse.json({
+    product: {
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: row.price,
+      unit: row.unit,
+      category: row.category,
+      status: row.status,
+      images: row.images,
+      organizationId: row.organizationId,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      supplier: { id: row.supplierId, name: row.supplierName },
+    },
+  })
 }
 
 // PATCH /api/products/[id] — Update a product

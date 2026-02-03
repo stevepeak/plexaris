@@ -57,6 +57,13 @@
       "when": 1770130000000,
       "tag": "0007_schema_refactor",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1770132659164,
+      "tag": "0008_material_tigra",
+      "breakpoints": true
     }
   ]
 }

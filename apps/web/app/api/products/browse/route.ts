@@ -18,6 +18,7 @@ export async function GET(request: Request) {
   const search = searchParams.get('search')
   const category = searchParams.get('category')
   const organizationId = searchParams.get('organizationId')
+  const favoritesOrgId = searchParams.get('favoritesOrgId')
 
   const conditions = [
     isNull(schema.product.archivedAt),
@@ -40,6 +41,21 @@ export async function GET(request: Request) {
         ilike(schema.product.description, pattern),
       )!,
     )
+  }
+
+  // Fetch favorite product IDs for the org if requested
+  let favoriteIds: Set<string> | null = null
+  if (favoritesOrgId) {
+    const favRows = await db
+      .select({ targetId: schema.favorite.targetId })
+      .from(schema.favorite)
+      .where(
+        and(
+          eq(schema.favorite.organizationId, favoritesOrgId),
+          eq(schema.favorite.targetType, 'product'),
+        ),
+      )
+    favoriteIds = new Set(favRows.map((r) => r.targetId))
   }
 
   const rows = await db
@@ -69,6 +85,7 @@ export async function GET(request: Request) {
     unit: row.unit,
     category: row.category,
     supplier: { id: row.supplierId, name: row.supplierName },
+    ...(favoriteIds ? { isFavorited: favoriteIds.has(row.id) } : {}),
   }))
 
   return NextResponse.json({ products })

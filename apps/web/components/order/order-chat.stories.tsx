@@ -11,7 +11,7 @@ type Story = StoryObj<typeof OrderChat>
 
 export const Default: Story = {
   render: () => (
-    <div className="h-[500px] w-[400px] border">
+    <div className="h-[500px] w-[250px] border">
       <OrderChat />
     </div>
   ),

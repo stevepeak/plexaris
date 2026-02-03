@@ -160,9 +160,6 @@ export default function DashboardPage() {
             <Skeleton className="h-8 w-8 rounded-full" />
           ) : (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">
-                {session?.user.name}
-              </span>
               <Button variant="ghost" size="icon" asChild>
                 <Link href="/settings/profile">
                   <Avatar className="h-8 w-8">
