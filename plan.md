@@ -14,5 +14,5 @@ Work on epics:
 - [x] 8. Create `sortable-cart-folder.tsx` — useSortable + Collapsible + inner SortableContext — passes: true
 - [x] 9. Refactor `order-cart.tsx` — wire up DndContext + layout modes + all sub-components; accept `onOpenProduct`/`onOpenSupplier` props — passes: true
 - [x] 10. Update `order/new/page.tsx` — pass `onOpenProduct`/`onOpenSupplier` to `OrderCart` — passes: true
-- [ ] 11. Update `order-cart.stories.tsx` — add stories for all layout modes — passes: false
+- [x] 11. Update `order-cart.stories.tsx` — add stories for all layout modes — passes: true
 - [ ] 12. Run `bun run fix && bun run knip:fix` then `bun run ci` — passes: false

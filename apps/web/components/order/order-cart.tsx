@@ -32,7 +32,7 @@ import { useCartState } from '@/hooks/use-cart-state'
 
 import { CartGroupHeader } from './cart-group-header'
 import { CartItem, type CartItemData } from './cart-item'
-import { CartLayoutMenu } from './cart-layout-menu'
+import { CartLayoutMenu, type CartLayoutMode } from './cart-layout-menu'
 import { SortableCartFolder } from './sortable-cart-folder'
 import { SortableCartItem } from './sortable-cart-item'
 
@@ -82,13 +82,20 @@ export interface OrderCartHandle {
 
 export interface OrderCartProps {
   initialItems?: CartItemData[]
+  initialLayoutMode?: CartLayoutMode
   onOpenProduct?: (productId: string, productName: string) => void
   onOpenSupplier?: (supplierId: string, supplierName: string) => void
 }
 
 export const OrderCart = forwardRef<OrderCartHandle, OrderCartProps>(
-  function OrderCart({ initialItems, onOpenProduct, onOpenSupplier }, ref) {
-    const cart = useCartState(initialItems ?? [...DEMO_ITEMS])
+  function OrderCart(
+    { initialItems, initialLayoutMode, onOpenProduct, onOpenSupplier },
+    ref,
+  ) {
+    const cart = useCartState(
+      initialItems ?? [...DEMO_ITEMS],
+      initialLayoutMode,
+    )
     const [selectedIndex, setSelectedIndex] = useState(-1)
     const allItemsRef = useRef(cart.allItems)
     allItemsRef.current = cart.allItems

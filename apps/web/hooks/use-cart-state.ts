@@ -54,11 +54,16 @@ function buildInitialState(items: CartItemData[]): CartState {
 // Hook
 // ---------------------------------------------------------------------------
 
-export function useCartState(initialItems?: CartItemData[]) {
+export function useCartState(
+  initialItems?: CartItemData[],
+  initialLayoutMode?: CartLayoutMode,
+) {
   const [state, setState] = useState<CartState>(() =>
     buildInitialState(initialItems ?? []),
   )
-  const [layoutMode, setLayoutMode] = useState<CartLayoutMode>('flat')
+  const [layoutMode, setLayoutMode] = useState<CartLayoutMode>(
+    initialLayoutMode ?? 'flat',
+  )
   const [activeId, setActiveId] = useState<string | null>(null)
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     () => new Set(),

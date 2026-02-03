@@ -208,3 +208,25 @@ Updated `apps/web/app/(app)/order/new/page.tsx` to pass the `onOpenProduct` and 
 Verified: TypeScript compiles without errors for `page.tsx`. The only type errors in the project are in `order-cart.stories.tsx` (missing `supplierId` field in demo data — addressed in task 11).
 
 Screenshot: browser was locked by another process; no screenshot taken. Verified via dev server HTTP 307 (auth redirect).
+
+### Task 11: Update order-cart.stories.tsx — add stories for all layout modes
+
+Rewrote `apps/web/components/order/order-cart.stories.tsx` with 8 stories covering all cart layout modes. Changes:
+
+- Added `initialLayoutMode` prop to `OrderCartProps` in `order-cart.tsx`, forwarded to `useCartState`
+- Updated `useCartState` to accept an optional `initialLayoutMode` parameter (defaults to `'flat'`)
+- Replaced old stories (which used stale `CartItem` without `supplierId`) with new stories using complete `CartItemData` objects
+- Created shared `SAMPLE_ITEMS` (5 items across 3 suppliers, 4 categories, 2 assignees) and `ITEMS_WITH_UNGROUPED` (adds 1 item without category/assignee)
+- Stories:
+  - `Empty` — empty cart with no items
+  - `Flat` — default flat list layout with 5 items
+  - `WithFolders` — folders mode (items at root level, user can create folders via + button)
+  - `MixedItems` — flat mode with 6 items including one missing category/assignee fields
+  - `GroupedBySupplier` — auto-grouped by supplier (Baker Bros, Green Valley, NutCo)
+  - `GroupedByCategory` — auto-grouped by category (Bakery, Dairy, Dairy Alternatives, Spreads)
+  - `GroupedByTeamMember` — auto-grouped by assignee (Alice, Bob)
+  - `SingleItem` — single item in the cart
+
+Verified: All 8 stories registered in Storybook index.json and all iframe URLs return HTTP 200.
+
+Screenshot: browser was locked by another process; no screenshot taken. Verified via Storybook index.json and HTTP 200 responses.
