@@ -5,7 +5,7 @@ Work on epics:
 ## Tasks
 
 - [x] 1. Install @dnd-kit packages (`@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`) into `apps/web` — passes: true
-- [ ] 2. Create `cart-item.tsx` + `cart-item.stories.tsx` — extract presentational item with clickable name + supplier badge — passes: false
+- [x] 2. Create `cart-item.tsx` + `cart-item.stories.tsx` — extract presentational item with clickable name + supplier badge — passes: true
 - [ ] 3. Create `cart-layout-menu.tsx` + `cart-layout-menu.stories.tsx` — layout mode dropdown with dynamic icon — passes: false
 - [ ] 4. Create `cart-group-header.tsx` + `cart-group-header.stories.tsx` — auto-group collapsible header — passes: false
 - [ ] 5. Create `cart-folder.tsx` + `cart-folder.stories.tsx` — folder header component — passes: false
