@@ -57,6 +57,9 @@ export function useOrderHotkeys({
       // Skip all other shortcuts when typing in an input
       if (isInputFocused()) return
 
+      // Ignore when modifier keys are held (allow native Cmd+C, Ctrl+V, etc.)
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+
       switch (e.key) {
         case '/': {
           e.preventDefault()
