@@ -1,7 +1,8 @@
 'use client'
 
-import { MousePointerClick } from 'lucide-react'
+import { MessageSquare, Search } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
 import { type CartStateReturn } from '@/hooks/use-cart-state'
 
 import { type ActivityEntry, ActivityLog } from './activity-log'
@@ -10,6 +11,60 @@ import { ProductDetail } from './product-detail'
 import { SupplierDetail } from './supplier-detail'
 import { TabBar } from './tab-bar'
 import { type TabItem, tabKey } from './types'
+
+function SearchArrow() {
+  return (
+    <svg
+      width="120"
+      height="80"
+      viewBox="0 0 120 80"
+      fill="none"
+      className="text-muted-foreground/40"
+    >
+      <path
+        d="M100 70 C 80 65, 40 60, 15 20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeDasharray="6 4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M20 10 L12 22 L24 24"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function ChatArrow() {
+  return (
+    <svg
+      width="120"
+      height="80"
+      viewBox="0 0 120 80"
+      fill="none"
+      className="text-muted-foreground/40"
+    >
+      <path
+        d="M20 70 C 40 65, 80 60, 105 20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeDasharray="6 4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M100 10 L108 22 L96 24"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
 
 interface ContentViewerProps {
   tabs: TabItem[]
@@ -31,6 +86,8 @@ interface ContentViewerProps {
   }) => void
   cart?: CartStateReturn
   activityEntries?: ActivityEntry[]
+  onFocusSearch?: () => void
+  onOpenChat?: () => void
 }
 
 export function ContentViewer({
@@ -45,15 +102,36 @@ export function ContentViewer({
   onAddToCart,
   cart,
   activityEntries,
+  onFocusSearch,
+  onOpenChat,
 }: ContentViewerProps) {
   const activeTab = tabs.find((t) => tabKey(t) === activeTabKey)
 
   if (tabs.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="flex flex-col items-center gap-2 text-muted-foreground">
-          <MousePointerClick className="h-8 w-8" />
-          <p className="text-sm">Select a product to view details</p>
+        <div className="flex items-center gap-16">
+          <div className="flex flex-col items-center gap-2">
+            <SearchArrow />
+            <Button variant="outline" className="gap-2" onClick={onFocusSearch}>
+              <Search className="h-4 w-4" />
+              Search products or recipes
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Browse the catalog on the left
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <ChatArrow />
+            <Button variant="outline" className="gap-2" onClick={onOpenChat}>
+              <MessageSquare className="h-4 w-4" />
+              Start chat with agent
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Let an assistant pick items for you
+            </p>
+          </div>
         </div>
       </div>
     )

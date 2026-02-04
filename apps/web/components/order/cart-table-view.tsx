@@ -1,9 +1,29 @@
 'use client'
 
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Check,
+  ListFilter,
+  Search,
+} from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
@@ -12,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import {
   Table,
   TableBody,
@@ -29,6 +50,15 @@ interface CartTableViewProps {
   cart: CartStateReturn
   onOpenProduct?: (productId: string, productName: string) => void
   onOpenSupplier?: (supplierId: string, supplierName: string) => void
+}
+
+type SortField = 'name' | 'price' | 'date'
+type SortDirection = 'asc' | 'desc'
+
+interface CartFilters {
+  suppliers: Set<string>
+  categories: Set<string>
+  teamMembers: Set<string>
 }
 
 // Editable column indices: 0 = supplier, 1 = quantity
@@ -68,6 +98,16 @@ export function CartTableView({
   const tableRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Search, filter, sort state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filters, setFilters] = useState<CartFilters>({
+    suppliers: new Set(),
+    categories: new Set(),
+    teamMembers: new Set(),
+  })
+  const [sortField, setSortField] = useState<SortField | null>(null)
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+
   const suppliers = useMemo(() => {
     const map = new Map<string, string>()
     for (const item of items) {
@@ -76,21 +116,134 @@ export function CartTableView({
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }))
   }, [items])
 
+  // Derive unique filter options from all items
+  const filterOptions = useMemo(() => {
+    const supplierSet = new Map<string, string>()
+    const categorySet = new Set<string>()
+    const teamMemberSet = new Set<string>()
+    for (const item of items) {
+      supplierSet.set(item.supplierId, item.supplier)
+      if (item.category) categorySet.add(item.category)
+      if (item.assignee) teamMemberSet.add(item.assignee)
+    }
+    return {
+      suppliers: Array.from(supplierSet.entries()).map(([id, name]) => ({
+        id,
+        name,
+      })),
+      categories: Array.from(categorySet).sort(),
+      teamMembers: Array.from(teamMemberSet).sort(),
+    }
+  }, [items])
+
+  const hasActiveFilters =
+    filters.suppliers.size > 0 ||
+    filters.categories.size > 0 ||
+    filters.teamMembers.size > 0
+
+  const toggleFilter = useCallback((type: keyof CartFilters, value: string) => {
+    setFilters((prev) => {
+      const next = new Set(prev[type])
+      if (next.has(value)) {
+        next.delete(value)
+      } else {
+        next.add(value)
+      }
+      return { ...prev, [type]: next }
+    })
+  }, [])
+
+  const clearFilters = useCallback(() => {
+    setFilters({
+      suppliers: new Set(),
+      categories: new Set(),
+      teamMembers: new Set(),
+    })
+  }, [])
+
+  const handleSort = useCallback(
+    (field: SortField) => {
+      if (sortField === field) {
+        setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+      } else {
+        setSortField(field)
+        setSortDirection('asc')
+      }
+    },
+    [sortField],
+  )
+
+  // Apply search, filters, and sort
+  const filteredItems = useMemo(() => {
+    let result = items
+
+    // Search
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(
+        (item) =>
+          item.name.toLowerCase().includes(q) ||
+          item.supplier.toLowerCase().includes(q) ||
+          item.category?.toLowerCase().includes(q) ||
+          item.assignee?.toLowerCase().includes(q),
+      )
+    }
+
+    // Filters
+    if (filters.suppliers.size > 0) {
+      result = result.filter((item) => filters.suppliers.has(item.supplierId))
+    }
+    if (filters.categories.size > 0) {
+      result = result.filter(
+        (item) => item.category && filters.categories.has(item.category),
+      )
+    }
+    if (filters.teamMembers.size > 0) {
+      result = result.filter(
+        (item) => item.assignee && filters.teamMembers.has(item.assignee),
+      )
+    }
+
+    // Sort
+    if (sortField) {
+      result = [...result].sort((a, b) => {
+        let cmp = 0
+        switch (sortField) {
+          case 'name':
+            cmp = a.name.localeCompare(b.name)
+            break
+          case 'price':
+            cmp = a.price - b.price
+            break
+          case 'date': {
+            const aTime = a.addedBy?.addedAt.getTime() ?? 0
+            const bTime = b.addedBy?.addedAt.getTime() ?? 0
+            cmp = aTime - bTime
+            break
+          }
+        }
+        return sortDirection === 'desc' ? -cmp : cmp
+      })
+    }
+
+    return result
+  }, [items, searchQuery, filters, sortField, sortDirection])
+
   const startEditing = useCallback(
     (row: number, col: number) => {
-      const item = items[row]
+      const item = filteredItems[row]
       if (!item) return
       if (col === 1) {
         setEditValue(String(item.quantity))
       }
       setEditingCell({ row, col })
     },
-    [items],
+    [filteredItems],
   )
 
   const commitEdit = useCallback(
     (row: number, col: number) => {
-      const item = items[row]
+      const item = filteredItems[row]
       if (!item) return
       if (col === 1) {
         const newQty = parseInt(editValue, 10)
@@ -101,7 +254,7 @@ export function CartTableView({
       setEditingCell(null)
       setEditValue('')
     },
-    [items, editValue, cart],
+    [filteredItems, editValue, cart],
   )
 
   const cancelEdit = useCallback(() => {
@@ -111,7 +264,7 @@ export function CartTableView({
 
   const handleSupplierChange = useCallback(
     (row: number, supplierId: string) => {
-      const item = items[row]
+      const item = filteredItems[row]
       if (!item) return
       const supplier = suppliers.find((s) => s.id === supplierId)
       if (supplier) {
@@ -119,7 +272,7 @@ export function CartTableView({
       }
       setEditingCell(null)
     },
-    [items, suppliers, cart],
+    [filteredItems, suppliers, cart],
   )
 
   // Focus input when editing qty
@@ -148,7 +301,7 @@ export function CartTableView({
           commitEdit(editingCell.row, editingCell.col)
           // Move down
           const nextRow = editingCell.row + 1
-          if (nextRow < items.length) {
+          if (nextRow < filteredItems.length) {
             setFocusedCell({ row: nextRow, col: editingCell.col })
           }
           return
@@ -164,7 +317,7 @@ export function CartTableView({
             nextCol = 0
             nextRow += 1
           }
-          if (nextRow < items.length) {
+          if (nextRow < filteredItems.length) {
             setFocusedCell({ row: nextRow, col: nextCol })
           }
           return
@@ -179,7 +332,7 @@ export function CartTableView({
       if (e.key === 'ArrowDown') {
         e.preventDefault()
         setFocusedCell((prev) =>
-          prev && prev.row < items.length - 1
+          prev && prev.row < filteredItems.length - 1
             ? { ...prev, row: prev.row + 1 }
             : prev,
         )
@@ -211,7 +364,7 @@ export function CartTableView({
           nextCol = 0
           nextRow += 1
         }
-        if (nextRow < items.length) {
+        if (nextRow < filteredItems.length) {
           setFocusedCell({ row: nextRow, col: nextCol })
         }
       } else if (e.key === 'Escape') {
@@ -222,7 +375,7 @@ export function CartTableView({
     [
       focusedCell,
       editingCell,
-      items.length,
+      filteredItems.length,
       startEditing,
       commitEdit,
       cancelEdit,
@@ -322,6 +475,30 @@ export function CartTableView({
     )
   }
 
+  function renderSortIcon(field: SortField) {
+    if (sortField !== field) {
+      return <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground/50" />
+    }
+    return sortDirection === 'asc' ? (
+      <ArrowUp className="ml-1 h-3 w-3" />
+    ) : (
+      <ArrowDown className="ml-1 h-3 w-3" />
+    )
+  }
+
+  function renderSortableHeader(label: string, field: SortField) {
+    return (
+      <button
+        type="button"
+        className="inline-flex items-center text-xs font-medium hover:text-foreground"
+        onClick={() => handleSort(field)}
+      >
+        {label}
+        {renderSortIcon(field)}
+      </button>
+    )
+  }
+
   if (items.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -339,21 +516,216 @@ export function CartTableView({
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
+      {/* Toolbar */}
+      <div className="flex items-center justify-between gap-3 border-b px-4 py-2">
+        {/* Left: Search */}
+        <div className="relative w-64">
+          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search cart"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-8 border-none bg-transparent pl-8 text-xs shadow-none focus-visible:ring-0"
+          />
+        </div>
+
+        {/* Right: Filter + Sort */}
+        <div className="flex items-center gap-1.5">
+          {/* Filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative h-8 w-8">
+                <ListFilter className="h-4 w-4" />
+                {hasActiveFilters && (
+                  <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-blue-500" />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-56 p-0">
+              <div className="p-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium">Filters</p>
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                      onClick={clearFilters}
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+              </div>
+              <Separator />
+
+              {/* Supplier filters */}
+              {filterOptions.suppliers.length > 0 && (
+                <div className="p-3">
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">
+                    Supplier
+                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    {filterOptions.suppliers.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        className="flex items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-accent"
+                        onClick={() => toggleFilter('suppliers', s.id)}
+                      >
+                        <div
+                          className={cn(
+                            'flex h-4 w-4 items-center justify-center rounded border',
+                            filters.suppliers.has(s.id)
+                              ? 'border-primary bg-primary text-primary-foreground'
+                              : 'border-input',
+                          )}
+                        >
+                          {filters.suppliers.has(s.id) && (
+                            <Check className="h-3 w-3" />
+                          )}
+                        </div>
+                        {s.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Category filters */}
+              {filterOptions.categories.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="p-3">
+                    <p className="mb-2 text-xs font-medium text-muted-foreground">
+                      Category
+                    </p>
+                    <div className="flex flex-col gap-1.5">
+                      {filterOptions.categories.map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          className="flex items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-accent"
+                          onClick={() => toggleFilter('categories', cat)}
+                        >
+                          <div
+                            className={cn(
+                              'flex h-4 w-4 items-center justify-center rounded border',
+                              filters.categories.has(cat)
+                                ? 'border-primary bg-primary text-primary-foreground'
+                                : 'border-input',
+                            )}
+                          >
+                            {filters.categories.has(cat) && (
+                              <Check className="h-3 w-3" />
+                            )}
+                          </div>
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Team member filters */}
+              {filterOptions.teamMembers.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="p-3">
+                    <p className="mb-2 text-xs font-medium text-muted-foreground">
+                      Team Member
+                    </p>
+                    <div className="flex flex-col gap-1.5">
+                      {filterOptions.teamMembers.map((member) => (
+                        <button
+                          key={member}
+                          type="button"
+                          className="flex items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-accent"
+                          onClick={() => toggleFilter('teamMembers', member)}
+                        >
+                          <div
+                            className={cn(
+                              'flex h-4 w-4 items-center justify-center rounded border',
+                              filters.teamMembers.has(member)
+                                ? 'border-primary bg-primary text-primary-foreground'
+                                : 'border-input',
+                            )}
+                          >
+                            {filters.teamMembers.has(member) && (
+                              <Check className="h-3 w-3" />
+                            )}
+                          </div>
+                          {member}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </PopoverContent>
+          </Popover>
+
+          {/* Sort */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <ArrowUpDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleSort('name')}>
+                <span className="flex-1">Name</span>
+                {sortField === 'name' &&
+                  (sortDirection === 'asc' ? (
+                    <ArrowUp className="ml-2 h-3 w-3" />
+                  ) : (
+                    <ArrowDown className="ml-2 h-3 w-3" />
+                  ))}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSort('price')}>
+                <span className="flex-1">Price</span>
+                {sortField === 'price' &&
+                  (sortDirection === 'asc' ? (
+                    <ArrowUp className="ml-2 h-3 w-3" />
+                  ) : (
+                    <ArrowDown className="ml-2 h-3 w-3" />
+                  ))}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSort('date')}>
+                <span className="flex-1">Recently Modified</span>
+                {sortField === 'date' &&
+                  (sortDirection === 'asc' ? (
+                    <ArrowUp className="ml-2 h-3 w-3" />
+                  ) : (
+                    <ArrowDown className="ml-2 h-3 w-3" />
+                  ))}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
       <ScrollArea className="flex-1">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[180px]">Name</TableHead>
+              <TableHead className="min-w-[180px]">
+                {renderSortableHeader('Name', 'name')}
+              </TableHead>
               <TableHead className="min-w-[120px]">Supplier</TableHead>
               <TableHead className="min-w-[100px]">Added By</TableHead>
-              <TableHead className="min-w-[80px]">Date</TableHead>
+              <TableHead className="min-w-[80px]">
+                {renderSortableHeader('Date', 'date')}
+              </TableHead>
               <TableHead className="min-w-[100px]">Qty</TableHead>
-              <TableHead className="min-w-[80px] text-right">Price</TableHead>
+              <TableHead className="min-w-[80px] text-right">
+                {renderSortableHeader('Price', 'price')}
+              </TableHead>
               <TableHead className="min-w-[80px] text-right">Total</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map((item, row) => (
+            {filteredItems.map((item, row) => (
               <TableRow key={item.id}>
                 <TableCell>
                   <button

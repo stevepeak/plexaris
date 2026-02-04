@@ -438,6 +438,15 @@ export default function OrderPage() {
             onAddToCart={handleAddToCart}
             cart={cart}
             activityEntries={activityEntries}
+            onFocusSearch={() => {
+              if (!panels.search) {
+                setPanels((prev) => ({ ...prev, search: true }))
+              }
+              setTimeout(() => searchInputRef.current?.focus(), 0)
+            }}
+            onOpenChat={() => {
+              setPanels((prev) => ({ ...prev, chat: true }))
+            }}
           />
         </div>
 
