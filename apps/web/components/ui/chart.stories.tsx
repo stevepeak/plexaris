@@ -4,7 +4,7 @@ import { Bar, BarChart, XAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "./chart"
 
 const meta: Meta = {
-  title: "ui/Chart",
+  title: "UI / Data Display / Chart",
 }
 export default meta
 type Story = StoryObj

@@ -2,17 +2,22 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 
+import { cn } from '@/lib/utils'
+
 import { CartItem, type CartItemProps } from './cart-item'
 
 interface SortableCartItemProps extends CartItemProps {
   /** The folder id this item belongs to, or undefined for root-level items */
   containerId?: string
+  /** Layout className applied to the sortable wrapper, not the item */
+  className?: string
 }
 
 export function SortableCartItem({
   containerId,
+  className,
   item,
-  ...props
+  ...itemProps
 }: SortableCartItemProps) {
   const {
     attributes,
@@ -36,7 +41,7 @@ export function SortableCartItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={isDragging ? 'z-10 opacity-50' : undefined}
+      className={cn(isDragging && 'z-10 opacity-50', className)}
       {...attributes}
     >
       <div className="flex">
@@ -49,7 +54,7 @@ export function SortableCartItem({
           <GripVertical className="h-4 w-4" />
         </button>
         <div className="min-w-0 flex-1">
-          <CartItem item={item} {...props} />
+          <CartItem item={item} {...itemProps} />
         </div>
       </div>
     </div>

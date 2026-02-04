@@ -7,7 +7,7 @@ import { CartFolder } from './cart-folder'
 import { CartItem, type CartItemData } from './cart-item'
 
 const meta: Meta<typeof CartFolder> = {
-  title: 'order/CartFolder',
+  title: 'Order / Cart / CartFolder',
   component: CartFolder,
   decorators: [
     (story) => <TooltipProvider delayDuration={300}>{story()}</TooltipProvider>,
@@ -67,15 +67,15 @@ function InteractiveFolder({
       onDelete={noop}
     >
       {items.map((item) => (
-        <CartItem
-          key={item.id}
-          item={item}
-          className="pl-8"
-          onUpdateQuantity={noop}
-          onRemove={noop}
-          onOpenProduct={noop}
-          onOpenSupplier={noop}
-        />
+        <div key={item.id} className="pl-8">
+          <CartItem
+            item={item}
+            onUpdateQuantity={noop}
+            onRemove={noop}
+            onOpenProduct={noop}
+            onOpenSupplier={noop}
+          />
+        </div>
       ))}
     </CartFolder>
   )

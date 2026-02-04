@@ -10,7 +10,7 @@ import { SortableCartFolder } from './sortable-cart-folder'
 import { SortableCartItem } from './sortable-cart-item'
 
 const meta: Meta<typeof SortableCartFolder> = {
-  title: 'order/SortableCartFolder',
+  title: 'Order / Cart / SortableCartFolder',
   component: SortableCartFolder,
   decorators: [
     (story) => <TooltipProvider delayDuration={300}>{story()}</TooltipProvider>,

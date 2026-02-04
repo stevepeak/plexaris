@@ -75,7 +75,7 @@ const ITEMS_WITH_UNGROUPED: CartItemData[] = [
 ]
 
 const meta: Meta<typeof OrderCart> = {
-  title: 'order/OrderCart',
+  title: 'Order / Cart / OrderCart',
   component: OrderCart,
 }
 export default meta

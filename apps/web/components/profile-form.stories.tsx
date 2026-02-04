@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { ProfileFormFields } from './profile-form'
 
 const meta: Meta<typeof ProfileFormFields> = {
-  title: 'components/ProfileFormFields',
+  title: 'Profile / ProfileFormFields',
   component: ProfileFormFields,
   parameters: {
     nextjs: { appDirectory: true },

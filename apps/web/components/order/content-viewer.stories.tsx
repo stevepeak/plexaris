@@ -4,7 +4,7 @@ import { ContentViewer } from './content-viewer'
 import { type TabItem } from './types'
 
 const meta: Meta<typeof ContentViewer> = {
-  title: 'order/ContentViewer',
+  title: 'Order / Browse / ContentViewer',
   component: ContentViewer,
 }
 export default meta

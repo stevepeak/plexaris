@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { Toggle } from "./toggle"
 
 const meta: Meta<typeof Toggle> = {
-  title: "ui/Toggle",
+  title: "UI / Forms / Toggle",
   component: Toggle,
 }
 export default meta

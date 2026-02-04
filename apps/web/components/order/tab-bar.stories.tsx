@@ -4,7 +4,7 @@ import { TabBar } from './tab-bar'
 import { type TabItem } from './types'
 
 const meta: Meta<typeof TabBar> = {
-  title: 'order/TabBar',
+  title: 'Order / Layout / TabBar',
   component: TabBar,
 }
 export default meta

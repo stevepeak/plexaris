@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { CartLayoutMenu, type CartLayoutMode } from './cart-layout-menu'
 
 const meta: Meta<typeof CartLayoutMenu> = {
-  title: 'order/CartLayoutMenu',
+  title: 'Order / Cart / CartLayoutMenu',
   component: CartLayoutMenu,
 }
 export default meta

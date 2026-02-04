@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { ToggleGroup, ToggleGroupItem } from "./toggle-group"
 
 const meta: Meta<typeof ToggleGroup> = {
-  title: "ui/ToggleGroup",
+  title: "UI / Forms / ToggleGroup",
   component: ToggleGroup,
 }
 export default meta

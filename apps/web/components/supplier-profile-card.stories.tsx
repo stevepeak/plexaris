@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { SupplierProfileCard } from './supplier-profile-card'
 
 const meta: Meta<typeof SupplierProfileCard> = {
-  title: 'SupplierProfileCard',
+  title: 'Supplier / SupplierProfileCard',
   component: SupplierProfileCard,
   decorators: [
     (story) => (

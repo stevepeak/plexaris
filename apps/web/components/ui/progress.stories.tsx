@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { Progress } from "./progress"
 
 const meta: Meta<typeof Progress> = {
-  title: "ui/Progress",
+  title: "UI / Feedback / Progress",
   component: Progress,
 }
 export default meta

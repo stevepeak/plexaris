@@ -5,7 +5,7 @@ import { CartGroupHeader } from './cart-group-header'
 import { CartItem, type CartItemData } from './cart-item'
 
 const meta: Meta<typeof CartGroupHeader> = {
-  title: 'order/CartGroupHeader',
+  title: 'Order / Cart / CartGroupHeader',
   component: CartGroupHeader,
 }
 export default meta
@@ -56,7 +56,9 @@ function InteractiveGroup({
       onOpenChange={setOpen}
     >
       {items.map((item) => (
-        <CartItem key={item.id} item={item} className="pl-8" />
+        <div key={item.id} className="pl-8">
+          <CartItem item={item} />
+        </div>
       ))}
     </CartGroupHeader>
   )

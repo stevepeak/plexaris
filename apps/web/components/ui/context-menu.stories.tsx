@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "./context-menu"
 
 const meta: Meta<typeof ContextMenu> = {
-  title: "ui/ContextMenu",
+  title: "UI / Navigation / ContextMenu",
   component: ContextMenu,
 }
 export default meta

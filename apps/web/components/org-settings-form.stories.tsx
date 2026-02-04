@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { OrgSettingsFormFields } from './org-settings-form'
 
 const meta: Meta<typeof OrgSettingsFormFields> = {
-  title: 'components/OrgSettingsFormFields',
+  title: 'Organization / Settings / OrgSettingsFormFields',
   component: OrgSettingsFormFields,
   parameters: {
     nextjs: { appDirectory: true },

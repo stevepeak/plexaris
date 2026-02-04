@@ -8,7 +8,7 @@ import { type CartItemData } from './cart-item'
 import { SortableCartItem } from './sortable-cart-item'
 
 const meta: Meta<typeof SortableCartItem> = {
-  title: 'order/SortableCartItem',
+  title: 'Order / Cart / SortableCartItem',
   component: SortableCartItem,
   decorators: [
     (story) => <TooltipProvider delayDuration={300}>{story()}</TooltipProvider>,

@@ -5,7 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { CartItem, type CartItemData } from './cart-item'
 
 const meta: Meta<typeof CartItem> = {
-  title: 'order/CartItem',
+  title: 'Order / Cart / CartItem',
   component: CartItem,
   decorators: [
     (story) => <TooltipProvider delayDuration={300}>{story()}</TooltipProvider>,

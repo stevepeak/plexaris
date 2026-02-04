@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { OrgTypeStep } from './org-type-step'
 
 const meta: Meta<typeof OrgTypeStep> = {
-  title: 'components/onboarding/OrgTypeStep',
+  title: 'Onboarding / OrgTypeStep',
   component: OrgTypeStep,
 }
 export default meta

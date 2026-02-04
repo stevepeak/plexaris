@@ -5,7 +5,7 @@ import { Button } from "./button"
 import { Toaster } from "./sonner"
 
 const meta: Meta<typeof Toaster> = {
-  title: "ui/Sonner",
+  title: "UI / Feedback / Sonner",
   component: Toaster,
 }
 export default meta

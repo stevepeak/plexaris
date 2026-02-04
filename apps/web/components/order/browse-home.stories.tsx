@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { BrowseHome, type BrowseSection } from './browse-home'
 
 const meta: Meta<typeof BrowseHome> = {
-  title: 'order/BrowseHome',
+  title: 'Order / Browse / BrowseHome',
   component: BrowseHome,
 }
 export default meta

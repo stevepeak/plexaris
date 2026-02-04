@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "./command"
 
 const meta: Meta<typeof Command> = {
-  title: "ui/Command",
+  title: "UI / Navigation / Command",
   component: Command,
 }
 export default meta

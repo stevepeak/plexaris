@@ -4,7 +4,7 @@ import { Button } from "./button"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./hover-card"
 
 const meta: Meta<typeof HoverCard> = {
-  title: "ui/HoverCard",
+  title: "UI / Overlay / HoverCard",
   component: HoverCard,
 }
 export default meta

@@ -4,7 +4,7 @@ import { Button } from "./button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible"
 
 const meta: Meta<typeof Collapsible> = {
-  title: "ui/Collapsible",
+  title: "UI / Layout / Collapsible",
   component: Collapsible,
 }
 export default meta

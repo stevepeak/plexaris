@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./resizable"
 
 const meta: Meta<typeof ResizablePanelGroup> = {
-  title: "ui/Resizable",
+  title: "UI / Layout / Resizable",
   component: ResizablePanelGroup,
 }
 export default meta

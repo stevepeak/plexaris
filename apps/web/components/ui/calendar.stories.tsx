@@ -4,7 +4,7 @@ import * as React from "react"
 import { Calendar } from "./calendar"
 
 const meta: Meta<typeof Calendar> = {
-  title: "ui/Calendar",
+  title: "UI / Forms / Calendar",
   component: Calendar,
 }
 export default meta

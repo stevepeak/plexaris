@@ -23,7 +23,6 @@ import {
   useState,
 } from 'react'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
@@ -274,12 +273,9 @@ export const OrderCart = forwardRef<OrderCartHandle, OrderCartProps>(
                 onOpenChange={() => cart.toggleGroupCollapse(group.key)}
               >
                 {group.items.map((item) => (
-                  <CartItem
-                    key={item.id}
-                    item={item}
-                    className="pl-8"
-                    {...itemCallbacks}
-                  />
+                  <div key={item.id} className="pl-8">
+                    <CartItem item={item} {...itemCallbacks} />
+                  </div>
                 ))}
               </CartGroupHeader>
             )
@@ -307,12 +303,7 @@ export const OrderCart = forwardRef<OrderCartHandle, OrderCartProps>(
           <div className="flex items-center gap-2 border-b px-4 py-3">
             <ShoppingCart className="h-5 w-5 text-muted-foreground" />
             <h2 className="font-semibold">Cart</h2>
-            {cart.allItems.length > 0 && (
-              <Badge variant="secondary" className="ml-auto">
-                {cart.itemCount}
-              </Badge>
-            )}
-            <div className={cart.allItems.length > 0 ? '' : 'ml-auto'}>
+            <div className="ml-auto">
               <CartLayoutMenu
                 value={cart.layoutMode}
                 onValueChange={cart.setLayoutMode}

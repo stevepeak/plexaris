@@ -4,7 +4,7 @@ import { Button } from "./button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./dropdown-menu"
 
 const meta: Meta<typeof DropdownMenu> = {
-  title: "ui/DropdownMenu",
+  title: "UI / Navigation / DropdownMenu",
   component: DropdownMenu,
 }
 export default meta

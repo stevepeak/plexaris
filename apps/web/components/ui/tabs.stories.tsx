@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs"
 
 const meta: Meta<typeof Tabs> = {
-  title: "ui/Tabs",
+  title: "UI / Layout / Tabs",
   component: Tabs,
 }
 export default meta

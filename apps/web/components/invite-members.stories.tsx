@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { InviteMembersList } from './invite-members'
 
 const meta: Meta<typeof InviteMembersList> = {
-  title: 'components/InviteMembersList',
+  title: 'Organization / Members / InviteMembersList',
   component: InviteMembersList,
   parameters: {
     nextjs: { appDirectory: true },

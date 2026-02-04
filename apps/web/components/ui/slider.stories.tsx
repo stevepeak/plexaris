@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { Slider } from "./slider"
 
 const meta: Meta<typeof Slider> = {
-  title: "ui/Slider",
+  title: "UI / Forms / Slider",
   component: Slider,
 }
 export default meta

@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { OrderChat } from './order-chat'
 
 const meta: Meta<typeof OrderChat> = {
-  title: 'order/OrderChat',
+  title: 'Order / Chat / OrderChat',
   component: OrderChat,
 }
 export default meta

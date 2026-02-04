@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { Separator } from "./separator"
 
 const meta: Meta<typeof Separator> = {
-  title: "ui/Separator",
+  title: "UI / Layout / Separator",
   component: Separator,
 }
 export default meta

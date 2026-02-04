@@ -1,5 +1,6 @@
 import {
   FolderOpen,
+  Group,
   List,
   type LucideIcon,
   Store,
@@ -42,32 +43,20 @@ const groupByOptions: LayoutOption[] = [
   { value: 'by-team-member', label: 'Team Member', icon: Users },
 ]
 
-const iconMap: Record<CartLayoutMode, LucideIcon> = {
-  flat: List,
-  folders: FolderOpen,
-  'by-supplier': Store,
-  'by-category': Tag,
-  'by-team-member': Users,
-}
-
 interface CartLayoutMenuProps {
   value: CartLayoutMode
   onValueChange: (mode: CartLayoutMode) => void
 }
 
 export function CartLayoutMenu({ value, onValueChange }: CartLayoutMenuProps) {
-  const ActiveIcon = iconMap[value]
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-7 w-7">
-          <ActiveIcon className="h-4 w-4" />
+          <Group className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuLabel>Organize</DropdownMenuLabel>
-        <DropdownMenuSeparator />
         <DropdownMenuRadioGroup
           value={value}
           onValueChange={(v) => onValueChange(v as CartLayoutMode)}

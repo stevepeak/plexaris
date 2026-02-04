@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { PendingInvitationsList } from './pending-invitations'
 
 const meta: Meta<typeof PendingInvitationsList> = {
-  title: 'components/PendingInvitationsList',
+  title: 'Organization / Members / PendingInvitationsList',
   component: PendingInvitationsList,
   parameters: {
     nextjs: { appDirectory: true },

@@ -8,7 +8,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "./input"
 
 const meta: Meta = {
-  title: "ui/Form",
+  title: "UI / Forms / Form",
 }
 export default meta
 type Story = StoryObj

@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "./navigation-menu"
 
 const meta: Meta<typeof NavigationMenu> = {
-  title: "ui/NavigationMenu",
+  title: "UI / Navigation / NavigationMenu",
   component: NavigationMenu,
 }
 export default meta

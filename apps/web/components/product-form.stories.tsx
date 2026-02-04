@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { ProductForm } from './product-form'
 
 const meta: Meta<typeof ProductForm> = {
-  title: 'ProductForm',
+  title: 'Product / ProductForm',
   component: ProductForm,
   decorators: [
     (story) => <div className="mx-auto max-w-4xl p-4">{story()}</div>,

@@ -4,7 +4,7 @@ import { type BrowseSection } from './browse-home'
 import { type BrowseProduct, CategorySidebar } from './category-sidebar'
 
 const meta: Meta<typeof CategorySidebar> = {
-  title: 'order/CategorySidebar',
+  title: 'Order / Browse / CategorySidebar',
   component: CategorySidebar,
 }
 export default meta

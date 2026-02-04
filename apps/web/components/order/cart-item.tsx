@@ -28,7 +28,6 @@ export interface CartItemProps {
   onRemove?: (id: string) => void
   onOpenProduct?: (productId: string, productName: string) => void
   onOpenSupplier?: (supplierId: string, supplierName: string) => void
-  className?: string
 }
 
 export function CartItem({
@@ -38,15 +37,10 @@ export function CartItem({
   onRemove,
   onOpenProduct,
   onOpenSupplier,
-  className,
 }: CartItemProps) {
   return (
     <div
-      className={cn(
-        'flex flex-col gap-2 px-4 py-3',
-        selected && 'bg-accent',
-        className,
-      )}
+      className={cn('flex flex-col gap-2 px-4 py-3', selected && 'bg-accent')}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">

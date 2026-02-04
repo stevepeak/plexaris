@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { type Product, ProductList } from './product-list'
 
 const meta: Meta<typeof ProductList> = {
-  title: 'ProductList',
+  title: 'Product / ProductList',
   component: ProductList,
   decorators: [
     (story) => <div className="mx-auto max-w-4xl p-4">{story()}</div>,

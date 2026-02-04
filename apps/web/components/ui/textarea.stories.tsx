@@ -4,7 +4,7 @@ import { Label } from "./label"
 import { Textarea } from "./textarea"
 
 const meta: Meta<typeof Textarea> = {
-  title: "ui/Textarea",
+  title: "UI / Forms / Textarea",
   component: Textarea,
 }
 export default meta

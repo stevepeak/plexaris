@@ -4,7 +4,7 @@ import { Button } from "./button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./sheet"
 
 const meta: Meta<typeof Sheet> = {
-  title: "ui/Sheet",
+  title: "UI / Overlay / Sheet",
   component: Sheet,
 }
 export default meta

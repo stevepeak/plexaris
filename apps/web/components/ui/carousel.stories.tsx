@@ -4,7 +4,7 @@ import { Card, CardContent } from "./card"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./carousel"
 
 const meta: Meta<typeof Carousel> = {
-  title: "ui/Carousel",
+  title: "UI / Layout / Carousel",
   component: Carousel,
 }
 export default meta

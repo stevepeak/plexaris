@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { OrgSwitcher } from './org-switcher'
 
 const meta: Meta<typeof OrgSwitcher> = {
-  title: 'components/OrgSwitcher',
+  title: 'Organization / Switcher / OrgSwitcher',
   component: OrgSwitcher,
   parameters: {
     nextjs: { appDirectory: true },

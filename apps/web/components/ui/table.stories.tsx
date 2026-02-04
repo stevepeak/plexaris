@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./table"
 
 const meta: Meta<typeof Table> = {
-  title: "ui/Table",
+  title: "UI / Data Display / Table",
   component: Table,
 }
 export default meta

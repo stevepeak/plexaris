@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { ClaimCard, type ClaimCardState } from './claim-card'
 
 const meta: Meta<typeof ClaimCard> = {
-  title: 'ClaimCard',
+  title: 'Organization / Switcher / ClaimCard',
   component: ClaimCard,
   decorators: [
     (story) => (

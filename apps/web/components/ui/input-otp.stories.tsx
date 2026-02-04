@@ -3,7 +3,7 @@ import  { type Meta, type StoryObj } from "@storybook/react"
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "./input-otp"
 
 const meta: Meta<typeof InputOTP> = {
-  title: "ui/InputOTP",
+  title: "UI / Forms / InputOTP",
   component: InputOTP,
 }
 export default meta

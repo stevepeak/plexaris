@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { type PanelState, PanelToggleBar } from './panel-toggle-bar'
 
 const meta: Meta<typeof PanelToggleBar> = {
-  title: 'order/PanelToggleBar',
+  title: 'Order / Layout / PanelToggleBar',
   component: PanelToggleBar,
 }
 export default meta
