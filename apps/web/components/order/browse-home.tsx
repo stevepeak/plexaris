@@ -12,7 +12,7 @@ const SECTIONS = [
   {
     key: 'favorites' as const,
     label: 'Favorites',
-    description: 'Frequently ordered items',
+    description: 'Items you and your staff have favorited',
     icon: Star,
     borderColor: 'border-amber-400',
     iconColor: 'text-amber-500',

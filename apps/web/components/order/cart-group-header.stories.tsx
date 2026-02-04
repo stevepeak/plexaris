@@ -21,6 +21,10 @@ const supplierItems: CartItemData[] = [
     supplier: 'Green Valley',
     supplierId: 's1',
     category: 'Dairy',
+    addedBy: {
+      name: 'Sarah Chen',
+      addedAt: new Date('2025-01-15T10:30:00'),
+    },
   },
   {
     id: '2',
@@ -31,6 +35,10 @@ const supplierItems: CartItemData[] = [
     supplier: 'Green Valley',
     supplierId: 's1',
     category: 'Spreads',
+    addedBy: {
+      name: 'Alex Rivera',
+      addedAt: new Date('2025-01-15T11:15:00'),
+    },
   },
 ]
 
@@ -112,6 +120,10 @@ export const MultipleGroups: Story = {
         supplier: 'Baker Bros',
         supplierId: 's2',
         category: 'Bakery',
+        addedBy: {
+          name: 'Jordan Kim',
+          addedAt: new Date('2025-01-15T09:00:00'),
+        },
       },
     ]
 

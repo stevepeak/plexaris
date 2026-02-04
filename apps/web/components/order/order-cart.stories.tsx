@@ -14,6 +14,10 @@ const SAMPLE_ITEMS: CartItemData[] = [
     supplierId: 'sup-1',
     category: 'Dairy Alternatives',
     assignee: 'Alice',
+    addedBy: {
+      name: 'Sarah Chen',
+      addedAt: new Date('2025-01-15T10:30:00'),
+    },
   },
   {
     id: '2',
@@ -25,6 +29,11 @@ const SAMPLE_ITEMS: CartItemData[] = [
     supplierId: 'sup-2',
     category: 'Spreads',
     assignee: 'Bob',
+    addedBy: {
+      name: 'Alex Rivera',
+      avatarUrl: 'https://i.pravatar.cc/32?u=alex',
+      addedAt: new Date('2025-01-15T11:15:00'),
+    },
   },
   {
     id: '3',
@@ -36,6 +45,10 @@ const SAMPLE_ITEMS: CartItemData[] = [
     supplierId: 'sup-3',
     category: 'Bakery',
     assignee: 'Alice',
+    addedBy: {
+      name: 'Sarah Chen',
+      addedAt: new Date('2025-01-15T09:00:00'),
+    },
   },
   {
     id: '4',
@@ -47,6 +60,10 @@ const SAMPLE_ITEMS: CartItemData[] = [
     supplierId: 'sup-1',
     category: 'Dairy',
     assignee: 'Bob',
+    addedBy: {
+      name: 'Jordan Kim',
+      addedAt: new Date('2025-01-14T16:45:00'),
+    },
   },
   {
     id: '5',
@@ -58,6 +75,11 @@ const SAMPLE_ITEMS: CartItemData[] = [
     supplierId: 'sup-3',
     category: 'Bakery',
     assignee: 'Alice',
+    addedBy: {
+      name: 'Alex Rivera',
+      avatarUrl: 'https://i.pravatar.cc/32?u=alex',
+      addedAt: new Date('2025-01-15T08:30:00'),
+    },
   },
 ]
 
@@ -155,6 +177,10 @@ export const SingleItem: Story = {
             supplierId: 'sup-1',
             category: 'Dairy Alternatives',
             assignee: 'Alice',
+            addedBy: {
+              name: 'Sarah Chen',
+              addedAt: new Date('2025-01-15T10:30:00'),
+            },
           },
         ]}
       />

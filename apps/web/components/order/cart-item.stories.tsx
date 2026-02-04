@@ -23,17 +23,28 @@ const sampleItem: CartItemData = {
   supplier: 'Green Valley',
   supplierId: 's1',
   category: 'Dairy',
+  addedBy: {
+    name: 'Sarah Chen',
+    addedAt: new Date('2025-01-15T10:30:00'),
+  },
 }
 
 const noop = () => undefined
 
 export const Default: Story = {
   render: () => (
-    <div className="w-[250px] border">
+    <div className="w-[280px] border">
+      <CartItem item={sampleItem} onOpenProduct={noop} onOpenSupplier={noop} />
+    </div>
+  ),
+}
+
+export const Selected: Story = {
+  render: () => (
+    <div className="w-[280px] border">
       <CartItem
         item={sampleItem}
-        onUpdateQuantity={noop}
-        onRemove={noop}
+        selected
         onOpenProduct={noop}
         onOpenSupplier={noop}
       />
@@ -41,14 +52,18 @@ export const Default: Story = {
   ),
 }
 
-export const Selected: Story = {
+export const WithAvatar: Story = {
   render: () => (
-    <div className="w-[250px] border">
+    <div className="w-[280px] border">
       <CartItem
-        item={sampleItem}
-        selected
-        onUpdateQuantity={noop}
-        onRemove={noop}
+        item={{
+          ...sampleItem,
+          addedBy: {
+            name: 'Alex Rivera',
+            avatarUrl: 'https://i.pravatar.cc/32?u=alex',
+            addedAt: new Date('2025-01-15T14:22:00'),
+          },
+        }}
         onOpenProduct={noop}
         onOpenSupplier={noop}
       />
@@ -58,15 +73,13 @@ export const Selected: Story = {
 
 export const LongName: Story = {
   render: () => (
-    <div className="w-[250px] border">
+    <div className="w-[280px] border">
       <CartItem
         item={{
           ...sampleItem,
           id: '2',
           name: 'Extra Premium Cold-Pressed Organic Oat Milk with Added Vitamins',
         }}
-        onUpdateQuantity={noop}
-        onRemove={noop}
         onOpenProduct={noop}
         onOpenSupplier={noop}
       />
@@ -76,11 +89,33 @@ export const LongName: Story = {
 
 export const HighQuantity: Story = {
   render: () => (
-    <div className="w-[250px] border">
+    <div className="w-[280px] border">
       <CartItem
         item={{ ...sampleItem, id: '3', quantity: 999 }}
-        onUpdateQuantity={noop}
-        onRemove={noop}
+        onOpenProduct={noop}
+        onOpenSupplier={noop}
+      />
+    </div>
+  ),
+}
+
+export const SingularUnit: Story = {
+  render: () => (
+    <div className="w-[280px] border">
+      <CartItem
+        item={{ ...sampleItem, id: '4', quantity: 1 }}
+        onOpenProduct={noop}
+        onOpenSupplier={noop}
+      />
+    </div>
+  ),
+}
+
+export const NoAddedBy: Story = {
+  render: () => (
+    <div className="w-[280px] border">
+      <CartItem
+        item={{ ...sampleItem, addedBy: undefined }}
         onOpenProduct={noop}
         onOpenSupplier={noop}
       />
@@ -90,7 +125,7 @@ export const HighQuantity: Story = {
 
 export const NoCallbacks: Story = {
   render: () => (
-    <div className="w-[250px] border">
+    <div className="w-[280px] border">
       <CartItem item={sampleItem} />
     </div>
   ),

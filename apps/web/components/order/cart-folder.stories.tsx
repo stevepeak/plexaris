@@ -26,6 +26,10 @@ const folderItems: CartItemData[] = [
     supplier: 'Green Valley',
     supplierId: 's1',
     category: 'Dairy',
+    addedBy: {
+      name: 'Sarah Chen',
+      addedAt: new Date('2025-01-15T10:30:00'),
+    },
   },
   {
     id: '2',
@@ -36,6 +40,10 @@ const folderItems: CartItemData[] = [
     supplier: 'Green Valley',
     supplierId: 's1',
     category: 'Spreads',
+    addedBy: {
+      name: 'Alex Rivera',
+      addedAt: new Date('2025-01-15T11:15:00'),
+    },
   },
 ]
 
@@ -68,13 +76,7 @@ function InteractiveFolder({
     >
       {items.map((item) => (
         <div key={item.id} className="pl-8">
-          <CartItem
-            item={item}
-            onUpdateQuantity={noop}
-            onRemove={noop}
-            onOpenProduct={noop}
-            onOpenSupplier={noop}
-          />
+          <CartItem item={item} onOpenProduct={noop} onOpenSupplier={noop} />
         </div>
       ))}
     </CartFolder>
@@ -125,6 +127,10 @@ export const MultipleFolders: Story = {
         supplier: 'Baker Bros',
         supplierId: 's2',
         category: 'Bakery',
+        addedBy: {
+          name: 'Jordan Kim',
+          addedAt: new Date('2025-01-15T09:00:00'),
+        },
       },
     ]
 

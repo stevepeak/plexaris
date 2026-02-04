@@ -1,11 +1,16 @@
 import { type Meta, type StoryObj } from '@storybook/react'
 import { useState } from 'react'
 
+import { TooltipProvider } from '@/components/ui/tooltip'
+
 import { CartLayoutMenu, type CartLayoutMode } from './cart-layout-menu'
 
 const meta: Meta<typeof CartLayoutMenu> = {
   title: 'Order / Cart / CartLayoutMenu',
   component: CartLayoutMenu,
+  decorators: [
+    (story) => <TooltipProvider delayDuration={300}>{story()}</TooltipProvider>,
+  ],
 }
 export default meta
 type Story = StoryObj<typeof CartLayoutMenu>

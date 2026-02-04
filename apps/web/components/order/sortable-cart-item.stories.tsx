@@ -26,6 +26,10 @@ const sampleItem: CartItemData = {
   supplier: 'Green Valley',
   supplierId: 's1',
   category: 'Dairy',
+  addedBy: {
+    name: 'Sarah Chen',
+    addedAt: new Date('2025-01-15T10:30:00'),
+  },
 }
 
 const noop = () => undefined
@@ -55,8 +59,6 @@ export const Default: Story = {
       <div className="w-[288px] border">
         <SortableCartItem
           item={sampleItem}
-          onUpdateQuantity={noop}
-          onRemove={noop}
           onOpenProduct={noop}
           onOpenSupplier={noop}
         />
@@ -73,8 +75,6 @@ export const InFolder: Story = {
           item={sampleItem}
           containerId="folder-1"
           className="pl-4"
-          onUpdateQuantity={noop}
-          onRemove={noop}
           onOpenProduct={noop}
           onOpenSupplier={noop}
         />
@@ -94,6 +94,10 @@ const items: CartItemData[] = [
     supplier: 'Baker Bros',
     supplierId: 's2',
     category: 'Bakery',
+    addedBy: {
+      name: 'Alex Rivera',
+      addedAt: new Date('2025-01-15T11:00:00'),
+    },
   },
   {
     id: '3',
@@ -104,6 +108,10 @@ const items: CartItemData[] = [
     supplier: 'Green Valley',
     supplierId: 's1',
     category: 'Dairy',
+    addedBy: {
+      name: 'Jordan Kim',
+      addedAt: new Date('2025-01-14T16:30:00'),
+    },
   },
 ]
 
@@ -115,8 +123,6 @@ export const MultipleItems: Story = {
           <SortableCartItem
             key={item.id}
             item={item}
-            onUpdateQuantity={noop}
-            onRemove={noop}
             onOpenProduct={noop}
             onOpenSupplier={noop}
           />

@@ -1,5 +1,8 @@
 import { type Metadata } from 'next'
+import Script from 'next/script'
 import { type ReactNode } from 'react'
+
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 import './globals.css'
 import { PostHogProvider } from './providers/posthog-provider'
@@ -24,9 +27,28 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* eslint-disable-next-line no-process-env */}
+        {process.env.NODE_ENV === 'development' && (
+          <>
+            <Script
+              src="//unpkg.com/react-grab/dist/index.global.js"
+              crossOrigin="anonymous"
+              strategy="beforeInteractive"
+            />
+            <Script
+              src="//unpkg.com/@react-grab/cursor/dist/client.global.js"
+              crossOrigin="anonymous"
+              strategy="lazyOnload"
+            />
+          </>
+        )}
+      </head>
       <body>
         <TRPCProvider>
-          <PostHogProvider>{children}</PostHogProvider>
+          <PostHogProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </PostHogProvider>
         </TRPCProvider>
       </body>
     </html>

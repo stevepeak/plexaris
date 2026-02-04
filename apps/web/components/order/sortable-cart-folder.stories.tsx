@@ -29,6 +29,10 @@ const folderItems: CartItemData[] = [
     supplier: 'Green Valley',
     supplierId: 's1',
     category: 'Dairy',
+    addedBy: {
+      name: 'Sarah Chen',
+      addedAt: new Date('2025-01-15T10:30:00'),
+    },
   },
   {
     id: '2',
@@ -39,6 +43,10 @@ const folderItems: CartItemData[] = [
     supplier: 'Green Valley',
     supplierId: 's1',
     category: 'Spreads',
+    addedBy: {
+      name: 'Alex Rivera',
+      addedAt: new Date('2025-01-15T11:15:00'),
+    },
   },
 ]
 
@@ -97,8 +105,6 @@ function InteractiveFolder({
           item={item}
           containerId={folderId}
           className="pl-4"
-          onUpdateQuantity={noop}
-          onRemove={noop}
           onOpenProduct={noop}
           onOpenSupplier={noop}
         />
@@ -159,6 +165,10 @@ export const MultipleFolders: Story = {
         supplier: 'Baker Bros',
         supplierId: 's2',
         category: 'Bakery',
+        addedBy: {
+          name: 'Jordan Kim',
+          addedAt: new Date('2025-01-15T09:00:00'),
+        },
       },
     ]
 

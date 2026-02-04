@@ -1,12 +1,35 @@
 'use client'
 
-import { Package, Star, Store } from 'lucide-react'
+import {
+  Apple,
+  Beef,
+  Croissant,
+  CupSoda,
+  Egg,
+  Fish,
+  type LucideIcon,
+  Milk,
+  Package,
+  Star,
+  Store,
+  Wheat,
+} from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  Bread: Wheat,
+  Pastry: Croissant,
+  Dairy: Milk,
+  Meat: Beef,
+  Fish,
+  Produce: Apple,
+  Beverages: CupSoda,
+  Ingredients: Egg,
+}
 
 interface ProductData {
   id: string
@@ -149,10 +172,16 @@ export function ProductDetail({
             <Package className="h-5 w-5 text-muted-foreground" />
           </div>
           <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-semibold">{product.name}</h2>
             {product.category && (
-              <Badge variant="secondary">{product.category}</Badge>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                {(() => {
+                  const Icon = CATEGORY_ICONS[product.category]
+                  return Icon ? <Icon className="h-3 w-3" /> : null
+                })()}
+                {product.category}
+              </span>
             )}
+            <h2 className="text-lg font-semibold">{product.name}</h2>
           </div>
           {organizationId && (
             <button
