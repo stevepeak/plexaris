@@ -102,7 +102,15 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-8" />
+      <main className="mx-auto max-w-4xl px-4 py-8">
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <h2 className="text-xl font-semibold">Dashboard</h2>
+          <p className="mt-2 max-w-md text-sm text-muted-foreground">
+            This is where you'll find important updates and action items. This
+            feature is coming soon.
+          </p>
+        </div>
+      </main>
     </div>
   )
 }

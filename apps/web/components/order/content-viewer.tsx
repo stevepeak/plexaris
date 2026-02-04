@@ -12,60 +12,6 @@ import { SupplierDetail } from './supplier-detail'
 import { TabBar } from './tab-bar'
 import { type TabItem, tabKey } from './types'
 
-function SearchArrow() {
-  return (
-    <svg
-      width="120"
-      height="80"
-      viewBox="0 0 120 80"
-      fill="none"
-      className="text-muted-foreground/40"
-    >
-      <path
-        d="M100 70 C 80 65, 40 60, 15 20"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeDasharray="6 4"
-        strokeLinecap="round"
-      />
-      <path
-        d="M20 10 L12 22 L24 24"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function ChatArrow() {
-  return (
-    <svg
-      width="120"
-      height="80"
-      viewBox="0 0 120 80"
-      fill="none"
-      className="text-muted-foreground/40"
-    >
-      <path
-        d="M20 70 C 40 65, 80 60, 105 20"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeDasharray="6 4"
-        strokeLinecap="round"
-      />
-      <path
-        d="M100 10 L108 22 L96 24"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
 interface ContentViewerProps {
   tabs: TabItem[]
   activeTabKey: string | null
@@ -112,7 +58,6 @@ export function ContentViewer({
       <div className="flex h-full items-center justify-center">
         <div className="flex items-center gap-16">
           <div className="flex flex-col items-center gap-2">
-            <SearchArrow />
             <Button variant="outline" className="gap-2" onClick={onFocusSearch}>
               <Search className="h-4 w-4" />
               Search products or recipes
@@ -123,7 +68,6 @@ export function ContentViewer({
           </div>
 
           <div className="flex flex-col items-center gap-2">
-            <ChatArrow />
             <Button variant="outline" className="gap-2" onClick={onOpenChat}>
               <MessageSquare className="h-4 w-4" />
               Start chat with agent

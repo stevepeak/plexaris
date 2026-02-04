@@ -1,23 +1,10 @@
 'use client'
 
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  Check,
-  ListFilter,
-  Search,
-} from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, ListFilter, Search } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import {
   Popover,
@@ -32,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
 import {
   Table,
   TableBody,
@@ -52,7 +38,14 @@ interface CartTableViewProps {
   onOpenSupplier?: (supplierId: string, supplierName: string) => void
 }
 
-type SortField = 'name' | 'price' | 'date'
+type SortField =
+  | 'name'
+  | 'supplier'
+  | 'addedBy'
+  | 'date'
+  | 'qty'
+  | 'price'
+  | 'total'
 type SortDirection = 'asc' | 'desc'
 
 interface CartFilters {
@@ -98,7 +91,7 @@ export function CartTableView({
   const tableRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Search, filter, sort state
+  // Search, filter, and sort state
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<CartFilters>({
     suppliers: new Set(),
@@ -116,7 +109,6 @@ export function CartTableView({
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }))
   }, [items])
 
-  // Derive unique filter options from all items
   const filterOptions = useMemo(() => {
     const supplierSet = new Map<string, string>()
     const categorySet = new Set<string>()
@@ -212,8 +204,11 @@ export function CartTableView({
           case 'name':
             cmp = a.name.localeCompare(b.name)
             break
-          case 'price':
-            cmp = a.price - b.price
+          case 'supplier':
+            cmp = a.supplier.localeCompare(b.supplier)
+            break
+          case 'addedBy':
+            cmp = (a.addedBy?.name ?? '').localeCompare(b.addedBy?.name ?? '')
             break
           case 'date': {
             const aTime = a.addedBy?.addedAt.getTime() ?? 0
@@ -221,6 +216,15 @@ export function CartTableView({
             cmp = aTime - bTime
             break
           }
+          case 'qty':
+            cmp = a.quantity - b.quantity
+            break
+          case 'price':
+            cmp = a.price - b.price
+            break
+          case 'total':
+            cmp = a.quantity * a.price - b.quantity * b.price
+            break
         }
         return sortDirection === 'desc' ? -cmp : cmp
       })
@@ -476,9 +480,7 @@ export function CartTableView({
   }
 
   function renderSortIcon(field: SortField) {
-    if (sortField !== field) {
-      return <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground/50" />
-    }
+    if (sortField !== field) return null
     return sortDirection === 'asc' ? (
       <ArrowUp className="ml-1 h-3 w-3" />
     ) : (
@@ -518,7 +520,6 @@ export function CartTableView({
     >
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3 border-b px-4 py-2">
-        {/* Left: Search */}
         <div className="relative w-64">
           <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -529,180 +530,128 @@ export function CartTableView({
           />
         </div>
 
-        {/* Right: Filter + Sort */}
-        <div className="flex items-center gap-1.5">
-          {/* Filter */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative h-8 w-8">
-                <ListFilter className="h-4 w-4" />
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative h-8 w-8">
+              <ListFilter className="h-4 w-4" />
+              {hasActiveFilters && (
+                <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-blue-500" />
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-56 p-0">
+            <div className="p-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-medium">Filters</p>
                 {hasActiveFilters && (
-                  <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-blue-500" />
+                  <button
+                    type="button"
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                    onClick={clearFilters}
+                  >
+                    Clear all
+                  </button>
                 )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-56 p-0">
-              <div className="p-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-medium">Filters</p>
-                  {hasActiveFilters && (
+              </div>
+            </div>
+
+            {filterOptions.suppliers.length > 0 && (
+              <div className="border-t p-3">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
+                  Supplier
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  {filterOptions.suppliers.map((s) => (
                     <button
+                      key={s.id}
                       type="button"
-                      className="text-xs text-muted-foreground hover:text-foreground"
-                      onClick={clearFilters}
+                      className="flex items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-accent"
+                      onClick={() => toggleFilter('suppliers', s.id)}
                     >
-                      Clear all
+                      <div
+                        className={cn(
+                          'flex h-4 w-4 items-center justify-center rounded border',
+                          filters.suppliers.has(s.id)
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-input',
+                        )}
+                      >
+                        {filters.suppliers.has(s.id) && (
+                          <Check className="h-3 w-3" />
+                        )}
+                      </div>
+                      {s.name}
                     </button>
-                  )}
+                  ))}
                 </div>
               </div>
-              <Separator />
+            )}
 
-              {/* Supplier filters */}
-              {filterOptions.suppliers.length > 0 && (
-                <div className="p-3">
-                  <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    Supplier
-                  </p>
-                  <div className="flex flex-col gap-1.5">
-                    {filterOptions.suppliers.map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        className="flex items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-accent"
-                        onClick={() => toggleFilter('suppliers', s.id)}
+            {filterOptions.categories.length > 0 && (
+              <div className="border-t p-3">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
+                  Category
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  {filterOptions.categories.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      className="flex items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-accent"
+                      onClick={() => toggleFilter('categories', cat)}
+                    >
+                      <div
+                        className={cn(
+                          'flex h-4 w-4 items-center justify-center rounded border',
+                          filters.categories.has(cat)
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-input',
+                        )}
                       >
-                        <div
-                          className={cn(
-                            'flex h-4 w-4 items-center justify-center rounded border',
-                            filters.suppliers.has(s.id)
-                              ? 'border-primary bg-primary text-primary-foreground'
-                              : 'border-input',
-                          )}
-                        >
-                          {filters.suppliers.has(s.id) && (
-                            <Check className="h-3 w-3" />
-                          )}
-                        </div>
-                        {s.name}
-                      </button>
-                    ))}
-                  </div>
+                        {filters.categories.has(cat) && (
+                          <Check className="h-3 w-3" />
+                        )}
+                      </div>
+                      {cat}
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Category filters */}
-              {filterOptions.categories.length > 0 && (
-                <>
-                  <Separator />
-                  <div className="p-3">
-                    <p className="mb-2 text-xs font-medium text-muted-foreground">
-                      Category
-                    </p>
-                    <div className="flex flex-col gap-1.5">
-                      {filterOptions.categories.map((cat) => (
-                        <button
-                          key={cat}
-                          type="button"
-                          className="flex items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-accent"
-                          onClick={() => toggleFilter('categories', cat)}
-                        >
-                          <div
-                            className={cn(
-                              'flex h-4 w-4 items-center justify-center rounded border',
-                              filters.categories.has(cat)
-                                ? 'border-primary bg-primary text-primary-foreground'
-                                : 'border-input',
-                            )}
-                          >
-                            {filters.categories.has(cat) && (
-                              <Check className="h-3 w-3" />
-                            )}
-                          </div>
-                          {cat}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Team member filters */}
-              {filterOptions.teamMembers.length > 0 && (
-                <>
-                  <Separator />
-                  <div className="p-3">
-                    <p className="mb-2 text-xs font-medium text-muted-foreground">
-                      Team Member
-                    </p>
-                    <div className="flex flex-col gap-1.5">
-                      {filterOptions.teamMembers.map((member) => (
-                        <button
-                          key={member}
-                          type="button"
-                          className="flex items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-accent"
-                          onClick={() => toggleFilter('teamMembers', member)}
-                        >
-                          <div
-                            className={cn(
-                              'flex h-4 w-4 items-center justify-center rounded border',
-                              filters.teamMembers.has(member)
-                                ? 'border-primary bg-primary text-primary-foreground'
-                                : 'border-input',
-                            )}
-                          >
-                            {filters.teamMembers.has(member) && (
-                              <Check className="h-3 w-3" />
-                            )}
-                          </div>
-                          {member}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-            </PopoverContent>
-          </Popover>
-
-          {/* Sort */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <ArrowUpDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleSort('name')}>
-                <span className="flex-1">Name</span>
-                {sortField === 'name' &&
-                  (sortDirection === 'asc' ? (
-                    <ArrowUp className="ml-2 h-3 w-3" />
-                  ) : (
-                    <ArrowDown className="ml-2 h-3 w-3" />
+            {filterOptions.teamMembers.length > 0 && (
+              <div className="border-t p-3">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
+                  Team Member
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  {filterOptions.teamMembers.map((member) => (
+                    <button
+                      key={member}
+                      type="button"
+                      className="flex items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-accent"
+                      onClick={() => toggleFilter('teamMembers', member)}
+                    >
+                      <div
+                        className={cn(
+                          'flex h-4 w-4 items-center justify-center rounded border',
+                          filters.teamMembers.has(member)
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-input',
+                        )}
+                      >
+                        {filters.teamMembers.has(member) && (
+                          <Check className="h-3 w-3" />
+                        )}
+                      </div>
+                      {member}
+                    </button>
                   ))}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSort('price')}>
-                <span className="flex-1">Price</span>
-                {sortField === 'price' &&
-                  (sortDirection === 'asc' ? (
-                    <ArrowUp className="ml-2 h-3 w-3" />
-                  ) : (
-                    <ArrowDown className="ml-2 h-3 w-3" />
-                  ))}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSort('date')}>
-                <span className="flex-1">Recently Modified</span>
-                {sortField === 'date' &&
-                  (sortDirection === 'asc' ? (
-                    <ArrowUp className="ml-2 h-3 w-3" />
-                  ) : (
-                    <ArrowDown className="ml-2 h-3 w-3" />
-                  ))}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                </div>
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
       </div>
 
       <ScrollArea className="flex-1">
@@ -712,16 +661,24 @@ export function CartTableView({
               <TableHead className="min-w-[180px]">
                 {renderSortableHeader('Name', 'name')}
               </TableHead>
-              <TableHead className="min-w-[120px]">Supplier</TableHead>
-              <TableHead className="min-w-[100px]">Added By</TableHead>
+              <TableHead className="min-w-[120px]">
+                {renderSortableHeader('Supplier', 'supplier')}
+              </TableHead>
+              <TableHead className="min-w-[100px]">
+                {renderSortableHeader('Added By', 'addedBy')}
+              </TableHead>
               <TableHead className="min-w-[80px]">
                 {renderSortableHeader('Date', 'date')}
               </TableHead>
-              <TableHead className="min-w-[100px]">Qty</TableHead>
+              <TableHead className="min-w-[100px]">
+                {renderSortableHeader('Qty', 'qty')}
+              </TableHead>
               <TableHead className="min-w-[80px] text-right">
                 {renderSortableHeader('Price', 'price')}
               </TableHead>
-              <TableHead className="min-w-[80px] text-right">Total</TableHead>
+              <TableHead className="min-w-[80px] text-right">
+                {renderSortableHeader('Total', 'total')}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

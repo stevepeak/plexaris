@@ -55,11 +55,23 @@ export function useOrderCart(orderId: string): CartStateReturn & {
     category: string | null
   }) => void
 } {
+  const utils = trpc.useUtils()
+  const invalidateEvents = useCallback(
+    () => utils.order.getEvents.invalidate({ orderId }),
+    [utils, orderId],
+  )
+
   const orderQuery = trpc.order.get.useQuery({ orderId })
   const addItemMutation = trpc.order.addItem.useMutation()
-  const removeItemMutation = trpc.order.removeItem.useMutation()
-  const updateQuantityMutation = trpc.order.updateQuantity.useMutation()
-  const updateSupplierMutation = trpc.order.updateSupplier.useMutation()
+  const removeItemMutation = trpc.order.removeItem.useMutation({
+    onSuccess: invalidateEvents,
+  })
+  const updateQuantityMutation = trpc.order.updateQuantity.useMutation({
+    onSuccess: invalidateEvents,
+  })
+  const updateSupplierMutation = trpc.order.updateSupplier.useMutation({
+    onSuccess: invalidateEvents,
+  })
 
   // Map server items to CartItemData once loaded
   const serverItems = orderQuery.data?.items
@@ -133,6 +145,7 @@ export function useOrderCart(orderId: string): CartStateReturn & {
         {
           onSuccess: (data) => {
             itemMapRef.current.set(item.id, data.orderItemId)
+            void invalidateEvents()
           },
           onError: () => {
             // Rollback on failure
@@ -141,7 +154,7 @@ export function useOrderCart(orderId: string): CartStateReturn & {
         },
       )
     },
-    [orderId, cart, addItemMutation],
+    [orderId, cart, addItemMutation, invalidateEvents],
   )
 
   // Wrap updateQuantity to persist
