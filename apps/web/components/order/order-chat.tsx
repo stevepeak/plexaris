@@ -3,6 +3,7 @@
 import { MessageSquare, Send } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { Kbd } from '@/components/kbd'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -83,6 +84,7 @@ export function OrderChat({ initialMessages = [] }: OrderChatProps) {
       <div className="flex items-center gap-2 border-b px-4 py-3">
         <MessageSquare className="h-5 w-5 text-muted-foreground" />
         <h2 className="font-semibold">Chat</h2>
+        <Kbd>c</Kbd>
       </div>
 
       <ScrollArea ref={scrollRef} className="flex-1">

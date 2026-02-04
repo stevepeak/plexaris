@@ -25,6 +25,7 @@ import {
   Wheat,
 } from 'lucide-react'
 
+import { Kbd } from '@/components/kbd'
 import { BrowseHome, type BrowseSection } from '@/components/order/browse-home'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -136,9 +137,9 @@ export function CategorySidebar({
             className="border-0 pl-7 pr-8 shadow-none focus-visible:ring-0"
           />
           {!search && (
-            <kbd className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 rounded border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+            <Kbd className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-muted-foreground">
               S
-            </kbd>
+            </Kbd>
           )}
         </div>
 
@@ -188,9 +189,9 @@ export function CategorySidebar({
           className="border-0 pl-7 pr-8 shadow-none focus-visible:ring-0"
         />
         {!search && (
-          <kbd className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 rounded border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+          <Kbd className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-muted-foreground">
             S
-          </kbd>
+          </Kbd>
         )}
       </div>
 

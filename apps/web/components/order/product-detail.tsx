@@ -10,6 +10,7 @@ import {
   type LucideIcon,
   Milk,
   Package,
+  ShoppingCart,
   Star,
   Store,
   Wheat,
@@ -46,6 +47,15 @@ interface ProductData {
 interface ProductDetailProps {
   productId: string
   onOpenSupplier: (supplierId: string, supplierName: string) => void
+  onAddToCart?: (item: {
+    id: string
+    name: string
+    price: number
+    unit: string
+    supplierId: string
+    supplierName: string
+    category: string | null
+  }) => void
   organizationId?: string | null
   onFavoriteToggled?: () => void
 }
@@ -53,6 +63,7 @@ interface ProductDetailProps {
 export function ProductDetail({
   productId,
   onOpenSupplier,
+  onAddToCart,
   organizationId,
   onFavoriteToggled,
 }: ProductDetailProps) {
@@ -228,6 +239,28 @@ export function ProductDetail({
             {product.supplier.name}
           </Button>
         </div>
+
+        {onAddToCart && (
+          <Button
+            className="gap-2"
+            onClick={() =>
+              onAddToCart({
+                id: product.id,
+                name: product.name,
+                price: parseFloat(
+                  product.price?.replace(/[^0-9.]/g, '') ?? '0',
+                ),
+                unit: product.unit ?? 'each',
+                supplierId: product.supplier.id,
+                supplierName: product.supplier.name,
+                category: product.category,
+              })
+            }
+          >
+            <ShoppingCart className="h-4 w-4" />
+            Add to Cart
+          </Button>
+        )}
       </div>
     </ScrollArea>
   )

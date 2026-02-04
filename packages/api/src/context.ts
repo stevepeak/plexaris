@@ -1,4 +1,12 @@
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+import { type DB } from '@app/db'
+
 export interface Context {
-  // Add context properties as needed
+  db: DB
+  session: {
+    user: {
+      id: string
+      name: string
+      email: string
+    }
+  } | null
 }

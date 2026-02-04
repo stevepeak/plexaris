@@ -18,6 +18,7 @@ const sampleOrgs = [
     name: 'Fresh Foods BV',
     type: 'supplier' as const,
     claimed: true,
+    logoUrl: null,
     role: 'owner' as const,
   },
   {
@@ -25,6 +26,7 @@ const sampleOrgs = [
     name: 'Restaurant De Gouden Leeuw',
     type: 'horeca' as const,
     claimed: true,
+    logoUrl: null,
     role: 'member' as const,
   },
   {
@@ -32,6 +34,7 @@ const sampleOrgs = [
     name: 'Bakkerij Jansen',
     type: 'supplier' as const,
     claimed: true,
+    logoUrl: 'https://placehold.co/64x64/orange/white?text=BJ',
     role: 'owner' as const,
   },
 ]

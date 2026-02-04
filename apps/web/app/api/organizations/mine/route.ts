@@ -20,6 +20,7 @@ export async function GET(request: Request) {
       name: schema.organization.name,
       type: schema.organization.type,
       claimed: schema.organization.claimed,
+      logoUrl: schema.organization.logoUrl,
       role: schema.membership.role,
     })
     .from(schema.membership)

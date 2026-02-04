@@ -1,7 +1,15 @@
 'use client'
 
-import { ChefHat, Package, Store, X } from 'lucide-react'
+import {
+  Activity,
+  ChefHat,
+  Package,
+  ShoppingCart,
+  Store,
+  X,
+} from 'lucide-react'
 
+import { Kbd } from '@/components/kbd'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 import { type TabItem, tabKey } from './types'
@@ -10,6 +18,8 @@ const TAB_ICONS = {
   product: Package,
   supplier: Store,
   recipe: ChefHat,
+  cart: ShoppingCart,
+  activity: Activity,
 } as const
 
 interface TabBarProps {
@@ -45,9 +55,9 @@ export function TabBar({ tabs, activeTabKey, onSelect, onClose }: TabBarProps) {
                 <span className="relative flex h-3.5 w-3.5 items-center justify-center">
                   <Icon className="h-3.5 w-3.5 group-hover:opacity-0" />
                   {index < 9 && (
-                    <kbd className="absolute inset-0 flex items-center justify-center rounded border text-[10px] font-mono text-muted-foreground opacity-0 group-hover:opacity-100">
+                    <Kbd className="absolute inset-0 flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100">
                       {index + 1}
-                    </kbd>
+                    </Kbd>
                   )}
                 </span>
                 <span className="max-w-[120px] truncate">{tab.label}</span>

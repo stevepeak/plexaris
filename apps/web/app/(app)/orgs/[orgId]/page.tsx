@@ -1,7 +1,6 @@
 'use client'
 
 import {
-  Building2,
   LogOut,
   Mail,
   MapPin,
@@ -18,7 +17,7 @@ import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { PendingInvitations } from '@/components/pending-invitations'
 import { ProductForm } from '@/components/product-form'
 import { type Product, ProductList } from '@/components/product-list'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -39,6 +38,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
+import { trpc } from '@/lib/trpc'
 
 function getInitials(name: string | undefined): string {
   if (!name) {
@@ -62,6 +62,90 @@ type OrgDetails = {
   address: string | null
   deliveryAddress: string | null
   deliveryAreas: string | null
+}
+
+const statusConfig: Record<
+  string,
+  {
+    label: string
+    variant: 'default' | 'secondary' | 'outline' | 'destructive'
+  }
+> = {
+  draft: { label: 'Draft', variant: 'secondary' },
+  submitted: { label: 'Submitted', variant: 'default' },
+  confirmed: { label: 'Confirmed', variant: 'outline' },
+  delivered: { label: 'Delivered', variant: 'outline' },
+  cancelled: { label: 'Cancelled', variant: 'destructive' },
+}
+
+function OrdersSection({ organizationId }: { organizationId: string }) {
+  const { data: orders, isPending } = trpc.order.list.useQuery({
+    organizationId,
+  })
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              Orders
+            </CardTitle>
+            <CardDescription>
+              Place and manage orders from your suppliers
+            </CardDescription>
+          </div>
+          <Button asChild>
+            <Link href="/order/new">New Order</Link>
+          </Button>
+        </div>
+      </CardHeader>
+      <Separator />
+      <CardContent className="p-0">
+        {isPending ? (
+          <div className="space-y-2 p-6">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : !orders?.length ? (
+          <div className="flex items-center justify-center py-8">
+            <p className="text-sm text-muted-foreground">
+              No orders yet. Start a new order to browse products from your
+              suppliers.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y">
+            {orders.map((order) => {
+              const config = statusConfig[order.status] ?? statusConfig.draft
+              return (
+                <Link
+                  key={order.id}
+                  href={`/order/${order.id}`}
+                  className="flex items-center justify-between px-6 py-3 transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex items-center gap-3">
+                    <Badge variant={config.variant}>{config.label}</Badge>
+                    <span className="text-sm">
+                      {order.itemCount}{' '}
+                      {order.itemCount === 1 ? 'item' : 'items'}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      by {order.createdByName}
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(order.updatedAt).toLocaleDateString()}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
 }
 
 export default function OrgPage() {
@@ -262,17 +346,18 @@ export default function OrgPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-start gap-4">
-                      {orgDetails?.logoUrl ? (
-                        <img
-                          src={orgDetails.logoUrl}
-                          alt={`${activeOrg.name} logo`}
-                          className="h-12 w-12 shrink-0 rounded-lg border object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted">
-                          <Building2 className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      )}
+                      <Avatar className="h-12 w-12 rounded-lg">
+                        {orgDetails?.logoUrl && (
+                          <AvatarImage
+                            src={orgDetails.logoUrl}
+                            alt={`${activeOrg.name} logo`}
+                            className="object-cover"
+                          />
+                        )}
+                        <AvatarFallback className="rounded-lg text-sm font-medium">
+                          {getInitials(activeOrg.name)}
+                        </AvatarFallback>
+                      </Avatar>
                       <div className="grid gap-1">
                         <CardTitle>{activeOrg.name}</CardTitle>
                         <div className="flex gap-2">
@@ -358,31 +443,7 @@ export default function OrgPage() {
             )}
 
             {activeOrg?.type === 'horeca' && (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <ShoppingCart className="h-5 w-5" />
-                        Orders
-                      </CardTitle>
-                      <CardDescription>
-                        Place and manage orders from your suppliers
-                      </CardDescription>
-                    </div>
-                    <Button asChild>
-                      <Link href="/order/new">New Order</Link>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <Separator />
-                <CardContent className="flex items-center justify-center py-8">
-                  <p className="text-sm text-muted-foreground">
-                    No orders yet. Start a new order to browse products from
-                    your suppliers.
-                  </p>
-                </CardContent>
-              </Card>
+              <OrdersSection organizationId={activeOrg.id} />
             )}
 
             {activeOrg && (

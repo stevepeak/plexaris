@@ -9,3 +9,6 @@ export * from './product-schema'
 
 // Favorite schema
 export * from './favorite-schema'
+
+// Order schema
+export * from './order-schema'

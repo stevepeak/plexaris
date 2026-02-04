@@ -2,6 +2,7 @@
 
 import { MessageSquare, Search, ShoppingCart } from 'lucide-react'
 
+import { Kbd } from '@/components/kbd'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import {
   Tooltip,
@@ -66,10 +67,7 @@ export function PanelToggleBar({ panels, onToggle }: PanelToggleBarProps) {
               </ToggleGroupItem>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {toggle.label}{' '}
-              <kbd className="ml-1 rounded border px-1 font-mono text-[10px]">
-                {toggle.shortcut}
-              </kbd>
+              {toggle.label} <Kbd className="ml-1">{toggle.shortcut}</Kbd>
             </TooltipContent>
           </Tooltip>
         ))}

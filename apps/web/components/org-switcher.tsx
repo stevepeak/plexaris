@@ -1,9 +1,10 @@
 'use client'
 
-import { Building2, Check, ChevronsUpDown, Plus } from 'lucide-react'
+import { Check, ChevronsUpDown, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +20,17 @@ type Organization = {
   name: string
   type: 'supplier' | 'horeca'
   claimed: boolean
+  logoUrl: string | null
   role: 'owner' | 'member'
+}
+
+function getOrgInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
 
 const ACTIVE_ORG_KEY = 'plexaris:activeOrgId'
@@ -89,7 +100,14 @@ export function OrgSwitcher({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm hover:bg-accent focus:outline-none">
-        <Building2 className="h-4 w-4 text-muted-foreground" />
+        <Avatar className="h-5 w-5 rounded-md text-[10px]">
+          {activeOrg.logoUrl && (
+            <AvatarImage src={activeOrg.logoUrl} alt={activeOrg.name} />
+          )}
+          <AvatarFallback className="rounded-md text-[10px]">
+            {getOrgInitials(activeOrg.name)}
+          </AvatarFallback>
+        </Avatar>
         <span className="max-w-[160px] truncate font-medium">
           {activeOrg.name}
         </span>
@@ -111,7 +129,14 @@ export function OrgSwitcher({
             className="flex items-center justify-between"
           >
             <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-muted-foreground" />
+              <Avatar className="h-5 w-5 rounded-md text-[10px]">
+                {org.logoUrl && (
+                  <AvatarImage src={org.logoUrl} alt={org.name} />
+                )}
+                <AvatarFallback className="rounded-md text-[10px]">
+                  {getOrgInitials(org.name)}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex flex-col">
                 <span className="text-sm">{org.name}</span>
                 <span className="text-xs capitalize text-muted-foreground">

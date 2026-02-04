@@ -8,10 +8,15 @@ interface UseOrderHotkeysOptions {
   panels: PanelState
   onTogglePanel: (panel: keyof PanelState) => void
   tabs: TabItem[]
+  activeTabKey: string | null
   setActiveTabKey: (key: string) => void
+  closeTab: (key: string) => void
   searchInputRef: RefObject<HTMLInputElement | null>
   cartRef: RefObject<OrderCartHandle | null>
   onNavigateHome: () => void
+  onOpenShortcuts: () => void
+  onOpenActivityTab?: () => void
+  onOpenCartTab?: () => void
 }
 
 function isInputFocused(): boolean {
@@ -27,10 +32,15 @@ export function useOrderHotkeys({
   panels,
   onTogglePanel,
   tabs,
+  activeTabKey,
   setActiveTabKey,
+  closeTab,
   searchInputRef,
   cartRef,
   onNavigateHome,
+  onOpenShortcuts,
+  onOpenActivityTab,
+  onOpenCartTab,
 }: UseOrderHotkeysOptions) {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -48,6 +58,18 @@ export function useOrderHotkeys({
       if (isInputFocused()) return
 
       switch (e.key) {
+        case '/': {
+          e.preventDefault()
+          onOpenShortcuts()
+          break
+        }
+        case 'w': {
+          if (activeTabKey) {
+            e.preventDefault()
+            closeTab(activeTabKey)
+          }
+          break
+        }
         case 'c': {
           e.preventDefault()
           onTogglePanel('chat')
@@ -63,6 +85,16 @@ export function useOrderHotkeys({
               searchInputRef.current?.focus()
             })
           })
+          break
+        }
+        case 'a': {
+          e.preventDefault()
+          onOpenActivityTab?.()
+          break
+        }
+        case 'e': {
+          e.preventDefault()
+          onOpenCartTab?.()
           break
         }
         case 'k': {
@@ -133,9 +165,14 @@ export function useOrderHotkeys({
     panels,
     onTogglePanel,
     tabs,
+    activeTabKey,
     setActiveTabKey,
+    closeTab,
     searchInputRef,
     cartRef,
     onNavigateHome,
+    onOpenShortcuts,
+    onOpenActivityTab,
+    onOpenCartTab,
   ])
 }

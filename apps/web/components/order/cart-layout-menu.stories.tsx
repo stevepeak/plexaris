@@ -35,10 +35,6 @@ export const Default: Story = {
   render: () => <InteractiveMenu />,
 }
 
-export const FoldersMode: Story = {
-  render: () => <InteractiveMenu initialMode="folders" />,
-}
-
 export const BySupplier: Story = {
   render: () => <InteractiveMenu initialMode="by-supplier" />,
 }

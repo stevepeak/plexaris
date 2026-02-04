@@ -64,6 +64,13 @@
       "when": 1770132659164,
       "tag": "0008_material_tigra",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1770220200497,
+      "tag": "0009_short_yellowjacket",
+      "breakpoints": true
     }
   ]
 }

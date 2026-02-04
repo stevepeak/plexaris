@@ -2,6 +2,10 @@
 
 import { MousePointerClick } from 'lucide-react'
 
+import { type CartStateReturn } from '@/hooks/use-cart-state'
+
+import { type ActivityEntry, ActivityLog } from './activity-log'
+import { CartTableView } from './cart-table-view'
 import { ProductDetail } from './product-detail'
 import { SupplierDetail } from './supplier-detail'
 import { TabBar } from './tab-bar'
@@ -16,6 +20,17 @@ interface ContentViewerProps {
   onOpenProduct: (productId: string, productName: string) => void
   organizationId?: string | null
   onFavoriteToggled?: () => void
+  onAddToCart?: (item: {
+    id: string
+    name: string
+    price: number
+    unit: string
+    supplierId: string
+    supplierName: string
+    category: string | null
+  }) => void
+  cart?: CartStateReturn
+  activityEntries?: ActivityEntry[]
 }
 
 export function ContentViewer({
@@ -27,6 +42,9 @@ export function ContentViewer({
   onOpenProduct,
   organizationId,
   onFavoriteToggled,
+  onAddToCart,
+  cart,
+  activityEntries,
 }: ContentViewerProps) {
   const activeTab = tabs.find((t) => tabKey(t) === activeTabKey)
 
@@ -55,6 +73,7 @@ export function ContentViewer({
             key={activeTab.id}
             productId={activeTab.id}
             onOpenSupplier={onOpenSupplier}
+            onAddToCart={onAddToCart}
             organizationId={organizationId}
             onFavoriteToggled={onFavoriteToggled}
           />
@@ -67,6 +86,17 @@ export function ContentViewer({
             organizationId={organizationId}
             onFavoriteToggled={onFavoriteToggled}
           />
+        )}
+        {activeTab?.type === 'cart' && cart && (
+          <CartTableView
+            key="cart"
+            cart={cart}
+            onOpenProduct={onOpenProduct}
+            onOpenSupplier={onOpenSupplier}
+          />
+        )}
+        {activeTab?.type === 'activity' && (
+          <ActivityLog key="activity" entries={activityEntries ?? []} />
         )}
       </div>
     </div>

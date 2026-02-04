@@ -2,6 +2,7 @@ import { type exampleAgentTask } from '@app/trigger'
 import { tasks } from '@trigger.dev/sdk'
 import { z } from 'zod'
 
+import { orderRouter } from './routers/order'
 import { publicProcedure, router } from './trpc'
 
 export type { Context } from './context'
@@ -37,6 +38,7 @@ const triggerRouter = router({
 export const appRouter = router({
   hello: helloRouter,
   trigger: triggerRouter,
+  order: orderRouter,
 })
 
 // Export type router type signature,

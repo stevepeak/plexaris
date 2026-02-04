@@ -3,8 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { useCartState } from '@/hooks/use-cart-state'
 
 import { type CartItemData } from './cart-item'
-import { type CartLayoutMode } from './cart-layout-menu'
-import { OrderCart } from './order-cart'
+import { CartTableView } from './cart-table-view'
 
 const SAMPLE_ITEMS: CartItemData[] = [
   {
@@ -86,92 +85,33 @@ const SAMPLE_ITEMS: CartItemData[] = [
   },
 ]
 
-const ITEMS_WITH_UNGROUPED: CartItemData[] = [
-  ...SAMPLE_ITEMS,
-  {
-    id: '6',
-    name: 'Mystery Item',
-    price: 9.99,
-    unit: 'each',
-    quantity: 1,
-    supplier: 'Unknown Supplier',
-    supplierId: 'sup-unknown',
-  },
-]
-
-function OrderCartStory({
-  items,
-  layoutMode,
-  showActions,
-}: {
-  items: CartItemData[]
-  layoutMode?: CartLayoutMode
-  showActions?: boolean
-}) {
-  const cart = useCartState(items, layoutMode)
+function CartTableViewStory({ items }: { items: CartItemData[] }) {
+  const cart = useCartState(items)
   return (
-    <div className="h-[500px] w-[250px] border">
-      <OrderCart
-        cart={cart}
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        onOpenCartTab={showActions ? () => {} : undefined}
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        onOpenActivityTab={showActions ? () => {} : undefined}
-      />
+    <div className="h-[400px] w-full border">
+      <CartTableView cart={cart} />
     </div>
   )
 }
 
-const meta: Meta<typeof OrderCart> = {
-  title: 'Order / Cart / OrderCart',
-  component: OrderCart,
+const meta: Meta<typeof CartTableView> = {
+  title: 'Order / Cart / CartTableView',
+  component: CartTableView,
 }
 export default meta
-type Story = StoryObj<typeof OrderCart>
+type Story = StoryObj<typeof CartTableView>
+
+export const Default: Story = {
+  render: () => <CartTableViewStory items={SAMPLE_ITEMS} />,
+}
 
 export const Empty: Story = {
-  render: () => <OrderCartStory items={[]} />,
-}
-
-export const Flat: Story = {
-  render: () => <OrderCartStory items={SAMPLE_ITEMS} layoutMode="flat" />,
-}
-
-export const WithActions: Story = {
-  render: () => (
-    <OrderCartStory items={SAMPLE_ITEMS} layoutMode="flat" showActions />
-  ),
-}
-
-export const MixedItems: Story = {
-  render: () => (
-    <div className="h-[600px] w-[250px] border">
-      <OrderCartStory items={ITEMS_WITH_UNGROUPED} layoutMode="flat" />
-    </div>
-  ),
-}
-
-export const GroupedBySupplier: Story = {
-  render: () => (
-    <OrderCartStory items={SAMPLE_ITEMS} layoutMode="by-supplier" />
-  ),
-}
-
-export const GroupedByCategory: Story = {
-  render: () => (
-    <OrderCartStory items={SAMPLE_ITEMS} layoutMode="by-category" />
-  ),
-}
-
-export const GroupedByTeamMember: Story = {
-  render: () => (
-    <OrderCartStory items={SAMPLE_ITEMS} layoutMode="by-team-member" />
-  ),
+  render: () => <CartTableViewStory items={[]} />,
 }
 
 export const SingleItem: Story = {
   render: () => (
-    <OrderCartStory
+    <CartTableViewStory
       items={[
         {
           id: '1',

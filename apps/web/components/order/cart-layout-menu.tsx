@@ -1,12 +1,4 @@
-import {
-  FolderOpen,
-  Group,
-  List,
-  type LucideIcon,
-  Store,
-  Tag,
-  Users,
-} from 'lucide-react'
+import { Group, List, type LucideIcon, Store, Tag, Users } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -26,7 +18,6 @@ import {
 
 export type CartLayoutMode =
   | 'flat'
-  | 'folders'
   | 'by-supplier'
   | 'by-category'
   | 'by-team-member'
@@ -39,7 +30,6 @@ interface LayoutOption {
 
 const organizeOptions: LayoutOption[] = [
   { value: 'flat', label: 'Flat', icon: List },
-  { value: 'folders', label: 'Folders', icon: FolderOpen },
 ]
 
 const groupByOptions: LayoutOption[] = [

@@ -162,9 +162,11 @@
       "name": "@app/api",
       "version": "0.0.0",
       "dependencies": {
+        "@app/db": "workspace:*",
         "@app/trigger": "workspace:*",
         "@trigger.dev/sdk": "^4.3.0",
         "@trpc/server": "catalog:",
+        "drizzle-orm": "catalog:",
         "zod": "catalog:",
       },
       "devDependencies": {

@@ -1,15 +1,6 @@
 'use client'
 
-import {
-  Building2,
-  Crown,
-  Image,
-  Loader2,
-  Mail,
-  MapPin,
-  Phone,
-  User,
-} from 'lucide-react'
+import { Camera, Crown, Loader2, Mail, MapPin, Phone, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import {
@@ -23,6 +14,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -183,6 +175,48 @@ export function OrgSettingsFormFields({
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2">
+              <Label>Logo</Label>
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  disabled={!isOwner}
+                  className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border bg-muted transition-colors hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Avatar className="h-full w-full rounded-lg">
+                    {logoUrl && (
+                      <AvatarImage
+                        src={logoUrl}
+                        alt={`${org.name} logo`}
+                        className="object-cover"
+                      />
+                    )}
+                    <AvatarFallback className="rounded-lg text-lg font-medium">
+                      {org.name
+                        .split(' ')
+                        .map((part) => part[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {isOwner && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Camera className="h-5 w-5 text-white" />
+                    </div>
+                  )}
+                </button>
+                <div className="grid gap-1">
+                  <p className="text-sm font-medium">Organization logo</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isOwner
+                      ? 'Click to upload a new logo'
+                      : 'Only owners can change the logo'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
               <Label htmlFor="org-name">Business name</Label>
               <Input
                 id="org-name"
@@ -206,34 +240,6 @@ export function OrgSettingsFormFields({
                 disabled={!isOwner}
               />
             </div>
-
-            {org.type === 'supplier' && (
-              <div className="grid gap-2">
-                <Label htmlFor="org-logo-url">Logo URL</Label>
-                <div className="flex items-center gap-3">
-                  {logoUrl ? (
-                    <img
-                      src={logoUrl}
-                      alt={`${org.name} logo`}
-                      className="h-10 w-10 shrink-0 rounded-md border object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border bg-muted">
-                      <Image className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                  )}
-                  <Input
-                    id="org-logo-url"
-                    type="url"
-                    autoComplete="off"
-                    placeholder="https://example.com/logo.png"
-                    value={logoUrl}
-                    onChange={(e) => setLogoUrl(e.target.value)}
-                    disabled={!isOwner}
-                  />
-                </div>
-              </div>
-            )}
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
