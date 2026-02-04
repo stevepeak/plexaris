@@ -12,3 +12,6 @@ export * from './favorite-schema'
 
 // Order schema
 export * from './order-schema'
+
+// Notification schema
+export * from './notification-schema'

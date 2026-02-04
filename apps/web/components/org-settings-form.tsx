@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Bell,
   Building2,
   Crown,
   Loader2,
@@ -12,6 +13,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import { ImageUpload } from '@/components/image-upload'
+import { NotificationSettings } from '@/components/notification-settings'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -65,6 +67,7 @@ export function OrgSettingsFormFields({
   members,
   isOwner,
   isPending,
+  organizationId,
   onUpdateOrg,
   onUpdateImage,
   onLeaveOrg,
@@ -74,6 +77,7 @@ export function OrgSettingsFormFields({
   members: Member[]
   isOwner: boolean
   isPending: boolean
+  organizationId?: string
   onUpdateOrg?: (
     data: Omit<OrgDetails, 'id' | 'type'>,
   ) => Promise<{ error?: string }>
@@ -157,6 +161,13 @@ export function OrgSettingsFormFields({
             <Users className="h-4 w-4" />
             Members
           </TabsTrigger>
+          <TabsTrigger
+            value="notifications"
+            className="justify-start gap-2 data-[state=active]:bg-muted data-[state=active]:shadow-none"
+          >
+            <Bell className="h-4 w-4" />
+            Notifications
+          </TabsTrigger>
         </TabsList>
         <div className="min-w-0 flex-1">
           <TabsContent value="general" className="mt-0">
@@ -173,6 +184,12 @@ export function OrgSettingsFormFields({
               <div className="h-5 w-32 animate-pulse rounded bg-muted" />
               <div className="h-12 animate-pulse rounded bg-muted" />
               <div className="h-12 animate-pulse rounded bg-muted" />
+            </div>
+          </TabsContent>
+          <TabsContent value="notifications" className="mt-0">
+            <div className="space-y-4">
+              <div className="h-5 w-40 animate-pulse rounded bg-muted" />
+              <div className="h-4 w-72 animate-pulse rounded bg-muted" />
             </div>
           </TabsContent>
         </div>
@@ -202,6 +219,13 @@ export function OrgSettingsFormFields({
         >
           <Users className="h-4 w-4" />
           Members
+        </TabsTrigger>
+        <TabsTrigger
+          value="notifications"
+          className="justify-start gap-2 data-[state=active]:bg-muted data-[state=active]:shadow-none"
+        >
+          <Bell className="h-4 w-4" />
+          Notifications
         </TabsTrigger>
         {(onLeaveOrg || onArchiveOrg) && (
           <TabsTrigger
@@ -405,6 +429,11 @@ export function OrgSettingsFormFields({
               </div>
             )}
           </div>
+        </TabsContent>
+        <TabsContent value="notifications" className="mt-0">
+          {organizationId && (
+            <NotificationSettings organizationId={organizationId} />
+          )}
         </TabsContent>
         {(onLeaveOrg || onArchiveOrg) && (
           <TabsContent value="danger" className="mt-0">
@@ -626,6 +655,7 @@ export function OrgSettings({
       members={members}
       isOwner={isOwner}
       isPending={isPending}
+      organizationId={organizationId}
       onUpdateOrg={isOwner ? handleUpdateOrg : undefined}
       onLeaveOrg={!isOwner ? handleLeaveOrg : undefined}
       onArchiveOrg={isOwner ? handleArchiveOrg : undefined}
