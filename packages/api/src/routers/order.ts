@@ -334,6 +334,87 @@ export const orderRouter = router({
       )
     }),
 
+  archive: protectedProcedure
+    .input(z.object({ orderId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      await verifyOrderAccess(ctx.db, ctx.session.user.id, input.orderId)
+
+      const now = new Date()
+      await ctx.db
+        .update(schema.order)
+        .set({ archivedAt: now, updatedAt: now })
+        .where(eq(schema.order.id, input.orderId))
+
+      await logEvent(
+        ctx.db,
+        input.orderId,
+        'order_archived',
+        ctx.session.user.id,
+      )
+
+      return { success: true }
+    }),
+
+  duplicate: protectedProcedure
+    .input(z.object({ orderId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const sourceOrder = await verifyOrderAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.orderId,
+      )
+
+      const sourceItems = await ctx.db
+        .select()
+        .from(schema.orderItem)
+        .where(
+          and(
+            eq(schema.orderItem.orderId, input.orderId),
+            isNull(schema.orderItem.removedAt),
+          ),
+        )
+
+      const now = new Date()
+      const [newOrder] = await ctx.db
+        .insert(schema.order)
+        .values({
+          organizationId: sourceOrder.organizationId,
+          createdBy: ctx.session.user.id,
+          status: 'draft',
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning({ id: schema.order.id })
+
+      await logEvent(ctx.db, newOrder!.id, 'order_created', ctx.session.user.id)
+
+      if (sourceItems.length > 0) {
+        await ctx.db.insert(schema.orderItem).values(
+          sourceItems.map((item) => ({
+            orderId: newOrder!.id,
+            productId: item.productId,
+            supplierId: item.supplierId,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            unit: item.unit,
+            addedBy: ctx.session.user.id,
+            createdAt: now,
+            updatedAt: now,
+          })),
+        )
+      }
+
+      await logEvent(
+        ctx.db,
+        input.orderId,
+        'order_duplicated',
+        ctx.session.user.id,
+        { newOrderId: newOrder!.id },
+      )
+
+      return { orderId: newOrder!.id }
+    }),
+
   getEvents: protectedProcedure
     .input(z.object({ orderId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {

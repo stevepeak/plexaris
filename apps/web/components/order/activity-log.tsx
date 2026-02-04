@@ -23,6 +23,8 @@ export interface ActivityEntry {
     | 'order_confirmed'
     | 'order_cancelled'
     | 'note_updated'
+    | 'order_archived'
+    | 'order_duplicated'
   itemName: string
   detail: string
   timestamp: Date
@@ -60,6 +62,8 @@ const ACTION_LABELS: Record<ActivityEntry['action'], string> = {
   order_confirmed: 'Confirmed',
   order_cancelled: 'Cancelled',
   note_updated: 'Note updated',
+  order_archived: 'Archived',
+  order_duplicated: 'Duplicated',
 }
 
 interface ActivityLogProps {

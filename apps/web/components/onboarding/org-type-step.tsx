@@ -14,17 +14,19 @@ export function OrgTypeStep({
   onSelect: (type: OrgType) => void
 }) {
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-2 gap-4">
       <button
         type="button"
         onClick={() => onSelect('supplier')}
         className={cn(
-          'flex items-start gap-4 rounded-lg border p-4 text-left transition-colors hover:border-primary hover:bg-accent',
-          selected === 'supplier' && 'border-primary bg-accent',
+          'flex flex-col items-center gap-3 rounded-lg border p-6 text-center transition-colors hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/30',
+          selected === 'supplier'
+            ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30'
+            : 'border-border',
         )}
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-          <Store className="h-5 w-5 text-primary" />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
+          <Store className="h-6 w-6 text-blue-600 dark:text-blue-400" />
         </div>
         <div>
           <div className="font-medium">Supplier</div>
@@ -37,12 +39,14 @@ export function OrgTypeStep({
         type="button"
         onClick={() => onSelect('horeca')}
         className={cn(
-          'flex items-start gap-4 rounded-lg border p-4 text-left transition-colors hover:border-primary hover:bg-accent',
-          selected === 'horeca' && 'border-primary bg-accent',
+          'flex flex-col items-center gap-3 rounded-lg border p-6 text-center transition-colors hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/30',
+          selected === 'horeca'
+            ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/30'
+            : 'border-border',
         )}
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-          <UtensilsCrossed className="h-5 w-5 text-primary" />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/40">
+          <UtensilsCrossed className="h-6 w-6 text-orange-600 dark:text-orange-400" />
         </div>
         <div>
           <div className="font-medium">Horeca</div>

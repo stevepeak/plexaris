@@ -41,6 +41,7 @@ const SHORTCUT_GROUPS = [
       { keys: ['W'], description: 'Close current tab' },
       { keys: ['A'], description: 'View activity' },
       { keys: ['E'], description: 'Edit cart' },
+      { keys: ['X'], description: 'Advanced options' },
     ],
   },
   {

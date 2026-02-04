@@ -17,6 +17,7 @@ interface UseOrderHotkeysOptions {
   onOpenShortcuts: () => void
   onOpenActivityTab?: () => void
   onOpenCartTab?: () => void
+  onOpenAdvancedTab?: () => void
 }
 
 function isInputFocused(): boolean {
@@ -41,6 +42,7 @@ export function useOrderHotkeys({
   onOpenShortcuts,
   onOpenActivityTab,
   onOpenCartTab,
+  onOpenAdvancedTab,
 }: UseOrderHotkeysOptions) {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -98,6 +100,11 @@ export function useOrderHotkeys({
         case 'e': {
           e.preventDefault()
           onOpenCartTab?.()
+          break
+        }
+        case 'x': {
+          e.preventDefault()
+          onOpenAdvancedTab?.()
           break
         }
         case 'k': {
@@ -177,5 +184,6 @@ export function useOrderHotkeys({
     onOpenShortcuts,
     onOpenActivityTab,
     onOpenCartTab,
+    onOpenAdvancedTab,
   ])
 }

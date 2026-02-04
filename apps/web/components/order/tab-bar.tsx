@@ -4,6 +4,7 @@ import {
   Activity,
   ChefHat,
   Package,
+  Settings,
   ShoppingCart,
   Store,
   X,
@@ -20,6 +21,7 @@ const TAB_ICONS = {
   recipe: ChefHat,
   cart: ShoppingCart,
   activity: Activity,
+  advanced: Settings,
 } as const
 
 interface TabBarProps {

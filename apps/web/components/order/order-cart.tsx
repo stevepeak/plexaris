@@ -39,11 +39,19 @@ interface OrderCartProps {
   onOpenSupplier?: (supplierId: string, supplierName: string) => void
   onOpenCartTab?: () => void
   onOpenActivityTab?: () => void
+  onOpenAdvancedTab?: () => void
 }
 
 export const OrderCart = forwardRef<OrderCartHandle, OrderCartProps>(
   function OrderCart(
-    { cart, onOpenProduct, onOpenSupplier, onOpenCartTab, onOpenActivityTab },
+    {
+      cart,
+      onOpenProduct,
+      onOpenSupplier,
+      onOpenCartTab,
+      onOpenActivityTab,
+      onOpenAdvancedTab,
+    },
     ref,
   ) {
     const [selectedIndex, setSelectedIndex] = useState(-1)
@@ -223,22 +231,45 @@ export const OrderCart = forwardRef<OrderCartHandle, OrderCartProps>(
                 Checkout
               </Button>
             </div>
-            {onOpenActivityTab && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="mt-1 w-full"
-                    onClick={onOpenActivityTab}
-                  >
-                    View activity
-                    <Kbd className="ml-1.5">A</Kbd>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  View activity <Kbd className="ml-1">A</Kbd>
-                </TooltipContent>
-              </Tooltip>
+            {(onOpenActivityTab || onOpenAdvancedTab) && (
+              <div className="mt-1 flex gap-2">
+                {onOpenActivityTab && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex-1"
+                        onClick={onOpenActivityTab}
+                      >
+                        Activity
+                        <Kbd className="ml-1.5">A</Kbd>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      View activity <Kbd className="ml-1">A</Kbd>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                {onOpenAdvancedTab && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex-1"
+                        onClick={onOpenAdvancedTab}
+                      >
+                        Advanced
+                        <Kbd className="ml-1.5">X</Kbd>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Advanced options <Kbd className="ml-1">X</Kbd>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
             )}
           </div>
         </div>

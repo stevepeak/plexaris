@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { type CartStateReturn } from '@/hooks/use-cart-state'
 
 import { type ActivityEntry, ActivityLog } from './activity-log'
+import { AdvancedTab } from './advanced-tab'
 import { CartTableView } from './cart-table-view'
 import { ProductDetail } from './product-detail'
 import { SupplierDetail } from './supplier-detail'
@@ -34,6 +35,8 @@ interface ContentViewerProps {
   activityEntries?: ActivityEntry[]
   onFocusSearch?: () => void
   onOpenChat?: () => void
+  orderId?: string
+  onOrderArchived?: () => void
 }
 
 export function ContentViewer({
@@ -50,6 +53,8 @@ export function ContentViewer({
   activityEntries,
   onFocusSearch,
   onOpenChat,
+  orderId,
+  onOrderArchived,
 }: ContentViewerProps) {
   const activeTab = tabs.find((t) => tabKey(t) === activeTabKey)
 
@@ -119,6 +124,13 @@ export function ContentViewer({
         )}
         {activeTab?.type === 'activity' && (
           <ActivityLog key="activity" entries={activityEntries ?? []} />
+        )}
+        {activeTab?.type === 'advanced' && orderId && (
+          <AdvancedTab
+            key="advanced"
+            orderId={orderId}
+            onOrderArchived={onOrderArchived}
+          />
         )}
       </div>
     </div>

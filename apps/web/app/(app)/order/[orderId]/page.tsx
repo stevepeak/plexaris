@@ -21,6 +21,7 @@ import {
 } from '@/components/order/panel-toggle-bar'
 import {
   ACTIVITY_TAB,
+  ADVANCED_TAB,
   CART_TAB,
   type TabItem,
   tabKey,
@@ -104,6 +105,14 @@ export default function OrderPage() {
         case 'note_updated':
           detail = 'Note updated'
           break
+        case 'order_archived':
+          detail = 'Order archived'
+          break
+        case 'order_duplicated':
+          detail = payload.newOrderId
+            ? `Duplicated to ${(payload.newOrderId as string).slice(0, 8)}...`
+            : 'Order duplicated'
+          break
         default:
           break
       }
@@ -148,6 +157,14 @@ export default function OrderPage() {
     openTab(ACTIVITY_TAB)
   }, [openTab])
 
+  const handleOpenAdvancedTab = useCallback(() => {
+    openTab(ADVANCED_TAB)
+  }, [openTab])
+
+  const handleOrderArchived = useCallback(() => {
+    // Navigation to /dashboard is handled inside AdvancedTab
+  }, [])
+
   const closeTab = useCallback(
     (key: string) => {
       setTabs((prev) => {
@@ -186,6 +203,7 @@ export default function OrderPage() {
     onOpenShortcuts: handleOpenShortcuts,
     onOpenActivityTab: handleOpenActivityTab,
     onOpenCartTab: handleOpenCartTab,
+    onOpenAdvancedTab: handleOpenAdvancedTab,
   })
 
   const handleFavoriteToggled = useCallback(() => {
@@ -447,6 +465,8 @@ export default function OrderPage() {
             onOpenChat={() => {
               setPanels((prev) => ({ ...prev, chat: true }))
             }}
+            orderId={orderId}
+            onOrderArchived={handleOrderArchived}
           />
         </div>
 
@@ -459,6 +479,7 @@ export default function OrderPage() {
               onOpenSupplier={handleOpenSupplier}
               onOpenCartTab={handleOpenCartTab}
               onOpenActivityTab={handleOpenActivityTab}
+              onOpenAdvancedTab={handleOpenAdvancedTab}
             />
           </div>
         )}

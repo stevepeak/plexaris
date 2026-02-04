@@ -71,6 +71,13 @@
       "when": 1770220200497,
       "tag": "0009_short_yellowjacket",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1770234801624,
+      "tag": "0010_dark_speedball",
+      "breakpoints": true
     }
   ]
 }

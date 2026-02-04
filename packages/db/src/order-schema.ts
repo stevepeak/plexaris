@@ -35,6 +35,8 @@ export const orderEventTypeEnum = pgEnum('order_event_type', [
   'order_confirmed',
   'order_cancelled',
   'note_updated',
+  'order_archived',
+  'order_duplicated',
 ])
 
 // ---------------------------------------------------------------------------
