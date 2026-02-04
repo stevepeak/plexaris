@@ -47,41 +47,6 @@ function SignupForm() {
     router.push(redirect ?? '/onboarding')
   }
 
-  const handleDemoUser = async () => {
-    setIsLoading(true)
-    setError(null)
-
-    const demoEmail = 'demo@plexaris.com'
-    const demoPassword = 'demo-password-123'
-    const demoName = 'Demo User'
-
-    // Try signing in first (demo user may already exist)
-    const signInResult = await authClient.signIn.email({
-      email: demoEmail,
-      password: demoPassword,
-    })
-
-    if (!signInResult.error) {
-      router.push(redirect ?? '/onboarding')
-      return
-    }
-
-    // If sign-in fails, create the demo account
-    const { error } = await authClient.signUp.email({
-      email: demoEmail,
-      password: demoPassword,
-      name: demoName,
-    })
-
-    if (error) {
-      setError(error.message ?? 'Failed to create demo account')
-      setIsLoading(false)
-      return
-    }
-
-    router.push(redirect ?? '/onboarding')
-  }
-
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
@@ -136,25 +101,6 @@ function SignupForm() {
             {isLoading ? 'Creating account...' : 'Sign up'}
           </Button>
         </form>
-
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">Or</span>
-          </div>
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          disabled={isLoading}
-          onClick={handleDemoUser}
-        >
-          Enter Demo User
-        </Button>
       </CardContent>
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
