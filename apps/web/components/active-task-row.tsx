@@ -1,10 +1,12 @@
 'use client'
 
-import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { AlertCircle, CheckCircle2, ExternalLink, Loader2 } from 'lucide-react'
+import Link from 'next/link'
+import { useCallback, useState } from 'react'
 
 import { useTriggerRun } from '@/app/hooks/use-trigger-run'
 import { Badge } from '@/components/ui/badge'
+import { trpc } from '@/lib/trpc'
 
 export function ActiveTaskRow({
   run,
@@ -15,26 +17,43 @@ export function ActiveTaskRow({
     taskType: string
     label: string
     status: string
-    publicAccessToken: string | null
+    createdAt?: string
+    publicAccessToken?: string | null
   }
 }) {
+  const isActive = run.status === 'running'
   const [latestLog, setLatestLog] = useState<string>('')
+  const utils = trpc.useUtils()
+
+  const fetchToken = useCallback(async () => {
+    const result = await utils.triggerRun.getPublicAccessToken.fetch({
+      triggerRunId: run.triggerRunId,
+    })
+    return result.publicAccessToken
+  }, [utils, run.triggerRunId])
 
   const { isCompleted, isFailed } = useTriggerRun({
-    triggerDevRunId: run.publicAccessToken ? run.triggerRunId : null,
-    triggerDevPublicAccessToken: run.publicAccessToken,
+    triggerDevRunId: isActive ? run.triggerRunId : null,
+    triggerDevPublicAccessToken: run.publicAccessToken ?? null,
+    fetchPublicAccessToken:
+      isActive && !run.publicAccessToken ? fetchToken : undefined,
     showToast: false,
     onStreamText: (text) => setLatestLog(text),
   })
 
-  const effectiveStatus = isCompleted
-    ? 'completed'
-    : isFailed
-      ? 'failed'
-      : run.status
+  const effectiveStatus = isActive
+    ? isCompleted
+      ? 'completed'
+      : isFailed
+        ? 'failed'
+        : 'running'
+    : run.status
 
   return (
-    <div className="flex items-center justify-between px-6 py-3">
+    <Link
+      href={`/tasks/${run.id}`}
+      className="flex items-center justify-between px-6 py-3 transition-colors hover:bg-muted/50"
+    >
       <div className="flex items-center gap-3">
         {effectiveStatus === 'completed' ? (
           <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -48,10 +67,18 @@ export function ActiveTaskRow({
           {run.taskType}
         </Badge>
       </div>
-      <span className="max-w-[300px] truncate text-xs text-muted-foreground">
-        {latestLog ||
-          (effectiveStatus === 'running' ? 'Starting...' : effectiveStatus)}
-      </span>
-    </div>
+      <div className="flex items-center gap-2">
+        <span className="max-w-[300px] truncate text-xs text-muted-foreground">
+          {latestLog ||
+            (effectiveStatus === 'running' ? 'Starting...' : effectiveStatus)}
+        </span>
+        {run.createdAt && (
+          <span className="shrink-0 text-xs text-muted-foreground">
+            {new Date(run.createdAt).toLocaleString()}
+          </span>
+        )}
+        <ExternalLink className="h-3 w-3 text-muted-foreground" />
+      </div>
+    </Link>
   )
 }

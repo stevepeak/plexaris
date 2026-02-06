@@ -95,25 +95,29 @@ export function OrgSwitcher({
     return <Skeleton className="h-9 w-40" />
   }
 
-  if (!activeOrg) return null
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm hover:bg-accent focus:outline-none">
-        <Avatar className="h-5 w-5 rounded-md text-[10px]">
-          {activeOrg.logoUrl && (
-            <AvatarImage src={activeOrg.logoUrl} alt={activeOrg.name} />
-          )}
-          <AvatarFallback className="rounded-md text-[10px]">
-            {getOrgInitials(activeOrg.name)}
-          </AvatarFallback>
-        </Avatar>
-        <span className="max-w-[160px] truncate font-medium">
-          {activeOrg.name}
-        </span>
-        <span className="rounded bg-muted px-1.5 py-0.5 text-xs capitalize text-muted-foreground">
-          {activeOrg.type}
-        </span>
+        {activeOrg ? (
+          <>
+            <Avatar className="h-5 w-5 rounded-md text-[10px]">
+              {activeOrg.logoUrl && (
+                <AvatarImage src={activeOrg.logoUrl} alt={activeOrg.name} />
+              )}
+              <AvatarFallback className="rounded-md text-[10px]">
+                {getOrgInitials(activeOrg.name)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="max-w-[160px] truncate font-medium">
+              {activeOrg.name}
+            </span>
+            <span className="rounded bg-muted px-1.5 py-0.5 text-xs capitalize text-muted-foreground">
+              {activeOrg.type}
+            </span>
+          </>
+        ) : (
+          <span className="text-muted-foreground">Select an organization</span>
+        )}
         <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
@@ -140,11 +144,11 @@ export function OrgSwitcher({
               <div className="flex flex-col">
                 <span className="text-sm">{org.name}</span>
                 <span className="text-xs capitalize text-muted-foreground">
-                  {org.type} &middot; {org.role}
+                  {org.type}
                 </span>
               </div>
             </div>
-            {org.id === activeOrg.id && (
+            {activeOrg && org.id === activeOrg.id && (
               <Check className="h-4 w-4 text-primary" />
             )}
           </DropdownMenuItem>

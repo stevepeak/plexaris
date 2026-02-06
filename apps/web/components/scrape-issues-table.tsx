@@ -28,7 +28,10 @@ export type ScrapeIssue = {
 }
 
 export function ScrapeIssuesTable({ issues }: { issues: ScrapeIssue[] }) {
-  if (!issues.length) return null
+  const validIssues = issues.filter(
+    (issue) => issue && (issue.source || issue.field || issue.error),
+  )
+  if (!validIssues.length) return null
 
   return (
     <Card>
@@ -39,8 +42,8 @@ export function ScrapeIssuesTable({ issues }: { issues: ScrapeIssue[] }) {
             Scrape Issues
           </CardTitle>
           <CardDescription>
-            {issues.length} {issues.length === 1 ? 'issue' : 'issues'} found
-            during data scraping
+            {validIssues.length} {validIssues.length === 1 ? 'issue' : 'issues'}{' '}
+            found during data scraping
           </CardDescription>
         </div>
       </CardHeader>
@@ -56,7 +59,7 @@ export function ScrapeIssuesTable({ issues }: { issues: ScrapeIssue[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {issues.map((issue, i) => (
+            {validIssues.map((issue, i) => (
               <TableRow key={`${issue.source}-${issue.field}-${i}`}>
                 <TableCell className="max-w-[200px] truncate font-mono text-xs">
                   {issue.source}

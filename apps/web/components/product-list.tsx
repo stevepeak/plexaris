@@ -15,13 +15,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -228,79 +222,70 @@ export function ProductList({
 }) {
   if (isPending) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-4 w-48" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-4 w-48" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
     )
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Products</CardTitle>
-            <CardDescription>
-              {products.length === 0
-                ? 'No products yet'
-                : `${products.length} product${products.length === 1 ? '' : 's'}`}
-            </CardDescription>
-          </div>
-          {isOwner && (
-            <Button size="sm" onClick={onAddProduct}>
-              <Plus className="h-4 w-4" />
-              Add Product
-            </Button>
-          )}
+    <div>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Products</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {products.length === 0
+              ? 'No products yet'
+              : `${products.length} product${products.length === 1 ? '' : 's'}`}
+          </p>
         </div>
-      </CardHeader>
-      <CardContent>
-        {isOwner && archivedProducts.length > 0 ? (
-          <Tabs defaultValue="active">
-            <TabsList>
-              <TabsTrigger value="active">
-                Active ({products.length})
-              </TabsTrigger>
-              <TabsTrigger value="archived">
-                Archived ({archivedProducts.length})
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="active">
-              <ProductTable
-                products={products}
-                isOwner={isOwner}
-                isArchived={false}
-                onEditProduct={onEditProduct}
-                onArchiveProduct={onArchiveProduct}
-              />
-            </TabsContent>
-            <TabsContent value="archived">
-              <ProductTable
-                products={archivedProducts}
-                isOwner={isOwner}
-                isArchived
-                onRestoreProduct={onRestoreProduct}
-              />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <ProductTable
-            products={products}
-            isOwner={isOwner}
-            isArchived={false}
-            onEditProduct={onEditProduct}
-            onArchiveProduct={onArchiveProduct}
-          />
+        {isOwner && (
+          <Button size="sm" onClick={onAddProduct}>
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Button>
         )}
-      </CardContent>
-    </Card>
+      </div>
+      <Separator className="my-6" />
+      {isOwner && archivedProducts.length > 0 ? (
+        <Tabs defaultValue="active">
+          <TabsList>
+            <TabsTrigger value="active">Active ({products.length})</TabsTrigger>
+            <TabsTrigger value="archived">
+              Archived ({archivedProducts.length})
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="active">
+            <ProductTable
+              products={products}
+              isOwner={isOwner}
+              isArchived={false}
+              onEditProduct={onEditProduct}
+              onArchiveProduct={onArchiveProduct}
+            />
+          </TabsContent>
+          <TabsContent value="archived">
+            <ProductTable
+              products={archivedProducts}
+              isOwner={isOwner}
+              isArchived
+              onRestoreProduct={onRestoreProduct}
+            />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <ProductTable
+          products={products}
+          isOwner={isOwner}
+          isArchived={false}
+          onEditProduct={onEditProduct}
+          onArchiveProduct={onArchiveProduct}
+        />
+      )}
+    </div>
   )
 }

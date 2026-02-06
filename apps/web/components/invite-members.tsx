@@ -6,13 +6,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -99,66 +92,64 @@ export function InviteMembersList({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg">Invitations</CardTitle>
-            <CardDescription>
-              Manage team invitations for this organization
-            </CardDescription>
-          </div>
-          {isOwner && onInvite && (
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm">
-                  <UserPlus className="h-4 w-4" />
-                  Invite member
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Invite a team member</DialogTitle>
-                  <DialogDescription>
-                    Send an invitation by email. They&apos;ll be able to accept
-                    or reject it from their dashboard.
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSend} className="grid gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="invite-email">Email address</Label>
-                    <Input
-                      id="invite-email"
-                      type="email"
-                      placeholder="colleague@company.com"
-                      autoComplete="off"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  {error && <p className="text-sm text-destructive">{error}</p>}
-                  <Button type="submit" disabled={isSending}>
-                    {isSending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="h-4 w-4" />
-                        Send invitation
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
-          )}
+    <div>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">Invitations</h3>
+          <p className="text-sm text-muted-foreground">
+            Manage team invitations for this organization
+          </p>
         </div>
-      </CardHeader>
+        {isOwner && onInvite && (
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <UserPlus className="h-4 w-4" />
+                Invite member
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Invite a team member</DialogTitle>
+                <DialogDescription>
+                  Send an invitation by email. They&apos;ll be able to accept or
+                  reject it from their dashboard.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSend} className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="invite-email">Email address</Label>
+                  <Input
+                    id="invite-email"
+                    type="email"
+                    placeholder="colleague@company.com"
+                    autoComplete="off"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                {error && <p className="text-sm text-destructive">{error}</p>}
+                <Button type="submit" disabled={isSending}>
+                  {isSending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      Send invitation
+                    </>
+                  )}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
       {success && (
-        <div className="mx-6 mb-4 flex items-center justify-between rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300">
+        <div className="mt-4 flex items-center justify-between rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300">
           <span>{success}</span>
           <button
             type="button"
@@ -169,50 +160,47 @@ export function InviteMembersList({
           </button>
         </div>
       )}
-      <Separator />
-      <CardContent className="pt-4">
-        {isPending ? (
-          <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Loading invitations...
-          </div>
-        ) : invitations.length === 0 ? (
-          <p className="py-4 text-sm text-muted-foreground">
-            No invitations yet.{' '}
-            {isOwner && 'Invite team members to collaborate.'}
-          </p>
-        ) : (
-          <div className="grid gap-3">
-            {invitations.map((inv) => {
-              const status = getStatus(inv)
-              return (
-                <div
-                  key={inv.id}
-                  className="flex items-center justify-between rounded-md border px-3 py-2"
-                >
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <div className="text-sm font-medium">{inv.email}</div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        Invited by {inv.invitedByName}
-                      </div>
+      <Separator className="my-4" />
+      {isPending ? (
+        <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Loading invitations...
+        </div>
+      ) : invitations.length === 0 ? (
+        <p className="py-4 text-sm text-muted-foreground">
+          No invitations yet. {isOwner && 'Invite team members to collaborate.'}
+        </p>
+      ) : (
+        <div className="grid gap-3">
+          {invitations.map((inv) => {
+            const status = getStatus(inv)
+            return (
+              <div
+                key={inv.id}
+                className="flex items-center justify-between rounded-md border px-3 py-2"
+              >
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <div className="text-sm font-medium">{inv.email}</div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      Invited by {inv.invitedByName}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="capitalize">
-                      {inv.role}
-                    </Badge>
-                    <StatusBadge status={status} />
-                  </div>
                 </div>
-              )
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="capitalize">
+                    {inv.role}
+                  </Badge>
+                  <StatusBadge status={status} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }
 

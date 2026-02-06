@@ -83,7 +83,7 @@ export default function ProfileSettingsPage() {
             <Separator orientation="vertical" className="h-6" />
             <OrgSwitcher
               organizations={organizations}
-              activeOrg={activeOrg}
+              activeOrg={null}
               onSwitch={switchOrg}
               isPending={orgsPending}
             />
