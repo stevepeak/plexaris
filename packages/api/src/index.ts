@@ -1,11 +1,15 @@
-import { type exampleAgentTask } from '@app/trigger'
+import { eq, schema } from '@app/db'
+import {
+  type exampleAgentTask,
+  type scrapeOrganizationTask,
+} from '@app/trigger'
 import { tasks } from '@trigger.dev/sdk'
 import { z } from 'zod'
 
 import { notificationRouter } from './routers/notification'
 import { orderRouter } from './routers/order'
 import { triggerRunRouter } from './routers/trigger-run'
-import { publicProcedure, router } from './trpc'
+import { protectedProcedure, publicProcedure, router } from './trpc'
 
 export type { Context } from './context'
 
@@ -34,6 +38,54 @@ const triggerRouter = router({
         runId: handle.id,
         publicAccessToken: handle.publicAccessToken,
       }
+    }),
+
+  scrapeOrganization: protectedProcedure
+    .input(z.object({ organizationId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const { organizationId } = input
+
+      // Fetch the org's URLs from data jsonb
+      const [org] = await ctx.db
+        .select({ data: schema.organization.data })
+        .from(schema.organization)
+        .where(eq(schema.organization.id, organizationId))
+        .limit(1)
+
+      if (!org) {
+        throw new Error('Organization not found')
+      }
+
+      const orgData = org.data as { urls?: string[] } | null
+      const urls = orgData?.urls ?? []
+
+      // Fetch file IDs for this org
+      const files = await ctx.db
+        .select({ id: schema.file.id })
+        .from(schema.file)
+        .where(eq(schema.file.organizationId, organizationId))
+
+      const fileIds = files.map((f) => f.id)
+
+      // Trigger the scrape-organization task
+      const handle = await tasks.trigger<typeof scrapeOrganizationTask>(
+        'scrape-organization',
+        { organizationId, urls, fileIds },
+      )
+
+      // Insert trigger_run row so the active tasks card picks it up immediately
+      const now = new Date()
+      await ctx.db.insert(schema.triggerRun).values({
+        organizationId,
+        triggerRunId: handle.id,
+        taskType: 'scrape-organization',
+        label: `Scraping ${urls[0] ?? 'uploaded files'}`,
+        status: 'running',
+        createdAt: now,
+        updatedAt: now,
+      })
+
+      return { runId: handle.id }
     }),
 })
 

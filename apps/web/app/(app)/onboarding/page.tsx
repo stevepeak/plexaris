@@ -25,6 +25,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
+import { trpc } from '@/lib/trpc'
 
 function getInitials(name: string | undefined): string {
   if (!name) {
@@ -69,6 +70,7 @@ export default function OnboardingPage() {
   const [files, setFiles] = useState<File[]>([])
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const scrapeMutation = trpc.trigger.scrapeOrganization.useMutation()
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -144,6 +146,17 @@ export default function OnboardingPage() {
         setError(uploadData.error ?? 'Failed to upload files')
         setIsLoading(false)
         return
+      }
+    }
+
+    // Trigger the scraping workflow if URLs or files were provided
+    const hasUrls = urls.trim().length > 0
+    const hasFiles = files.length > 0
+    if (hasUrls || hasFiles) {
+      try {
+        await scrapeMutation.mutateAsync({ organizationId: orgId })
+      } catch {
+        // Non-blocking — the org is created, scrape can be retried later
       }
     }
 

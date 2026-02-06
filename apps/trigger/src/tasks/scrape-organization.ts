@@ -13,14 +13,18 @@ import { scrapeProductTask } from './scrape-product'
 
 export const scrapeOrganizationTask = task({
   id: 'scrape-organization',
-  run: async (args: {
-    organizationId: string
-    urls: string[]
-    fileIds: string[]
-  }) => {
+  run: async (
+    args: {
+      organizationId: string
+      urls: string[]
+      fileIds: string[]
+    },
+    { ctx },
+  ) => {
     const { organizationId, urls, fileIds } = args
     const config = getConfig()
     const db = createDb()
+    const triggerRunId = ctx.run.id
 
     logger.log('Starting organization scrape', {
       organizationId,
@@ -39,18 +43,25 @@ export const scrapeOrganizationTask = task({
       throw new Error(`Organization not found: ${organizationId}`)
     }
 
-    // 2. Insert trigger_run row
+    // 2. Ensure trigger_run row exists (may already be inserted by the tRPC mutation)
     const now = new Date()
-    const triggerRunId = `scrape-org-${organizationId}-${Date.now()}`
-    await db.insert(schema.triggerRun).values({
-      organizationId,
-      triggerRunId,
-      taskType: 'scrape-organization',
-      label: `Scraping ${urls[0] ?? 'uploaded files'}`,
-      status: 'running',
-      createdAt: now,
-      updatedAt: now,
-    })
+    const [existing] = await db
+      .select({ id: schema.triggerRun.id })
+      .from(schema.triggerRun)
+      .where(eq(schema.triggerRun.triggerRunId, triggerRunId))
+      .limit(1)
+
+    if (!existing) {
+      await db.insert(schema.triggerRun).values({
+        organizationId,
+        triggerRunId,
+        taskType: 'scrape-organization',
+        label: `Scraping ${urls[0] ?? 'uploaded files'}`,
+        status: 'running',
+        createdAt: now,
+        updatedAt: now,
+      })
+    }
 
     void streams.append('progress', 'Starting organization scrape...')
 

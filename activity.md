@@ -86,3 +86,16 @@ Created three agent workflows for scraping organization and product data. Built 
 - `apps/trigger/package.json` — added `@app/browserbase` dependency
 
 **Screenshot:** `screenshots/task5-agent-workflows.png`
+
+## 2026-02-06 — Task 6: Wire it all together
+
+Wired the onboarding flow to the scraping workflow and the org page. Added a `scrapeOrganization` tRPC mutation to the trigger router that fetches the org's URLs and file IDs from the database, triggers the `scrape-organization` Trigger.dev task, and inserts a `trigger_run` row using the actual Trigger.dev run ID so the active tasks card picks it up immediately. Updated the onboarding submit handler to call this mutation after org creation and file upload (non-blocking — if the trigger fails, the org is still created and the user is redirected). Updated the `scrape-organization` and `scrape-product` Trigger.dev tasks to use `ctx.run.id` instead of generating synthetic run IDs, and the org task now checks for an existing `trigger_run` row before inserting (to avoid duplicates since the tRPC mutation inserts first). The full flow: onboarding creates org → uploads files → triggers scrape → redirects to org page → active tasks card shows running agents → scrape issues appear when complete. All CI checks pass (typecheck, lint, knip, build).
+
+**Files changed:**
+
+- `packages/api/src/index.ts` — added `scrapeOrganization` tRPC mutation to trigger router
+- `apps/web/app/(app)/onboarding/page.tsx` — wired submit to call scrapeOrganization mutation before redirect
+- `apps/trigger/src/tasks/scrape-organization.ts` — use `ctx.run.id`, check for existing trigger_run row
+- `apps/trigger/src/tasks/scrape-product.ts` — use `ctx.run.id` for trigger_run tracking
+
+**Screenshot:** `screenshots/task6-wire-together.png`

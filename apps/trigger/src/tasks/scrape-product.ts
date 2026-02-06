@@ -11,15 +11,19 @@ import { logger, streams, task } from '@trigger.dev/sdk'
 
 export const scrapeProductTask = task({
   id: 'scrape-product',
-  run: async (args: {
-    organizationId: string
-    productUrl?: string
-    fileId?: string
-    productHint: string
-  }) => {
+  run: async (
+    args: {
+      organizationId: string
+      productUrl?: string
+      fileId?: string
+      productHint: string
+    },
+    { ctx },
+  ) => {
     const { organizationId, productUrl, fileId, productHint } = args
     const config = getConfig()
     const db = createDb()
+    const triggerRunId = ctx.run.id
 
     logger.log('Starting product scrape', {
       organizationId,
@@ -30,7 +34,6 @@ export const scrapeProductTask = task({
 
     // 1. Insert trigger_run row
     const now = new Date()
-    const triggerRunId = `scrape-product-${organizationId}-${Date.now()}`
     await db.insert(schema.triggerRun).values({
       organizationId,
       triggerRunId,

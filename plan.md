@@ -183,7 +183,7 @@ Products are **universal** — the same physical product can be supplied by mult
 
 ## Task 6: Wire it all together
 
-**passes:** false
+**passes:** true
 
 1. Onboarding submit triggers the `scrape-organization` task via tRPC → Trigger.dev (returns `runId`).
 2. The tRPC mutation inserts the initial `trigger_run` row (with the `triggerRunId`) before returning, so the active tasks card picks it up immediately. The frontend uses the Task 4a query to fetch a fresh public access token from the Trigger.dev API when it needs to subscribe.
