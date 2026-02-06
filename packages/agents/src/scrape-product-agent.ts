@@ -1,20 +1,43 @@
-import { Experimental_Agent as Agent, type ToolSet } from 'ai'
+import { Experimental_Agent as Agent, Output, type ToolSet } from 'ai'
+import { dedent } from 'ts-dedent'
 import { z } from 'zod'
 
-export const scrapeProductOutputSchema = z.object({
-  productId: z.string().nullable().describe('The product ID (new or existing)'),
-  productName: z.string().describe('The product name'),
-  isNew: z.boolean().describe('Whether a new product was created'),
-  fieldsExtracted: z
-    .number()
-    .describe('Number of fields successfully extracted'),
-  issuesCount: z.number().describe('Number of scrape issues encountered'),
+import { agentGenerate } from './generate'
+import { createModel } from './model'
+
+const scrapeIssueSchema = z.object({
+  source: z.string().describe('The URL or filename where the issue was found'),
+  field: z.string().describe('The schema field path (e.g. "unit.gtin")'),
+  rawValue: z.string().describe('The raw value that was found'),
+  error: z.string().describe("Why it doesn't match the expected format"),
+  timestamp: z.string().describe('ISO datetime of when the issue was recorded'),
 })
 
-export type ScrapeProductOutput = z.infer<typeof scrapeProductOutputSchema>
+/** Internal schema used for OpenAI structured output (data as JSON string). */
+const agentOutputSchema = z.object({
+  productName: z.string().describe('The product name'),
+  suggestionsCreated: z
+    .number()
+    .describe('Number of suggestions created by the agent'),
+  data: z
+    .string()
+    .describe(
+      'The full extracted product data as a JSON-encoded string (e.g. \'{"brand":"Acme"}\')',
+    ),
+  issues: z
+    .array(scrapeIssueSchema)
+    .describe('All scrape issues encountered during extraction'),
+})
+
+export interface ScrapeProductOutput {
+  productName: string
+  suggestionsCreated: number
+  data: Record<string, unknown>
+  issues: z.infer<typeof scrapeIssueSchema>[]
+}
 
 export interface ScrapeProductInput {
-  model: ConstructorParameters<typeof Agent>[0]['model']
+  modelId?: string
   organizationId: string
   productUrl?: string
   fileId?: string
@@ -25,16 +48,16 @@ export interface ScrapeProductInput {
 
 /**
  * Agent that scrapes a product page or file to extract product data,
- * then deduplicates and upserts the product into the database.
+ * then creates suggestions for human review rather than directly modifying the database.
  *
  * Deduplication strategy:
  * - Match by articleNumber or unit.gtin (hard identifiers)
- * - If match found: update existing product's data with new/richer fields
- * - If no match: insert new product
+ * - If match found: suggest update_field per changed field
+ * - If no match: suggest create with full product data
  * - Same name but different numbers = distinct products
  */
 export async function scrapeProductAgent({
-  model,
+  modelId,
   organizationId,
   productUrl,
   fileId,
@@ -45,81 +68,94 @@ export async function scrapeProductAgent({
   if (onProgress) onProgress(`Scraping product: ${productHint}`)
 
   const agent = new Agent({
-    model,
-    system: `You are a product data extraction agent. You scrape a single product page or document section to extract detailed product information.
+    model: createModel(modelId),
+    instructions: dedent`
+      You are a product data extraction agent. You scrape a single product page or document section to extract detailed product information.
 
-## Product Schema Fields
-Extract as many of these fields as possible:
-- brand: Product brand name
-- variant: Product variant or flavour
-- intrastatCode: 8-digit Intrastat/CN commodity code
-- articleNumber: Distributor article number (CRITICAL for deduplication)
-- countryOfOrigin: ISO 3166-1 alpha-2 country code
-- description: Product description
-- unit: Individual unit details (gtin/EAN code, dimensions in mm, weight in grams, net content, packaging type, packshot URLs)
-- case: Case/tray details (gtin, dimensions, weight, units per case, net content, packaging type)
-- pallet: Pallet configuration (gtin, pallet type euro/chep, load layout, dimensions in cm, weight in kg)
-- productInfo: Ingredients list, nutritional values per 100g/ml, allergen information
+      ## Product Schema
+      Top-level DB columns (set directly when creating/updating):
+      - name: Product name (required)
+      - description: Product description
+      - price: Product price
+      - unit: Unit of measure (kg, piece, liter, box)
+      - category: Product category
 
-## Deduplication Strategy
-Before inserting a product, check if it already exists:
-1. If you found an articleNumber, use queryDatabase operation "findProductByArticleNumber"
-2. If you found a unit GTIN/EAN, use queryDatabase operation "findProductByGtin"
-3. If a match is found, update the existing product's data with any new/richer fields using "updateProductData"
-4. If no match is found, create a new product using "upsertProduct"
+      Additional fields stored in the data jsonb column:
+      - brand: Product brand name
+      - variant: Product variant or flavour
+      - intrastatCode: 8-digit Intrastat/CN commodity code
+      - articleNumber: Distributor article number (CRITICAL for deduplication)
+      - countryOfOrigin: ISO 3166-1 alpha-2 country code
+      - unit: Individual unit details (gtin/EAN code, dimensions in mm, weight in grams, net content, packaging type, packshot URLs)
+      - case: Case/tray details (gtin, dimensions, weight, units per case, net content, packaging type)
+      - pallet: Pallet configuration (gtin, pallet type euro/chep, load layout, dimensions in cm, weight in kg)
+      - productInfo: Ingredients list, nutritional values per 100g/ml, allergen information
 
-IMPORTANT: Name alone is NOT sufficient for deduplication. Same name + different article numbers = different products.
+      ## Deduplication Strategy
+      Before creating suggestions, check if the product already exists:
+      1. If you found an articleNumber, use "searchProduct" with the articleNumber
+      2. If you found a unit GTIN/EAN, use "searchProduct" with the gtin
+      3. If a match is found, use "suggestProduct" with action "update_field" for each changed field
+      4. If no match is found, use "suggestProduct" with action "create" and the full product data blob in proposedValue
 
-## Scrape Issues
-For any field where the scraped value doesn't match the expected format, record a scrape issue:
-- source: the URL or filename
-- field: the schema field path (e.g. "unit.gtin")
-- rawValue: the value you found
-- error: why it doesn't match
-- timestamp: current ISO datetime
+      IMPORTANT: Name alone is NOT sufficient for deduplication. Same name + different article numbers = different products.
 
-Store all issues in the product's data.scrapeIssues array.
+      ## Creating Suggestions
+      Instead of directly creating or updating products, you create suggestions for human review:
+      - For NEW products: call "suggestProduct" with action "create", proposedValue containing ALL product data (name, description, price, unit, category, plus data blob)
+      - For EXISTING products: call "suggestProduct" with action "update_field" once per changed field, including field path, currentValue, and proposedValue
+      - Always set confidence ("high", "medium", "low") based on data quality
+      - Always set source to the URL or file ID
+      - Always provide reasoning explaining how you determined the value
 
-## Instructions
-1. If a URL is provided, use "goto" to navigate to it, then "extract" to pull product data
-2. If a file ID is provided, use "readFile" to read the file and extract product data
-3. Check for existing product via articleNumber or GTIN
-4. Insert or update the product in the database
-5. Return the result with productId, name, whether it's new, fields extracted, and issues count`,
+      ## Scrape Issues
+      For any field where the scraped value doesn't match the expected format, record a scrape issue:
+      - source: the URL or filename
+      - field: the schema field path (e.g. "unit.gtin")
+      - rawValue: the value you found
+      - error: why it doesn't match
+      - timestamp: current ISO datetime
+
+      ## Instructions
+      1. If a URL is provided:
+         a. Use "fetchPage" to fetch the URL and get page metadata
+         b. Use "getPageContent" to retrieve the page content (token-optimized)
+         c. Use "searchContent" to find specific product fields (GTIN, prices, dimensions, etc.)
+         d. Extract product data from the content
+      2. If a file ID is provided, use "readFile" to read the file and extract product data
+      3. Check for existing product via articleNumber or GTIN using "searchProduct"
+      4. Create suggestions using "suggestProduct" for each proposed change
+      5. Return the result with productName, suggestionsCreated count, the full extracted data object, and the complete issues array
+    `,
     tools,
-    onStepFinish: ({ text }) => {
-      if (onProgress && text) {
-        onProgress(text.slice(0, 200))
-      }
-    },
+    output: Output.object({
+      schema: agentOutputSchema,
+    }),
   })
 
-  const result = await agent.generate({
-    prompt: `Extract product data for organization ${organizationId}.
-Product hint: "${productHint}"
-${productUrl ? `Product URL: ${productUrl}` : ''}
-${fileId ? `File ID: ${fileId}` : ''}
+  const result = await agentGenerate(() =>
+    agent.generate({
+      prompt: dedent`
+        Extract product data for organization ${organizationId}.
+        Product hint: "${productHint}"
+        ${productUrl ? `Product URL: ${productUrl}` : ''}
+        ${fileId ? `File ID: ${fileId}` : ''}
 
-Scrape the product information, deduplicate against existing products, and store the result in the database.`,
-  })
+        Scrape the product information, deduplicate against existing products using searchProduct, and create suggestions using suggestProduct for human review.
+      `,
+      onStepFinish: ({ text }) => {
+        if (onProgress && text) {
+          onProgress(text.slice(0, 200))
+        }
+      },
+    }),
+  )
 
-  try {
-    const parsed = scrapeProductOutputSchema.parse(
-      JSON.parse(extractJson(result.text)),
-    )
-    return parsed
-  } catch {
-    return {
-      productId: null,
-      productName: productHint,
-      isNew: false,
-      fieldsExtracted: 0,
-      issuesCount: 0,
-    }
+  const raw = result.output
+  return {
+    productName: raw.productName,
+    suggestionsCreated: raw.suggestionsCreated,
+    data: JSON.parse(raw.data) as Record<string, unknown>,
+    issues: raw.issues,
   }
-}
-
-function extractJson(text: string): string {
-  const match = text.match(/\{[\s\S]*\}/)
-  return match?.[0] ?? '{}'
 }

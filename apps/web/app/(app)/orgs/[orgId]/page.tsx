@@ -3,6 +3,7 @@
 import {
   Bell,
   LayoutDashboard,
+  Lightbulb,
   LogOut,
   Package,
   Settings,
@@ -21,6 +22,7 @@ import { NotificationsTab } from '@/components/org-page/notifications-tab'
 import { OrdersTab } from '@/components/org-page/orders-tab'
 import { ProductsTab } from '@/components/org-page/products-tab'
 import { SettingsTab } from '@/components/org-page/settings-tab'
+import { SuggestionsTab } from '@/components/org-page/suggestions-tab'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -36,6 +38,7 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { authClient } from '@/lib/auth-client'
+import { trpc } from '@/lib/trpc'
 import { cn } from '@/lib/utils'
 
 function getInitials(name: string | undefined): string {
@@ -51,6 +54,7 @@ function getInitials(name: string | undefined): string {
 const TAB_CONFIG = [
   { value: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { value: 'agents', label: 'Agents', icon: Zap },
+  { value: 'suggestions', label: 'Suggestions', icon: Lightbulb },
   {
     value: 'orders',
     label: 'Orders',
@@ -81,6 +85,11 @@ export default function OrgPage() {
     switchOrg,
     isPending: orgsPending,
   } = useActiveOrg(refreshKey)
+
+  const { data: pendingCount } = trpc.suggestion.pendingCount.useQuery(
+    { organizationId: orgId },
+    { enabled: !!activeOrg, refetchInterval: 10000 },
+  )
 
   const activeTab = searchParams.get('tab') ?? 'dashboard'
 
@@ -228,6 +237,13 @@ export default function OrgPage() {
                   >
                     <Icon className="h-4 w-4" />
                     {tab.label}
+                    {tab.value === 'suggestions' &&
+                      pendingCount &&
+                      pendingCount.count > 0 && (
+                        <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary-foreground">
+                          {pendingCount.count}
+                        </span>
+                      )}
                   </TabsTrigger>
                 )
               })}
@@ -246,6 +262,10 @@ export default function OrgPage() {
 
               <TabsContent value="agents" className="mt-0">
                 <AgentsTab organizationId={activeOrg.id} />
+              </TabsContent>
+
+              <TabsContent value="suggestions" className="mt-0">
+                <SuggestionsTab organizationId={activeOrg.id} />
               </TabsContent>
 
               {activeOrg.type === 'horeca' && (

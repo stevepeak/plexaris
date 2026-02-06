@@ -18,7 +18,8 @@ async function startSdk(): Promise<Tracer | undefined> {
   }
 
   initializing = (async () => {
-    if (!sentryInitialized) {
+    // eslint-disable-next-line no-process-env
+    if (!sentryInitialized && process.env.SENTRY_DSN) {
       Sentry.init({
         defaultIntegrations: false,
         // eslint-disable-next-line no-process-env

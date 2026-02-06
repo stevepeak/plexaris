@@ -1,14 +1,12 @@
-import {
-  createReadFileTool,
-  createSuggestOrganizationTool,
-  scrapeOrganizationAgent,
-} from '@app/agents'
+import { createReadFileTool, discoverProductsAgent } from '@app/agents'
 import { createDb, eq, schema } from '@app/db'
 import { createHttpTools } from '@app/http'
 import { logger, streams, task } from '@trigger.dev/sdk'
 
-export const scrapeOrganizationTask = task({
-  id: 'scrape-organization',
+import { scrapeProductTask } from './scrape-product'
+
+export const discoverProductsTask = task({
+  id: 'discover-products',
   run: async (
     args: {
       organizationId: string
@@ -21,24 +19,13 @@ export const scrapeOrganizationTask = task({
     const db = createDb()
     const triggerRunId = ctx.run.id
 
-    logger.log('Starting organization scrape', {
+    logger.log('Starting product discovery', {
       organizationId,
       urlCount: urls.length,
       fileCount: fileIds.length,
     })
 
-    // 1. Fetch the organization to determine type
-    const [org] = await db
-      .select({ type: schema.organization.type })
-      .from(schema.organization)
-      .where(eq(schema.organization.id, organizationId))
-      .limit(1)
-
-    if (!org) {
-      throw new Error(`Organization not found: ${organizationId}`)
-    }
-
-    // 2. Ensure trigger_run row exists (may already be inserted by the tRPC mutation)
+    // 1. Ensure trigger_run row exists (may already be inserted by the tRPC mutation)
     const now = new Date()
     const [existing] = await db
       .select({ id: schema.triggerRun.id })
@@ -50,18 +37,18 @@ export const scrapeOrganizationTask = task({
       await db.insert(schema.triggerRun).values({
         organizationId,
         triggerRunId,
-        taskType: 'scrape-organization',
-        label: `Scraping ${urls[0] ?? 'uploaded files'}`,
+        taskType: 'discover-products',
+        label: 'Discovering products...',
         status: 'running',
         createdAt: now,
         updatedAt: now,
       })
     }
 
-    void streams.append('progress', 'Starting organization scrape...')
+    void streams.append('progress', 'Starting product discovery...')
 
     try {
-      // 3. Set up scraper tools
+      // 2. Set up tools (HTTP + readFile only, no queryDatabase)
       const httpTools = createHttpTools({
         onProgress: (message) => {
           void streams.append('progress', message)
@@ -71,18 +58,16 @@ export const scrapeOrganizationTask = task({
       const tools = {
         ...httpTools,
         readFile: createReadFileTool(),
-        suggestOrganization: createSuggestOrganizationTool(triggerRunId),
       }
 
       void streams.append(
         'progress',
-        'HTTP tools initialized, starting agent...',
+        'HTTP tools initialized, starting discovery agent...',
       )
 
-      // 4. Run the scraping agent
-      const result = await scrapeOrganizationAgent({
+      // 3. Run the discovery agent
+      const result = await discoverProductsAgent({
         organizationId,
-        organizationType: org.type,
         urls,
         fileIds,
         tools,
@@ -93,27 +78,33 @@ export const scrapeOrganizationTask = task({
 
       void streams.append(
         'progress',
-        'Scraping complete. Saving organization data...',
+        `Discovery complete. Found ${result.productsDiscovered.length} products.`,
       )
 
-      // 5. Persist extracted data to the organization's data column
-      await db
-        .update(schema.organization)
-        .set({ data: result.data, updatedAt: new Date() })
-        .where(eq(schema.organization.id, organizationId))
+      // 4. Spawn product scrape sub-tasks for each discovered product
+      for (const product of result.productsDiscovered) {
+        void streams.append(
+          'progress',
+          `Spawning product scrape: ${product.name}`,
+        )
+        await scrapeProductTask.trigger({
+          organizationId,
+          productUrl: product.url ?? undefined,
+          productHint: product.name,
+        })
+      }
 
-      // 6. Update trigger_run status to completed
+      // 5. Update trigger_run status to completed
       await db
         .update(schema.triggerRun)
         .set({ status: 'completed', updatedAt: new Date() })
         .where(eq(schema.triggerRun.triggerRunId, triggerRunId))
 
-      void streams.append('progress', 'Organization scrape completed!')
+      void streams.append('progress', 'Product discovery completed!')
 
-      logger.log('Organization scrape completed', {
+      logger.log('Product discovery completed', {
         organizationId,
-        fieldsExtracted: Object.keys(result.data).length,
-        issuesCount: result.issues.length,
+        productsDiscovered: result.productsDiscovered.length,
       })
 
       return result
@@ -125,7 +116,7 @@ export const scrapeOrganizationTask = task({
 
       void streams.append(
         'progress',
-        `Scrape failed: ${error instanceof Error ? error.message : String(error)}`,
+        `Discovery failed: ${error instanceof Error ? error.message : String(error)}`,
       )
 
       throw error

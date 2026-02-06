@@ -17,18 +17,21 @@ function getPostHogClient(): PostHogClient | null {
     return posthogClient
   }
 
-  try {
-    const env = getConfig()
-    posthogClient = new PostHogClient(env.POSTHOG_API_KEY, {
-      host: env.POSTHOG_HOST,
-    })
-    return posthogClient
-  } catch (error) {
-    // If config is not available or PostHog is not configured, return null
-    // eslint-disable-next-line no-console
-    console.warn('PostHog client initialization failed:', error)
-    return null
+  const env = getConfig()
+  if (env.POSTHOG_API_KEY) {
+    try {
+      posthogClient = new PostHogClient(env.POSTHOG_API_KEY, {
+        host: env.POSTHOG_HOST,
+      })
+      return posthogClient
+    } catch (error) {
+      // If config is not available or PostHog is not configured, return null
+      // eslint-disable-next-line no-console
+      console.warn('PostHog client initialization failed:', error)
+      return null
+    }
   }
+  return null
 }
 
 /**

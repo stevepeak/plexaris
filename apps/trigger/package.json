@@ -1,10 +1,8 @@
 {
   "dependencies": {
-    "@ai-sdk/openai": "catalog:",
     "@app/agents": "workspace:*",
-    "@app/browserbase": "workspace:*",
-    "@app/config": "workspace:*",
     "@app/db": "workspace:*",
+    "@app/http": "workspace:*",
     "@opentelemetry/api": "catalog:",
     "@opentelemetry/sdk-node": "catalog:",
     "@sentry/node": "catalog:",

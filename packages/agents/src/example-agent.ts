@@ -1,6 +1,9 @@
 import { Experimental_Agent as Agent, Output } from 'ai'
 import { z } from 'zod'
 
+import { agentGenerate } from './generate'
+import { createModel } from './model'
+
 /**
  * Example Agent with Zod Schema
  *
@@ -62,7 +65,7 @@ export const exampleAgentOutputSchema = z.object({
       count: z.number().describe('A sample number'),
       items: z.array(z.string()).describe('A sample array of strings'),
     })
-    .optional()
+    .nullable()
     .describe('Optional structured data'),
 })
 
@@ -70,7 +73,7 @@ export type ExampleAgentOutput = z.infer<typeof exampleAgentOutputSchema>
 
 // Define the input type
 export type ExampleAgentInput = {
-  model: ConstructorParameters<typeof Agent>[0]['model']
+  modelId?: string
   name?: string
 }
 
@@ -84,13 +87,13 @@ export type ExampleAgentInput = {
  * @returns Promise resolving to the structured output
  */
 export async function exampleAgent({
-  model,
+  modelId,
   name = 'World',
 }: ExampleAgentInput): Promise<ExampleAgentOutput> {
   // Create the agent with structured output
   const agent = new Agent({
-    model,
-    system: `You are a helpful assistant that generates greeting messages.
+    model: createModel(modelId),
+    instructions: `You are a helpful assistant that generates greeting messages.
 Your responses must follow the exact schema provided.`,
     // Add tools here - see instructions above
     tools: {
@@ -104,16 +107,17 @@ Your responses must follow the exact schema provided.`,
       // },
     },
     // Use structured output with Zod schema
-    experimental_output: Output.object({
+    output: Output.object({
       schema: exampleAgentOutputSchema,
     }),
   })
 
   // Generate the response
-  const result = await agent.generate({
-    prompt: `Generate a greeting message for ${name}. Include a timestamp and some sample data.`,
-  })
+  const result = await agentGenerate(() =>
+    agent.generate({
+      prompt: `Generate a greeting message for ${name}. Include a timestamp and some sample data.`,
+    }),
+  )
 
-  // Return the structured output (automatically validated by Zod)
-  return result.experimental_output
+  return result.output
 }

@@ -8,7 +8,6 @@ import { z } from 'zod'
  */
 export function createReadFileTool() {
   return tool({
-    name: 'readFile',
     description:
       'Read an uploaded file from the database by its ID. Returns the file name, MIME type, and content as text.',
     inputSchema: z.object({

@@ -1,29 +1,41 @@
-import { Experimental_Agent as Agent, type ToolSet } from 'ai'
+import { Experimental_Agent as Agent, Output, type ToolSet } from 'ai'
+import { dedent } from 'ts-dedent'
 import { z } from 'zod'
 
-export const scrapeOrganizationOutputSchema = z.object({
-  organizationId: z.string().describe('The organization that was scraped'),
-  fieldsExtracted: z
-    .number()
-    .describe('Number of fields successfully extracted'),
-  issuesCount: z.number().describe('Number of scrape issues encountered'),
-  productsDiscovered: z
-    .array(
-      z.object({
-        name: z.string(),
-        url: z.string().optional(),
-        hint: z.string().optional(),
-      }),
-    )
-    .describe('Products discovered during scraping'),
+import { agentGenerate } from './generate'
+import { createModel } from './model'
+
+const scrapeIssueSchema = z.object({
+  source: z.string().describe('The URL or filename where the issue was found'),
+  field: z
+    .string()
+    .describe('The schema field path (e.g. "info.headquarters.vatNumber")'),
+  rawValue: z.string().describe('The raw value that was found'),
+  error: z.string().describe("Why it doesn't match the expected format"),
+  timestamp: z.string().describe('ISO datetime of when the issue was recorded'),
 })
 
-export type ScrapeOrganizationOutput = z.infer<
-  typeof scrapeOrganizationOutputSchema
->
+/** Internal schema used for OpenAI structured output (data as JSON string). */
+const agentOutputSchema = z.object({
+  organizationId: z.string().describe('The organization that was scraped'),
+  data: z
+    .string()
+    .describe(
+      'The full extracted organization data as a JSON-encoded string (e.g. \'{"name":"Acme"}\')',
+    ),
+  issues: z
+    .array(scrapeIssueSchema)
+    .describe('All scrape issues encountered during extraction'),
+})
+
+export interface ScrapeOrganizationOutput {
+  organizationId: string
+  data: Record<string, unknown>
+  issues: z.infer<typeof scrapeIssueSchema>[]
+}
 
 export interface ScrapeOrganizationInput {
-  model: ConstructorParameters<typeof Agent>[0]['model']
+  modelId?: string
   organizationId: string
   organizationType: 'supplier' | 'horeca'
   urls: string[]
@@ -34,13 +46,13 @@ export interface ScrapeOrganizationInput {
 
 /**
  * Agent that scrapes URLs and uploaded files to extract organization data
- * (company details, contacts, addresses, etc.) and discovers product listings.
+ * (company details, contacts, addresses, etc.).
  *
- * The agent uses browserbase tools to navigate and extract from web pages,
- * readFile to access uploaded documents, and queryDatabase to store results.
+ * The agent creates suggestions for actionable changes (phone, email, address, etc.)
+ * and also returns the full data blob for the trigger task to persist.
  */
 export async function scrapeOrganizationAgent({
-  model,
+  modelId,
   organizationId,
   organizationType,
   urls,
@@ -52,96 +64,100 @@ export async function scrapeOrganizationAgent({
 
   const schemaDescription =
     organizationType === 'supplier'
-      ? `Extract supplier company data including:
-- headquarters info (company name, address, phone, fax, GLN number, VAT number)
-- stock/warehouse location (address, phone, business hours)
-- contacts (emergency phone, key account manager, customer service, quality assurance, ordering, logistics, stock contacts — each with name, email, phone, mobile, fax, role)
-- banking details (bank name, address, account number, IBAN, BIC)
-- delivery specifications for each product (product name, item number, EAN code, tariff number, country of origin, unit of measure details, pallet config, storage requirements, pricing, validity dates)
-- distribution centers and central ordering office
-- food/allergen information per product
-- label copies`
-      : `Extract HoReCa establishment data including:
-- delivery location info (store number, location name, address, remarks)
-- administration details (trade name, invoice address, finance contact, VAT number, CoC number, IBAN)
-- contact persons (name, email, phone, mobile, fax, role)
-- order info (first delivery date, contact person)
-- delivery config (vehicle restrictions, delivery restrictions/time windows, opening hours)`
+      ? dedent`
+          Extract supplier company data including:
+          - headquarters info (company name, address, phone, fax, GLN number, VAT number)
+          - stock/warehouse location (address, phone, business hours)
+          - contacts (emergency phone, key account manager, customer service, quality assurance, ordering, logistics, stock contacts — each with name, email, phone, mobile, fax, role)
+          - banking details (bank name, address, account number, IBAN, BIC)
+          - delivery specifications for each product (product name, item number, EAN code, tariff number, country of origin, unit of measure details, pallet config, storage requirements, pricing, validity dates)
+          - distribution centers and central ordering office
+          - food/allergen information per product
+          - label copies
+        `
+      : dedent`
+          Extract HoReCa establishment data including:
+          - delivery location info (store number, location name, address, remarks)
+          - administration details (trade name, invoice address, finance contact, VAT number, CoC number, IBAN)
+          - contact persons (name, email, phone, mobile, fax, role)
+          - order info (first delivery date, contact person)
+          - delivery config (vehicle restrictions, delivery restrictions/time windows, opening hours)
+        `
 
   const agent = new Agent({
-    model,
-    system: `You are a data extraction agent that scrapes websites and documents to find company and product information for a ${organizationType} organization.
+    model: createModel(modelId),
+    instructions: dedent`
+      You are a data extraction agent that scrapes websites and documents to find company information for a ${organizationType} organization.
 
-Your goal is to extract as much structured data as possible from the provided URLs and files.
+      Your goal is to extract as much structured data as possible from the provided URLs and files.
 
-${schemaDescription}
+      ${schemaDescription}
 
-## Instructions
+      ## Instructions
 
-1. First, fetch the organization from the database using queryDatabase with operation "getOrganization" and params { id: "${organizationId}" } to see what data already exists.
+      1. For each URL provided:
+         a. Use "fetchPage" to fetch the URL - this returns page metadata and categorized links
+         b. Use "getPageContent" to retrieve the main content (optimized for token efficiency)
+         c. Analyze the content to extract relevant data fields
+         d. Use "getLinks" with filters like "product", "about", "contact" to find related pages worth exploring
+         e. Follow relevant links to gather more data
 
-2. For each URL provided, use the "goto" tool to navigate to it, then use "extract" to pull structured data. If a page has links to more detailed pages (like product listings or about pages), use "observe" to find those links and navigate to them.
+      2. For each file ID provided, use the "readFile" tool to read the uploaded file content and extract relevant information.
 
-3. For each file ID provided, use the "readFile" tool to read the uploaded file content and extract relevant information.
+      3. As you gather data, build up a structured object matching the ${organizationType} schema. For any field where the scraped value doesn't match the expected format, record it as a scrape issue with:
+         - source: the URL or filename
+         - field: the schema field path (e.g. "info.headquarters.vatNumber")
+         - rawValue: the value you found
+         - error: why it doesn't match (e.g. "Expected Dutch VAT format NL*B*, got: BE123456789")
+         - timestamp: current ISO datetime
 
-4. As you gather data, build up a structured object matching the ${organizationType} schema. For any field where the scraped value doesn't match the expected format, record it as a scrape issue with:
-   - source: the URL or filename
-   - field: the schema field path (e.g. "info.headquarters.vatNumber")
-   - rawValue: the value you found
-   - error: why it doesn't match (e.g. "Expected Dutch VAT format NL*B*, got: BE123456789")
-   - timestamp: current ISO datetime
+      4. Create suggestions for actionable organization changes using "suggestOrganization":
+         - Use action "update_field" for each top-level field you discover (phone, email, address, etc.)
+         - Use action "update" for the full data JSONB blob with all extracted details
+         - Always set confidence ("high", "medium", "low") based on data quality
+         - Always set source to the URL or file ID
+         - Always provide reasoning explaining how you determined the value
 
-5. After extracting all data, update the organization's data column using queryDatabase with operation "updateOrganizationData". Include the scrapeIssues array in the data.
+      5. Return the final result with the organization ID, the full extracted data object, and the complete issues array.
 
-6. While scraping, look for product listings, product pages, or product catalogs. For each product discovered, record its name, URL (if available), and any identifying hint (article number, brand name, etc.).
-
-7. Return the final result with the organization ID, count of fields extracted, issues count, and list of discovered products.
-
-## Important
-- Be thorough — navigate sub-pages, follow links to "about", "products", "contact" pages
-- Extract ALL available data, even partial matches
-- Always record scrape issues rather than silently dropping data
-- Prefer hard identifiers (article numbers, GTIN/EAN codes) over soft ones (names)`,
+      ## Important
+      - Plan your exploration strategy based on the links returned by fetchPage
+      - Use "searchContent" to find specific information (prices, phone numbers, emails, etc.)
+      - Extract ALL available data, even partial matches
+      - Always record scrape issues rather than silently dropping data
+      - Prefer hard identifiers (article numbers, GTIN/EAN codes) over soft ones (names)
+    `,
     tools,
-    onStepFinish: ({ text }) => {
-      if (onProgress && text) {
-        onProgress(text.slice(0, 200))
-      }
-    },
+    output: Output.object({
+      schema: agentOutputSchema,
+    }),
   })
 
-  const result = await agent.generate({
-    prompt: `Scrape the following sources for organization ${organizationId} (type: ${organizationType}):
+  const result = await agentGenerate(() =>
+    agent.generate({
+      prompt: dedent`
+        Scrape the following sources for organization ${organizationId} (type: ${organizationType}):
 
-URLs to scrape:
-${urls.length > 0 ? urls.map((u) => `- ${u}`).join('\n') : '(none)'}
+        URLs to scrape:
+        ${urls.length > 0 ? urls.map((u) => `- ${u}`).join('\n') : '(none)'}
 
-File IDs to read:
-${fileIds.length > 0 ? fileIds.map((f) => `- ${f}`).join('\n') : '(none)'}
+        File IDs to read:
+        ${fileIds.length > 0 ? fileIds.map((f) => `- ${f}`).join('\n') : '(none)'}
 
-Extract all company/organization data you can find, store it in the database, and report back what you found including any products discovered.`,
-  })
+        Extract all company/organization data you can find, create suggestions for actionable changes using suggestOrganization, and report back what you found.
+      `,
+      onStepFinish: ({ text }) => {
+        if (onProgress && text) {
+          onProgress(text.slice(0, 200))
+        }
+      },
+    }),
+  )
 
-  // Parse the agent's final text output into structured data
-  // The agent should return JSON matching our output schema
-  try {
-    const parsed = scrapeOrganizationOutputSchema.parse(
-      JSON.parse(extractJson(result.text)),
-    )
-    return parsed
-  } catch {
-    // If the agent couldn't produce valid structured output, return a default
-    return {
-      organizationId,
-      fieldsExtracted: 0,
-      issuesCount: 0,
-      productsDiscovered: [],
-    }
+  const raw = result.output
+  return {
+    organizationId: raw.organizationId,
+    data: JSON.parse(raw.data) as Record<string, unknown>,
+    issues: raw.issues,
   }
-}
-
-/** Extract the first JSON object from a string that may contain prose around it */
-function extractJson(text: string): string {
-  const match = text.match(/\{[\s\S]*\}/)
-  return match?.[0] ?? '{}'
 }

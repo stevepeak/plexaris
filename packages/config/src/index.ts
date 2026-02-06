@@ -1,12 +1,6 @@
 import { z } from 'zod'
 
 const envSchema = z.object({
-  APP_URL: z
-    .string()
-    .url()
-    .transform((value) => value.replace(/\/+$/, ''))
-    .default('http://localhost:3000'),
-
   // Better Auth
   BETTER_AUTH_SECRET: z
     .string()
@@ -23,21 +17,22 @@ const envSchema = z.object({
       'DATABASE_URL must start with postgres:// or postgresql://',
     ),
 
-  // Trigger.dev
-  TRIGGER_PROJECT_ID: z.string().optional(),
-  TRIGGER_SECRET_KEY: z.string().min(1).startsWith('tr_'),
+  // Stripe
+  STRIPE_PUBLISHABLE_KEY: z.string().startsWith('pk_'),
+  STRIPE_SECRET_KEY: z.string().startsWith('sk_'),
 
   // AI
-  OPENAI_API_KEY: z.string().startsWith('sk-'),
   OPENROUTER_API_KEY: z.string().startsWith('sk-or-v1-'),
-  OPENROUTER_PROVISION_KEY: z.string().startsWith('sk-or-v1-'),
-  AI_GATEWAY_API_KEY: z.string().startsWith('vck_'),
 
   // Sentry
-  SENTRY_DSN: z.string().startsWith('https://'),
+  // SENTRY_DSN: z.string().startsWith('https://'),
+
+  // Trigger.dev
+  TRIGGER_PROJECT_REF: z.string().min(1).startsWith('proj_'),
+  TRIGGER_SECRET_KEY: z.string().min(1).startsWith('tr_'),
 
   // PostHog
-  POSTHOG_API_KEY: z.string().min(1),
+  POSTHOG_API_KEY: z.string().nullable(),
   POSTHOG_HOST: z.string().url().default('https://us.i.posthog.com'),
 })
 
@@ -48,7 +43,7 @@ export type ParsedEnv = z.infer<typeof envSchema>
  * Usage
  * ```ts
  * import { getConfig } from '@app/config'
- * const { APP_URL } = getConfig()
+ * const config = getConfig()
  * ```
  */
 export function getConfig(
@@ -61,9 +56,7 @@ export function getConfig(
   const normalizedEnv = {
     ...env,
     POSTHOG_API_KEY: env.POSTHOG_API_KEY ?? env.NEXT_PUBLIC_POSTHOG_API_KEY,
-    POSTHOG_HOST: env.POSTHOG_HOST ?? env.NEXT_PUBLIC_POSTHOG_HOST,
     SENTRY_DSN: env.SENTRY_DSN ?? env.NEXT_PUBLIC_SENTRY_DSN,
-    APP_URL: env.APP_URL ?? env.NEXT_PUBLIC_APP_URL,
   }
 
   return envSchema.parse(normalizedEnv)

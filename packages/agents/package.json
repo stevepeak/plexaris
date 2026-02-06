@@ -14,8 +14,11 @@
     "fix": "eslint --fix --quiet ."
   },
   "dependencies": {
+    "@app/config": "workspace:*",
     "@app/db": "workspace:*",
+    "@openrouter/ai-sdk-provider": "catalog:",
     "ai": "catalog:",
+    "ts-dedent": "^2.2.0",
     "zod": "catalog:"
   },
   "devDependencies": {
