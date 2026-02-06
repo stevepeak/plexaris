@@ -65,3 +65,24 @@ Added an "Active Tasks" card and "Scrape Issues" table to the organization page.
 - `apps/web/app/(app)/orgs/[orgId]/page.tsx` — wired in ActiveTasksCard and ScrapeIssuesTable
 
 **Screenshot:** `screenshots/task4-org-page-active-tasks-issues.png`
+
+## 2026-02-06 — Task 5: Trigger.dev agent workflows
+
+Created three agent workflows for scraping organization and product data. Built two AI agent tools (`readFile` for reading uploaded files from the database, `queryDatabase` for CRUD operations on organizations and products) in `packages/agents/src/tools/`. Created the `scrapeOrganizationAgent` which navigates URLs with browserbase tools, reads uploaded files, extracts company/contact/delivery data against the horecaSchema or supplierSchema, stores results in the organization's `data` jsonb column, records scrape issues, and discovers product listings to spawn sub-tasks. Created the `scrapeProductAgent` which scrapes individual product pages, deduplicates by article number or GTIN/EAN, and upserts into the product table. Both agents use the AI SDK v5 `Experimental_Agent` class with browserbase, readFile, and queryDatabase tools. Created corresponding Trigger.dev tasks (`scrape-organization` and `scrape-product`) that manage `trigger_run` rows for live progress tracking, initialize browser sessions via a new `createBrowserSession` helper in the browserbase package, and handle error/completion status updates. All CI checks pass (typecheck, lint, knip, build).
+
+**Files changed:**
+
+- `packages/agents/src/tools/read-file.ts` — new tool for reading uploaded files from the file table
+- `packages/agents/src/tools/query-database.ts` — new tool for database CRUD operations on orgs and products
+- `packages/agents/src/scrape-organization-agent.ts` — new agent for scraping organization data from URLs and files
+- `packages/agents/src/scrape-product-agent.ts` — new agent for scraping and deduplicating product data
+- `packages/agents/src/index.ts` — added barrel exports for new agents and tools
+- `packages/agents/package.json` — added `@app/db` dependency
+- `packages/browserbase/src/session.ts` — new helper to create browser sessions without importing Stagehand directly
+- `packages/browserbase/src/index.ts` — added barrel export for session helper
+- `apps/trigger/src/tasks/scrape-organization.ts` — new Trigger.dev task for org scraping workflow
+- `apps/trigger/src/tasks/scrape-product.ts` — new Trigger.dev task for product scraping workflow
+- `apps/trigger/src/index.ts` — added exports for new tasks
+- `apps/trigger/package.json` — added `@app/browserbase` dependency
+
+**Screenshot:** `screenshots/task5-agent-workflows.png`

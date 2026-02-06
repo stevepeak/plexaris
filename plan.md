@@ -125,7 +125,7 @@ Onboard new Horeca/Supplier organizations by collecting URLs and documents, then
 
 ## Task 5: Trigger.dev agent workflows
 
-**passes:** false
+**passes:** true
 
 **Goal:** Three agent workflows that scrape URLs and documents, then insert structured data.
 

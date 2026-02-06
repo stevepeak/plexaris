@@ -8,3 +8,9 @@ export {
 } from './tools'
 
 export { getSessionRecording, type RecordingEvent } from './recording'
+
+export {
+  type BrowserSession,
+  createBrowserSession,
+  type CreateSessionOptions,
+} from './session'

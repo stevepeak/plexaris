@@ -2,6 +2,7 @@
   "dependencies": {
     "@ai-sdk/openai": "catalog:",
     "@app/agents": "workspace:*",
+    "@app/browserbase": "workspace:*",
     "@app/config": "workspace:*",
     "@app/db": "workspace:*",
     "@opentelemetry/api": "catalog:",
