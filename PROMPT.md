@@ -1,6 +1,6 @@
 @plan.md @activity.md
 
-We are rebuilding the project from scratch in this repo. Therefore, no backwards compatibility is asked for.
+We are building the project from scratch in this repo. Therefore, no backwards compatibility is asked for.
 
 # Process
 
