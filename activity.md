@@ -14,3 +14,17 @@ Added `data jsonb` columns to `organization` and `product` tables for storing st
 - `packages/db/migrations/0012_nervous_avengers.sql` — migration
 
 **Screenshot:** `screenshots/task1-database-schema.png`
+
+## 2026-02-06 — Task 2: Move Zod schemas into packages/db
+
+Moved all Zod validation schemas from `docs/schema.ts` into `packages/db/src/data-schemas.ts`. Removed `orderSchema` (out of scope per plan). Added `scrapeIssueSchema` for tracking validation failures during scraping. Created combined data schemas (`horecaDataSchema`, `supplierDataSchema`, `productDataSchema`) that wrap the entity schemas with a `scrapeIssues` array. Added `zod` as a dependency to `packages/db`. Exported everything from the barrel file. Deleted the original `docs/schema.ts`. All CI checks pass (typecheck, lint, knip, build).
+
+**Files changed:**
+
+- `packages/db/src/data-schemas.ts` — new, moved from `docs/schema.ts` with scrapeIssueSchema and combined data schemas
+- `packages/db/src/schema.ts` — added barrel export for data-schemas
+- `packages/db/package.json` — added `zod` dependency
+- `bun.lock` — updated lockfile with zod for packages/db
+- `docs/schema.ts` — deleted (moved to packages/db)
+
+**Screenshot:** `screenshots/task2-zod-schemas.png`

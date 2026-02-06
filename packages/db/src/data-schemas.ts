@@ -784,111 +784,39 @@ export const supplierSchema = z
     'Supplier — a company that provides products to the distribution network',
   )
 
-// ─── Order ──────────────────────────────────────────────────────────────────
+// ─── Scrape Issues ─────────────────────────────────────────────────────────
 
-const orderStatusEnum = z.enum([
-  'draft',
-  'submitted',
-  'confirmed',
-  'in_transit',
-  'delivered',
-  'partially_delivered',
-  'cancelled',
-])
-
-/** A single line item on an order */
-const orderLineItemSchema = z.object({
-  productArticleNumber: z
-    .string()
-    .min(1)
-    .describe('Article number referencing a product'),
-  productName: z.string().min(1).describe('Product name for display purposes'),
-  quantity: z
-    .number()
-    .int()
-    .positive()
-    .describe('Ordered quantity in units of measure'),
-  unitOfMeasure: z
-    .string()
-    .min(1)
-    .describe("Unit of measure for this line (e.g. 'cases', 'buckets')"),
-  unitPrice: z
-    .number()
-    .nonnegative()
-    .describe('Price per unit of measure in order currency'),
-  totalPrice: z
-    .number()
-    .nonnegative()
-    .describe('Line total (quantity × unitPrice)'),
-  remarks: z
-    .string()
-    .optional()
-    .describe('Line-level remarks or special instructions'),
+export const scrapeIssueSchema = z.object({
+  source: z.string().describe('URL or filename where the issue occurred'),
+  field: z.string().describe('Schema field path (e.g. "unit.gtin")'),
+  rawValue: z.unknown().describe('The value that failed validation'),
+  error: z.string().describe('Human-readable reason'),
+  timestamp: z.string().datetime().describe('When the issue was recorded'),
 })
 
-export const orderSchema = z
-  .object({
-    orderNumber: z.string().min(1).describe('Unique order identifier'),
-    status: orderStatusEnum.describe('Current order lifecycle status'),
-    currency: currencyEnum.describe('Order currency'),
+// ─── Combined Data Schemas (entity + scrape issues) ────────────────────────
 
-    // Dates
-    orderDate: z
-      .string()
-      .date()
-      .describe('Date the order was placed (YYYY-MM-DD)'),
-    requestedDeliveryDate: z
-      .string()
-      .date()
-      .describe('Requested delivery date (YYYY-MM-DD)'),
-    actualDeliveryDate: z
-      .string()
-      .date()
-      .optional()
-      .describe('Actual delivery date if delivered (YYYY-MM-DD)'),
+export const horecaDataSchema = z.object({
+  ...horecaSchema.shape,
+  scrapeIssues: z.array(scrapeIssueSchema).default([]),
+})
 
-    // References to other entities
-    horecaStoreNumber: z
-      .string()
-      .min(1)
-      .describe('Store number of the ordering HoReCa location'),
-    supplierName: z
-      .string()
-      .min(1)
-      .describe('Name of the supplier fulfilling this order'),
+export const supplierDataSchema = z.object({
+  ...supplierSchema.shape,
+  scrapeIssues: z.array(scrapeIssueSchema).default([]),
+})
 
-    // Line items
-    lineItems: z
-      .array(orderLineItemSchema)
-      .min(1)
-      .describe('Ordered products — at least one line item required'),
-
-    // Totals
-    subtotal: z
-      .number()
-      .nonnegative()
-      .describe('Sum of all line item totals before tax'),
-    vatRate: z
-      .number()
-      .min(0)
-      .max(1)
-      .describe('VAT rate as a decimal (e.g. 0.21 for 21%)'),
-    vatAmount: z
-      .number()
-      .nonnegative()
-      .describe('Calculated VAT amount (subtotal × vatRate)'),
-    total: z.number().nonnegative().describe('Order grand total including VAT'),
-
-    remarks: z
-      .string()
-      .optional()
-      .describe('Order-level remarks or delivery instructions'),
-  })
-  .describe('A purchase order from a HoReCa location to a supplier')
+export const productDataSchema = z.object({
+  ...productSchema.shape,
+  scrapeIssues: z.array(scrapeIssueSchema).default([]),
+})
 
 // ─── Type Exports ───────────────────────────────────────────────────────────
 
 export type Horeca = z.infer<typeof horecaSchema>
 export type Product = z.infer<typeof productSchema>
 export type Supplier = z.infer<typeof supplierSchema>
-export type Order = z.infer<typeof orderSchema>
+export type ScrapeIssue = z.infer<typeof scrapeIssueSchema>
+export type HorecaData = z.infer<typeof horecaDataSchema>
+export type ProductData = z.infer<typeof productDataSchema>
+export type SupplierData = z.infer<typeof supplierDataSchema>

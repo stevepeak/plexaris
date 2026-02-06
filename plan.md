@@ -35,7 +35,7 @@ Onboard new Horeca/Supplier organizations by collecting URLs and documents, then
 
 ## Task 2: Move Zod schemas into `packages/db`
 
-**passes:** false
+**passes:** true
 
 **Goal:** The `docs/schema.ts` schemas need to live alongside the database code so both the API and agents can import them for `zod.parse()` on insert and select.
 
