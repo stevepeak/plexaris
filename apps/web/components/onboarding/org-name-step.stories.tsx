@@ -20,8 +20,6 @@ export const Empty: Story = {
       onNameChange={noop}
       onBack={noop}
       onSubmit={noop}
-      isLoading={false}
-      error={null}
     />
   ),
 }
@@ -34,36 +32,6 @@ export const Filled: Story = {
       onNameChange={noop}
       onBack={noop}
       onSubmit={noop}
-      isLoading={false}
-      error={null}
-    />
-  ),
-}
-
-export const Loading: Story = {
-  render: () => (
-    <OrgNameStep
-      orgType="horeca"
-      name="Restaurant De Kas"
-      onNameChange={noop}
-      onBack={noop}
-      onSubmit={noop}
-      isLoading={true}
-      error={null}
-    />
-  ),
-}
-
-export const WithError: Story = {
-  render: () => (
-    <OrgNameStep
-      orgType="horeca"
-      name="Restaurant De Kas"
-      onNameChange={noop}
-      onBack={noop}
-      onSubmit={noop}
-      isLoading={false}
-      error="Failed to create organization"
     />
   ),
 }

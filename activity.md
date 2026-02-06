@@ -28,3 +28,22 @@ Moved all Zod validation schemas from `docs/schema.ts` into `packages/db/src/dat
 - `docs/schema.ts` — deleted (moved to packages/db)
 
 **Screenshot:** `screenshots/task2-zod-schemas.png`
+
+## 2026-02-06 — Task 3: Onboarding flow — Add URL and file upload steps
+
+Expanded the onboarding flow from 2 steps (Type → Name) to 4 steps (Type → Name → URLs → Files). Created `UrlStep` component with a textarea for entering website URLs (one per line), with a dynamic "Skip"/"Continue" button. Created `FileUploadStep` component with drag-and-drop file upload area, file list with remove buttons, 5MB per-file size enforcement, and the final "Create organization" submit button. Updated `OrgNameStep` to show "Continue" instead of "Create organization" since submission now happens on step 4. Added file upload API route at `POST /api/organizations/[id]/files` that stores files as bytea in the `file` table. Updated the organization creation route to accept and store URLs in the `data` jsonb column. Created Storybook stories for both new components. All CI checks pass (typecheck, lint, knip, build).
+
+**Files changed:**
+
+- `apps/web/components/onboarding/types.ts` — added `urls` and `files` steps to `getSteps()`
+- `apps/web/components/onboarding/url-step.tsx` — new URL input step component
+- `apps/web/components/onboarding/url-step.stories.tsx` — new Storybook stories
+- `apps/web/components/onboarding/file-upload-step.tsx` — new file upload step component
+- `apps/web/components/onboarding/file-upload-step.stories.tsx` — new Storybook stories
+- `apps/web/components/onboarding/org-name-step.tsx` — simplified to "Continue" button
+- `apps/web/components/onboarding/org-name-step.stories.tsx` — updated for new props
+- `apps/web/app/(app)/onboarding/page.tsx` — wired up all 4 steps with URLs and file upload
+- `apps/web/app/api/organizations/route.ts` — accepts and stores URLs in data jsonb
+- `apps/web/app/api/organizations/[id]/files/route.ts` — new file upload endpoint
+
+**Screenshot:** `screenshots/task3-onboarding-flow.png`

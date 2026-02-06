@@ -1,4 +1,4 @@
-import { createDb, eq, schema } from '@app/db'
+import { createDb, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
@@ -15,8 +15,16 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { name, type, description, phone, email, address, deliveryAddress } =
-    body
+  const {
+    name,
+    type,
+    description,
+    phone,
+    email,
+    address,
+    deliveryAddress,
+    urls,
+  } = body
 
   if (!name || !type || !['supplier', 'horeca'].includes(type)) {
     return NextResponse.json(
@@ -26,6 +34,14 @@ export async function POST(request: Request) {
   }
 
   const now = new Date()
+
+  // Parse URLs if provided
+  const parsedUrls: string[] = urls
+    ? (urls as string)
+        .split('\n')
+        .map((u: string) => u.trim())
+        .filter(Boolean)
+    : []
 
   const [org] = await db
     .insert(schema.organization)
@@ -38,6 +54,8 @@ export async function POST(request: Request) {
       email: email || null,
       address: address || null,
       deliveryAddress: deliveryAddress || null,
+      data:
+        parsedUrls.length > 0 ? { urls: parsedUrls, scrapeIssues: [] } : null,
       createdAt: now,
       updatedAt: now,
     })

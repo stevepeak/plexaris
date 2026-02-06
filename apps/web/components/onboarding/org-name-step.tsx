@@ -1,6 +1,6 @@
 'use client'
 
-import { Building2, Loader2 } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,16 +12,12 @@ export function OrgNameStep({
   onNameChange,
   onBack,
   onSubmit,
-  isLoading,
-  error,
 }: {
   orgType: 'supplier' | 'horeca'
   name: string
   onNameChange: (name: string) => void
   onBack: () => void
   onSubmit: () => void
-  isLoading: boolean
-  error: string | null
 }) {
   return (
     <form
@@ -46,28 +42,13 @@ export function OrgNameStep({
           required
         />
       </div>
-      {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="flex gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onBack}
-          disabled={isLoading}
-        >
+        <Button type="button" variant="outline" onClick={onBack}>
           Back
         </Button>
-        <Button type="submit" disabled={isLoading} className="flex-1">
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Creating...
-            </>
-          ) : (
-            <>
-              <Building2 className="h-4 w-4" />
-              Create organization
-            </>
-          )}
+        <Button type="submit" className="flex-1">
+          <ArrowRight className="h-4 w-4" />
+          Continue
         </Button>
       </div>
     </form>

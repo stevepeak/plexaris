@@ -69,7 +69,7 @@ Onboard new Horeca/Supplier organizations by collecting URLs and documents, then
 
 ## Task 3: Onboarding flow — Add URL and file upload steps
 
-**passes:** false
+**passes:** true
 
 **Goal:** Expand the current 2-step onboarding (type → name) to 4 steps.
 

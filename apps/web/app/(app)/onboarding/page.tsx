@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { FileUploadStep } from '@/components/onboarding/file-upload-step'
 import { OrgNameStep } from '@/components/onboarding/org-name-step'
 import { OrgTypeStep } from '@/components/onboarding/org-type-step'
 import { StepProgress } from '@/components/onboarding/step-progress'
 import { getSteps, type OrgType } from '@/components/onboarding/types'
+import { UrlStep } from '@/components/onboarding/url-step'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -36,6 +38,21 @@ function getInitials(name: string | undefined): string {
     .slice(0, 2)
 }
 
+function getSubtitle(stepId: string): string {
+  switch (stepId) {
+    case 'type':
+      return 'What type of business are you?'
+    case 'name':
+      return 'Almost there — just give it a name'
+    case 'urls':
+      return 'Share your website and catalog links'
+    case 'files':
+      return 'Upload any documents with product or company details'
+    default:
+      return ''
+  }
+}
+
 export default function OnboardingPage() {
   const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
@@ -48,6 +65,8 @@ export default function OnboardingPage() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [orgType, setOrgType] = useState<OrgType | null>(null)
   const [name, setName] = useState('')
+  const [urls, setUrls] = useState('')
+  const [files, setFiles] = useState<File[]>([])
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -72,16 +91,30 @@ export default function OnboardingPage() {
     setCurrentStepIndex((prev) => Math.max(0, prev - 1))
   }
 
+  const handleNameNext = () => {
+    if (!name.trim()) return
+    setCurrentStepIndex(2)
+  }
+
+  const handleUrlsNext = () => {
+    setCurrentStepIndex(3)
+  }
+
   const handleSubmit = async () => {
     if (!orgType || !name.trim()) return
 
     setIsLoading(true)
     setError(null)
 
+    // Create the organization with URLs
     const response = await fetch('/api/organizations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name.trim(), type: orgType }),
+      body: JSON.stringify({
+        name: name.trim(),
+        type: orgType,
+        urls: urls.trim() || undefined,
+      }),
     })
 
     const data = await response.json()
@@ -92,7 +125,29 @@ export default function OnboardingPage() {
       return
     }
 
-    router.push(`/orgs/${data.organization.id}`)
+    const orgId = data.organization.id
+
+    // Upload files if any
+    if (files.length > 0) {
+      const formData = new FormData()
+      for (const file of files) {
+        formData.append('files', file)
+      }
+
+      const uploadResponse = await fetch(`/api/organizations/${orgId}/files`, {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!uploadResponse.ok) {
+        const uploadData = await uploadResponse.json()
+        setError(uploadData.error ?? 'Failed to upload files')
+        setIsLoading(false)
+        return
+      }
+    }
+
+    router.push(`/orgs/${orgId}`)
   }
 
   return (
@@ -155,9 +210,7 @@ export default function OnboardingPage() {
         <div className="text-center">
           <h1 className="text-2xl font-semibold">Create your organization</h1>
           <p className="mt-2 text-muted-foreground">
-            {currentStep.id === 'type'
-              ? 'What type of business are you?'
-              : 'Almost there — just give it a name'}
+            {getSubtitle(currentStep.id)}
           </p>
         </div>
 
@@ -172,6 +225,24 @@ export default function OnboardingPage() {
             orgType={orgType}
             name={name}
             onNameChange={setName}
+            onBack={handleBack}
+            onSubmit={handleNameNext}
+          />
+        )}
+
+        {currentStep.id === 'urls' && (
+          <UrlStep
+            urls={urls}
+            onUrlsChange={setUrls}
+            onBack={handleBack}
+            onNext={handleUrlsNext}
+          />
+        )}
+
+        {currentStep.id === 'files' && (
+          <FileUploadStep
+            files={files}
+            onFilesChange={setFiles}
             onBack={handleBack}
             onSubmit={handleSubmit}
             isLoading={isLoading}
