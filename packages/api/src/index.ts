@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { notificationRouter } from './routers/notification'
 import { orderRouter } from './routers/order'
+import { triggerRunRouter } from './routers/trigger-run'
 import { publicProcedure, router } from './trpc'
 
 export type { Context } from './context'
@@ -39,6 +40,7 @@ const triggerRouter = router({
 export const appRouter = router({
   hello: helloRouter,
   trigger: triggerRouter,
+  triggerRun: triggerRunRouter,
   order: orderRouter,
   notification: notificationRouter,
 })

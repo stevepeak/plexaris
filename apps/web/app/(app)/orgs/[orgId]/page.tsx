@@ -12,11 +12,16 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
+import { ActiveTasksCard } from '@/components/active-tasks-card'
 import { InviteMembers } from '@/components/invite-members'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { PendingInvitations } from '@/components/pending-invitations'
 import { ProductForm } from '@/components/product-form'
 import { type Product, ProductList } from '@/components/product-list'
+import {
+  type ScrapeIssue,
+  ScrapeIssuesTable,
+} from '@/components/scrape-issues-table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -62,6 +67,7 @@ type OrgDetails = {
   address: string | null
   deliveryAddress: string | null
   deliveryAreas: string | null
+  data: { scrapeIssues?: ScrapeIssue[] } | null
 }
 
 const statusConfig: Record<
@@ -441,6 +447,13 @@ export default function OrgPage() {
                   )}
               </Card>
             )}
+
+            {activeOrg && <ActiveTasksCard organizationId={activeOrg.id} />}
+
+            {orgDetails?.data?.scrapeIssues &&
+              orgDetails.data.scrapeIssues.length > 0 && (
+                <ScrapeIssuesTable issues={orgDetails.data.scrapeIssues} />
+              )}
 
             {activeOrg?.type === 'horeca' && (
               <OrdersSection organizationId={activeOrg.id} />

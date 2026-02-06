@@ -47,3 +47,21 @@ Expanded the onboarding flow from 2 steps (Type → Name) to 4 steps (Type → N
 - `apps/web/app/api/organizations/[id]/files/route.ts` — new file upload endpoint
 
 **Screenshot:** `screenshots/task3-onboarding-flow.png`
+
+## 2026-02-06 — Task 4: Active tasks card + scrape issues on organization page
+
+Added an "Active Tasks" card and "Scrape Issues" table to the organization page. Created a new tRPC router (`triggerRunRouter`) with a `list` query that fetches running `trigger_run` rows for an org and retrieves fresh `publicAccessToken` from the Trigger.dev API server-side. The `ActiveTasksCard` component polls for active runs every 5 seconds and renders each run with a live streaming log line via the existing `useTriggerRun` hook, with status indicators (spinner/check/x). The card hides when there are no active runs. The `ScrapeIssuesTable` component displays scrape issues from the org's `data` jsonb column in a table with Source, Field, Raw Value, and Error columns; it hides when the array is empty. Both components have Storybook stories using static variants that avoid server-side dependencies. All CI checks pass (typecheck, lint, knip, build).
+
+**Files changed:**
+
+- `packages/api/src/routers/trigger-run.ts` — new tRPC router for active trigger runs
+- `packages/api/src/index.ts` — added `triggerRun` router to appRouter
+- `apps/web/components/active-tasks-card.tsx` — new ActiveTasksCard component (tRPC + live streaming)
+- `apps/web/components/active-tasks-card-static.tsx` — static variant for Storybook
+- `apps/web/components/active-tasks-card.stories.tsx` — Storybook stories
+- `apps/web/components/active-task-row.tsx` — individual task row with useTriggerRun hook
+- `apps/web/components/scrape-issues-table.tsx` — reusable scrape issues table component
+- `apps/web/components/scrape-issues-table.stories.tsx` — Storybook stories
+- `apps/web/app/(app)/orgs/[orgId]/page.tsx` — wired in ActiveTasksCard and ScrapeIssuesTable
+
+**Screenshot:** `screenshots/task4-org-page-active-tasks-issues.png`

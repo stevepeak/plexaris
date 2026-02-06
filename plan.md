@@ -93,7 +93,7 @@ Onboard new Horeca/Supplier organizations by collecting URLs and documents, then
 
 ## Task 4: Active tasks card + scrape issues on the organization page
 
-**passes:** false
+**passes:** true
 
 **Goal:** Show live agent progress and scrape issues inline on the existing org page.
 
