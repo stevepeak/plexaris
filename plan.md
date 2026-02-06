@@ -6,6 +6,8 @@ Onboard new Horeca/Supplier organizations by collecting URLs and documents, then
 
 ## Task 1: Database — Add JSON data field and file storage table
 
+**passes:** true
+
 **Goal:** Store structured scraped data on organizations and products, and store uploaded files in the database. Scrape issues are stored alongside the data in the same jsonb column.
 
 1. Add a `data jsonb` column to the `organization` table to hold the parsed `horecaSchema` or `supplierSchema` payload **plus** a `scrapeIssues` array (see `scrapeIssueSchema` in Task 2).
@@ -32,6 +34,8 @@ Onboard new Horeca/Supplier organizations by collecting URLs and documents, then
 ---
 
 ## Task 2: Move Zod schemas into `packages/db`
+
+**passes:** false
 
 **Goal:** The `docs/schema.ts` schemas need to live alongside the database code so both the API and agents can import them for `zod.parse()` on insert and select.
 
@@ -65,6 +69,8 @@ Onboard new Horeca/Supplier organizations by collecting URLs and documents, then
 
 ## Task 3: Onboarding flow — Add URL and file upload steps
 
+**passes:** false
+
 **Goal:** Expand the current 2-step onboarding (type → name) to 4 steps.
 
 **Current flow:** Type Selection → Name Entry → Done
@@ -86,6 +92,8 @@ Onboard new Horeca/Supplier organizations by collecting URLs and documents, then
 ---
 
 ## Task 4: Active tasks card + scrape issues on the organization page
+
+**passes:** false
 
 **Goal:** Show live agent progress and scrape issues inline on the existing org page.
 
@@ -116,6 +124,8 @@ Onboard new Horeca/Supplier organizations by collecting URLs and documents, then
 ---
 
 ## Task 5: Trigger.dev agent workflows
+
+**passes:** false
 
 **Goal:** Three agent workflows that scrape URLs and documents, then insert structured data.
 
@@ -172,6 +182,8 @@ Products are **universal** — the same physical product can be supplied by mult
 ---
 
 ## Task 6: Wire it all together
+
+**passes:** false
 
 1. Onboarding submit triggers the `scrape-organization` task via tRPC → Trigger.dev (returns `runId`).
 2. The tRPC mutation inserts the initial `trigger_run` row (with the `triggerRunId`) before returning, so the active tasks card picks it up immediately. The frontend uses the Task 4a query to fetch a fresh public access token from the Trigger.dev API when it needs to subscribe.

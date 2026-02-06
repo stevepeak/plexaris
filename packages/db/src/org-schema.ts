@@ -1,5 +1,6 @@
 import {
   boolean,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -29,6 +30,7 @@ export const organization = pgTable('organization', {
   address: text('address'),
   deliveryAddress: text('delivery_address'),
   deliveryAreas: text('delivery_areas'),
+  data: jsonb('data'),
   createdAt: timestamp('created_at').notNull(),
   updatedAt: timestamp('updated_at').notNull(),
   archivedAt: timestamp('archived_at'),

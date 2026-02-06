@@ -21,6 +21,7 @@ export const product = pgTable('product', {
   category: text('category'),
   status: text('status').notNull().default('draft'), // 'draft', 'active', 'archived'
   images: jsonb('images').$type<string[]>().default([]),
+  data: jsonb('data'),
   createdAt: timestamp('created_at').notNull(),
   updatedAt: timestamp('updated_at').notNull(),
   archivedAt: timestamp('archived_at'),
