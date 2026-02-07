@@ -81,11 +81,11 @@ export const Accepted: Story = {
   },
 }
 
-export const Rejected: Story = {
+export const Dismissed: Story = {
   args: {
     suggestion: {
       ...baseSuggestion,
-      status: 'rejected',
+      status: 'dismissed',
     },
   },
 }

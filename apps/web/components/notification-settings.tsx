@@ -12,6 +12,14 @@ import {
 
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { trpc } from '@/lib/trpc'
 
 type NotificationType =
@@ -31,59 +39,62 @@ type Preference = {
   inApp: boolean
 }
 
-const NOTIFICATION_CONFIG: {
+type NotificationItem = {
   type: NotificationType
   label: string
   description: string
   icon: LucideIcon
-  colorClass: string
+}
+
+const NOTIFICATION_GROUPS: {
+  label: string
+  items: NotificationItem[]
 }[] = [
   {
-    type: 'order_placed',
-    label: 'Order placed',
-    description: 'When a new order is submitted',
-    icon: ShoppingCart,
-    colorClass:
-      'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400',
+    label: 'Orders',
+    items: [
+      {
+        type: 'order_placed',
+        label: 'Order placed',
+        description: 'When a new order is submitted',
+        icon: ShoppingCart,
+      },
+      {
+        type: 'order_cancelled',
+        label: 'Order cancelled',
+        description: 'When an order is cancelled',
+        icon: XCircle,
+      },
+      {
+        type: 'order_returned',
+        label: 'Order returned',
+        description: 'When an order is returned',
+        icon: RotateCcw,
+      },
+      {
+        type: 'order_issues',
+        label: 'Order issues',
+        description: 'When there are problems with an order',
+        icon: AlertTriangle,
+      },
+    ],
   },
   {
-    type: 'order_cancelled',
-    label: 'Order cancelled',
-    description: 'When an order is cancelled',
-    icon: XCircle,
-    colorClass: 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400',
-  },
-  {
-    type: 'order_returned',
-    label: 'Order returned',
-    description: 'When an order is returned',
-    icon: RotateCcw,
-    colorClass:
-      'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400',
-  },
-  {
-    type: 'user_invited',
-    label: 'User invited',
-    description: 'When a new member is invited',
-    icon: UserPlus,
-    colorClass:
-      'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400',
-  },
-  {
-    type: 'user_accepted_invite',
-    label: 'User accepted invite',
-    description: 'When an invited member joins',
-    icon: UserCheck,
-    colorClass:
-      'bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400',
-  },
-  {
-    type: 'order_issues',
-    label: 'Order issues',
-    description: 'When there are problems with an order',
-    icon: AlertTriangle,
-    colorClass:
-      'bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400',
+    label: 'Team',
+    items: [
+      {
+        type: 'user_invited',
+        label: 'User invited',
+        description: 'When a new member is invited',
+        icon: UserPlus,
+      },
+      {
+        type: 'user_accepted_invite',
+        label: 'User accepted invite',
+        description: 'When an invited member joins',
+        icon: UserCheck,
+      },
+    ],
   },
 ]
 
@@ -105,8 +116,7 @@ export function NotificationSettingsFormFields({
         <div className="h-4 w-72 animate-pulse rounded bg-muted" />
         <div className="h-px bg-border" />
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4">
-            <div className="h-10 w-10 animate-pulse rounded-lg bg-muted" />
+          <div key={i} className="flex items-center gap-4 py-2">
             <div className="flex-1 space-y-2">
               <div className="h-4 w-32 animate-pulse rounded bg-muted" />
               <div className="h-3 w-48 animate-pulse rounded bg-muted" />
@@ -131,63 +141,77 @@ export function NotificationSettingsFormFields({
       </p>
       <Separator className="my-6" />
 
-      <div className="mb-4 hidden items-center sm:flex">
-        <div className="flex-1" />
-        <div className="flex w-[180px] shrink-0 justify-between text-xs font-medium text-muted-foreground">
-          <span className="w-9 text-center">Email</span>
-          <span className="w-9 text-center">SMS</span>
-          <span className="w-9 text-center">In-app</span>
-        </div>
-      </div>
+      <div className="space-y-8">
+        {NOTIFICATION_GROUPS.map((group) => (
+          <div key={group.label}>
+            <h3 className="mb-2 text-sm font-medium text-muted-foreground">
+              {group.label}
+            </h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Event</TableHead>
+                  <TableHead className="w-16 text-center">Email</TableHead>
+                  <TableHead className="w-16 text-center">SMS</TableHead>
+                  <TableHead className="w-16 text-center">In-app</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {group.items.map((item) => {
+                  const pref = prefMap.get(item.type) ?? {
+                    email: true,
+                    sms: true,
+                    inApp: true,
+                  }
+                  const Icon = item.icon
 
-      <div className="grid gap-4">
-        {NOTIFICATION_CONFIG.map((config) => {
-          const pref = prefMap.get(config.type) ?? {
-            email: true,
-            sms: true,
-            inApp: true,
-          }
-          const Icon = config.icon
-
-          return (
-            <div key={config.type} className="flex items-center gap-4">
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${config.colorClass}`}
-              >
-                <Icon className="h-5 w-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{config.label}</p>
-                <p className="text-xs text-muted-foreground">
-                  {config.description}
-                </p>
-              </div>
-              <div className="flex w-[180px] shrink-0 justify-between">
-                <Switch
-                  checked={pref.email}
-                  onCheckedChange={(checked) =>
-                    onToggle(config.type, 'email', checked)
-                  }
-                  aria-label={`${config.label} email`}
-                />
-                <Switch
-                  checked={pref.sms}
-                  onCheckedChange={(checked) =>
-                    onToggle(config.type, 'sms', checked)
-                  }
-                  aria-label={`${config.label} SMS`}
-                />
-                <Switch
-                  checked={pref.inApp}
-                  onCheckedChange={(checked) =>
-                    onToggle(config.type, 'inApp', checked)
-                  }
-                  aria-label={`${config.label} in-app`}
-                />
-              </div>
-            </div>
-          )
-        })}
+                  return (
+                    <TableRow key={item.type}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          <div>
+                            <p className="text-sm font-medium">{item.label}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {item.description}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Switch
+                          checked={pref.email}
+                          onCheckedChange={(checked) =>
+                            onToggle(item.type, 'email', checked)
+                          }
+                          aria-label={`${item.label} email`}
+                        />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Switch
+                          checked={pref.sms}
+                          onCheckedChange={(checked) =>
+                            onToggle(item.type, 'sms', checked)
+                          }
+                          aria-label={`${item.label} SMS`}
+                        />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Switch
+                          checked={pref.inApp}
+                          onCheckedChange={(checked) =>
+                            onToggle(item.type, 'inApp', checked)
+                          }
+                          aria-label={`${item.label} in-app`}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        ))}
       </div>
     </div>
   )

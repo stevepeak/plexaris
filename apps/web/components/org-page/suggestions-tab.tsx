@@ -28,7 +28,7 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
       status:
         statusFilter === 'all'
           ? undefined
-          : (statusFilter as 'pending' | 'accepted' | 'rejected' | 'dismissed'),
+          : (statusFilter as 'pending' | 'accepted' | 'dismissed'),
       targetType:
         targetTypeFilter === 'all'
           ? undefined
@@ -48,17 +48,6 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
     },
   })
 
-  const rejectMutation = trpc.suggestion.reject.useMutation({
-    onSuccess: () => {
-      toast.success('Suggestion rejected')
-      void utils.suggestion.list.invalidate({ organizationId })
-      void utils.suggestion.pendingCount.invalidate({ organizationId })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to reject suggestion')
-    },
-  })
-
   const dismissMutation = trpc.suggestion.dismiss.useMutation({
     onSuccess: () => {
       toast.success('Suggestion dismissed')
@@ -70,10 +59,7 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
     },
   })
 
-  const isMutating =
-    acceptMutation.isPending ||
-    rejectMutation.isPending ||
-    dismissMutation.isPending
+  const isMutating = acceptMutation.isPending || dismissMutation.isPending
 
   return (
     <div>
@@ -92,7 +78,6 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="accepted">Accepted</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
             <SelectItem value="dismissed">Dismissed</SelectItem>
           </SelectContent>
         </Select>
@@ -122,7 +107,6 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
               key={s.id}
               suggestion={s}
               onAccept={(id) => acceptMutation.mutate({ id })}
-              onReject={(id) => rejectMutation.mutate({ id })}
               onDismiss={(id) => dismissMutation.mutate({ id })}
               isLoading={isMutating}
             />

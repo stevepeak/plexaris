@@ -255,27 +255,13 @@ export const suggestionRouter = router({
           })
         }
 
-        const field = s.field!
-        if (field.startsWith('data.')) {
-          // Merge into JSONB at the specified path
-          const jsonPath = `{${field.slice(5).split('.').join(',')}}`
-          await ctx.db
-            .update(schema.product)
-            .set({
-              data: sql`jsonb_set(COALESCE(${schema.product.data}, '{}'::jsonb), ${jsonPath}::text[], ${JSON.stringify(s.proposedValue)}::jsonb, true)`,
-              updatedAt: now,
-            })
-            .where(eq(schema.product.id, s.targetId))
-        } else {
-          // Update top-level column
-          await ctx.db
-            .update(schema.product)
-            .set({
-              [field]: s.proposedValue,
-              updatedAt: now,
-            })
-            .where(eq(schema.product.id, s.targetId))
-        }
+        await ctx.db
+          .update(schema.product)
+          .set({
+            [s.field!]: s.proposedValue,
+            updatedAt: now,
+          })
+          .where(eq(schema.product.id, s.targetId))
       }
 
       if (s.targetType === 'organization' && s.action === 'update_field') {
@@ -286,25 +272,13 @@ export const suggestionRouter = router({
           })
         }
 
-        const field = s.field!
-        if (field.startsWith('data.')) {
-          const jsonPath = `{${field.slice(5).split('.').join(',')}}`
-          await ctx.db
-            .update(schema.organization)
-            .set({
-              data: sql`jsonb_set(COALESCE(${schema.organization.data}, '{}'::jsonb), ${jsonPath}::text[], ${JSON.stringify(s.proposedValue)}::jsonb, true)`,
-              updatedAt: now,
-            })
-            .where(eq(schema.organization.id, s.targetId))
-        } else {
-          await ctx.db
-            .update(schema.organization)
-            .set({
-              [field]: s.proposedValue,
-              updatedAt: now,
-            })
-            .where(eq(schema.organization.id, s.targetId))
-        }
+        await ctx.db
+          .update(schema.organization)
+          .set({
+            [s.field!]: s.proposedValue,
+            updatedAt: now,
+          })
+          .where(eq(schema.organization.id, s.targetId))
       }
 
       if (s.targetType === 'organization' && s.action === 'update') {
@@ -330,38 +304,6 @@ export const suggestionRouter = router({
         .update(schema.suggestion)
         .set({
           status: 'accepted',
-          reviewedBy: ctx.session.user.id,
-          reviewedAt: now,
-          updatedAt: now,
-        })
-        .where(eq(schema.suggestion.id, input.id))
-
-      return { success: true }
-    }),
-
-  reject: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .mutation(async ({ ctx, input }) => {
-      const [s] = await ctx.db
-        .select()
-        .from(schema.suggestion)
-        .where(eq(schema.suggestion.id, input.id))
-        .limit(1)
-
-      if (!s) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Suggestion not found',
-        })
-      }
-
-      await verifyMembership(ctx.db, ctx.session.user.id, s.organizationId)
-
-      const now = new Date()
-      await ctx.db
-        .update(schema.suggestion)
-        .set({
-          status: 'rejected',
           reviewedBy: ctx.session.user.id,
           reviewedAt: now,
           updatedAt: now,

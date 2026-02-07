@@ -1,0 +1,1 @@
+ALTER TABLE "suggestion" ALTER COLUMN "trigger_run_id" SET NOT NULL;

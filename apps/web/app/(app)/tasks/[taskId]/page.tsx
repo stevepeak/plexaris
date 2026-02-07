@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock,
+  Construction,
   Loader2,
   XCircle,
 } from 'lucide-react'
@@ -14,6 +15,7 @@ import { useCallback, useState } from 'react'
 
 import { useTriggerRun } from '@/app/hooks/use-trigger-run'
 import { CodeViewer } from '@/components/code-viewer'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -175,6 +177,16 @@ export default function TaskDetailPage() {
       </header>
 
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+        <Alert>
+          <Construction className="h-4 w-4" />
+          <AlertTitle>Active Development</AlertTitle>
+          <AlertDescription>
+            This page exposes agent execution details that end-users may not
+            need. It will evolve as we learn what information is most useful to
+            surface.
+          </AlertDescription>
+        </Alert>
+
         {/* Task Header */}
         <Card>
           <CardHeader>

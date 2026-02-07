@@ -42,7 +42,7 @@ export const suggestion = pgTable('suggestion', {
   confidence: text('confidence'),
   source: text('source'),
   reasoning: text('reasoning'),
-  triggerRunId: text('trigger_run_id'),
+  triggerRunId: text('trigger_run_id').notNull(),
   status: suggestionStatusEnum('status').notNull().default('pending'),
   reviewedBy: text('reviewed_by'),
   reviewedAt: timestamp('reviewed_at'),

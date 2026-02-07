@@ -11,7 +11,7 @@ export function createSuggestProductTool(triggerRunId: string) {
 
   return tool({
     description:
-      'Suggest a product change. Use action "create" for new products, "update_field" for changing a specific field on an existing product, or "update" for bulk data updates.',
+      'Suggest a product change. Use action "create" for new products, "update_field" for changing a specific field on an existing product, or "update" for bulk data updates. Only suggest changes for actual database columns: name, description, price, unit, category, status. Do NOT suggest changes targeting the "data" JSON column.',
     inputSchema: z.object({
       organizationId: z
         .string()
@@ -26,10 +26,9 @@ export function createSuggestProductTool(triggerRunId: string) {
           'The existing product ID (null for create, required for update/update_field)',
         ),
       field: z
-        .string()
-        .nullable()
+        .enum(['name', 'description', 'price', 'unit', 'category', 'status'])
         .describe(
-          'Field path for update_field (e.g. "price", "data.unit.gtin")',
+          'Column name being changed. Must be an actual database column.',
         ),
       label: z
         .string()
@@ -74,7 +73,7 @@ export function createSuggestProductTool(triggerRunId: string) {
           targetType: 'product',
           targetId: productId ?? null,
           action,
-          field: field ?? null,
+          field,
           label,
           currentValue: currentValue ?? null,
           proposedValue,
@@ -101,17 +100,25 @@ export function createSuggestOrganizationTool(triggerRunId: string) {
 
   return tool({
     description:
-      'Suggest an organization data change. Use action "update_field" for changing a specific field, or "update" for the full data blob.',
+      'Suggest an organization data change. Use action "update_field" for changing a specific field, or "update" for bulk updates. Only suggest changes for actual database columns: name, description, phone, email, address, deliveryAddress, deliveryAreas, logoUrl. Do NOT suggest changes targeting the "data" JSON column.',
     inputSchema: z.object({
       organizationId: z.string().describe('The organization ID'),
       action: z
         .enum(['update', 'update_field'])
         .describe('The type of change being suggested'),
       field: z
-        .string()
-        .nullable()
+        .enum([
+          'name',
+          'description',
+          'phone',
+          'email',
+          'address',
+          'deliveryAddress',
+          'deliveryAreas',
+          'logoUrl',
+        ])
         .describe(
-          'Field path for update_field (e.g. "phone", "data.headquarters.vatNumber")',
+          'Column name being changed. Must be an actual database column.',
         ),
       label: z
         .string()
@@ -155,7 +162,7 @@ export function createSuggestOrganizationTool(triggerRunId: string) {
           targetType: 'organization',
           targetId: organizationId,
           action,
-          field: field ?? null,
+          field,
           label,
           currentValue: currentValue ?? null,
           proposedValue,

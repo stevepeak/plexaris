@@ -1,7 +1,7 @@
 import { type DB, eq, schema } from '@app/db'
 import { auth, runs } from '@trigger.dev/sdk'
 import { TRPCError } from '@trpc/server'
-import { and, desc } from 'drizzle-orm'
+import { and, count, desc } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { protectedProcedure, router } from '../trpc'
@@ -176,24 +176,42 @@ export const triggerRunRouter = router({
     }),
 
   listAll: protectedProcedure
-    .input(z.object({ organizationId: z.string().uuid() }))
+    .input(
+      z.object({
+        organizationId: z.string().uuid(),
+        page: z.number().int().min(1).default(1),
+        limit: z.number().int().min(1).max(100).default(15),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       await verifyMembership(ctx.db, ctx.session.user.id, input.organizationId)
 
-      const tasks = await ctx.db
-        .select()
-        .from(schema.triggerRun)
-        .where(eq(schema.triggerRun.organizationId, input.organizationId))
-        .orderBy(desc(schema.triggerRun.createdAt))
+      const where = eq(schema.triggerRun.organizationId, input.organizationId)
 
-      return tasks.map((task) => ({
-        id: task.id,
-        triggerRunId: task.triggerRunId,
-        taskType: task.taskType,
-        label: task.label,
-        status: task.status,
-        createdAt: task.createdAt.toISOString(),
-        updatedAt: task.updatedAt.toISOString(),
-      }))
+      const [tasks, [{ total }]] = await Promise.all([
+        ctx.db
+          .select()
+          .from(schema.triggerRun)
+          .where(where)
+          .orderBy(desc(schema.triggerRun.createdAt))
+          .limit(input.limit)
+          .offset((input.page - 1) * input.limit),
+        ctx.db.select({ total: count() }).from(schema.triggerRun).where(where),
+      ])
+
+      return {
+        items: tasks.map((task) => ({
+          id: task.id,
+          triggerRunId: task.triggerRunId,
+          taskType: task.taskType,
+          label: task.label,
+          status: task.status,
+          createdAt: task.createdAt.toISOString(),
+          updatedAt: task.updatedAt.toISOString(),
+        })),
+        total,
+        page: input.page,
+        totalPages: Math.ceil(total / input.limit),
+      }
     }),
 })

@@ -13,7 +13,6 @@ export function ProductsTab({
   isOwner: boolean
 }) {
   const [products, setProducts] = useState<Product[]>([])
-  const [archivedProducts, setArchivedProducts] = useState<Product[]>([])
   const [isPending, setIsPending] = useState(false)
   const [productView, setProductView] = useState<
     'list' | 'add' | { editing: Product }
@@ -21,14 +20,10 @@ export function ProductsTab({
 
   const refreshProducts = useCallback(() => {
     setIsPending(true)
-    void Promise.all([
-      fetch(`/api/products?organizationId=${organizationId}`)
-        .then((res) => (res.ok ? res.json() : { products: [] }))
-        .then((data) => setProducts(data.products ?? [])),
-      fetch(`/api/products?organizationId=${organizationId}&archived=true`)
-        .then((res) => (res.ok ? res.json() : { products: [] }))
-        .then((data) => setArchivedProducts(data.products ?? [])),
-    ]).finally(() => setIsPending(false))
+    void fetch(`/api/products?organizationId=${organizationId}`)
+      .then((res) => (res.ok ? res.json() : { products: [] }))
+      .then((data) => setProducts(data.products ?? []))
+      .finally(() => setIsPending(false))
   }, [organizationId])
 
   useEffect(() => {
@@ -81,11 +76,6 @@ export function ProductsTab({
     return {}
   }
 
-  const handleArchiveRestore = async (product: Product) => {
-    await fetch(`/api/products/${product.id}/archive`, { method: 'POST' })
-    refreshProducts()
-  }
-
   if (productView === 'add') {
     return (
       <ProductForm
@@ -108,13 +98,10 @@ export function ProductsTab({
   return (
     <ProductList
       products={products}
-      archivedProducts={archivedProducts}
       isPending={isPending}
       isOwner={isOwner}
       onAddProduct={() => setProductView('add')}
       onEditProduct={(p) => setProductView({ editing: p })}
-      onArchiveProduct={handleArchiveRestore}
-      onRestoreProduct={handleArchiveRestore}
     />
   )
 }

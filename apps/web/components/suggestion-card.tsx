@@ -1,13 +1,7 @@
 'use client'
 
-import {
-  Building2,
-  Check,
-  ExternalLink,
-  EyeOff,
-  Package,
-  X,
-} from 'lucide-react'
+import { Building2, Check, EyeOff, Package, Zap } from 'lucide-react'
+import Link from 'next/link'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -32,7 +26,7 @@ export interface SuggestionCardData {
   confidence: string | null
   source: string | null
   reasoning: string | null
-  triggerRunId: string | null
+  triggerRunId: string
   status: 'pending' | 'accepted' | 'rejected' | 'dismissed'
   createdAt: string
 }
@@ -40,7 +34,6 @@ export interface SuggestionCardData {
 interface SuggestionCardProps {
   suggestion: SuggestionCardData
   onAccept?: (id: string) => void
-  onReject?: (id: string) => void
   onDismiss?: (id: string) => void
   isLoading?: boolean
 }
@@ -64,8 +57,6 @@ function statusVariant(
   switch (status) {
     case 'accepted':
       return 'default'
-    case 'rejected':
-      return 'destructive'
     case 'dismissed':
       return 'secondary'
     default:
@@ -82,7 +73,6 @@ function formatValue(value: unknown): string {
 export function SuggestionCard({
   suggestion,
   onAccept,
-  onReject,
   onDismiss,
   isLoading,
 }: SuggestionCardProps) {
@@ -178,17 +168,31 @@ export function SuggestionCard({
           </p>
         )}
 
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           {suggestion.source && (
-            <span className="flex items-center gap-1 truncate">
-              <ExternalLink className="h-3 w-3" />
-              <span className="truncate">{suggestion.source}</span>
-            </span>
+            <>
+              <a
+                href={suggestion.source}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                {suggestion.source}
+              </a>
+              {' discovered by '}
+            </>
           )}
-          <span className="shrink-0">
-            {new Date(suggestion.createdAt).toLocaleString()}
-          </span>
-        </div>
+          {!suggestion.source && 'Discovered by '}
+          <Link
+            href={`/tasks/${suggestion.triggerRunId}`}
+            className="inline-flex items-center gap-0.5 align-baseline hover:underline"
+          >
+            <Zap className="h-3 w-3 shrink-0 translate-y-px" />
+            Agent
+          </Link>
+          {' on '}
+          {new Date(suggestion.createdAt).toLocaleDateString()}
+        </p>
       </CardContent>
 
       {isPending && (
@@ -201,15 +205,6 @@ export function SuggestionCard({
           >
             <Check className="mr-1 h-3 w-3" />
             Accept
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onReject?.(suggestion.id)}
-            disabled={isLoading}
-          >
-            <X className="mr-1 h-3 w-3" />
-            Reject
           </Button>
           <Button
             size="sm"
