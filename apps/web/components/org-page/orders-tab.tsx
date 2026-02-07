@@ -22,7 +22,38 @@ const statusConfig: Record<
   cancelled: { label: 'Cancelled', variant: 'destructive' },
 }
 
-export function OrdersTab({ organizationId }: { organizationId: string }) {
+export function OrdersTab({
+  organizationId,
+  orgType,
+}: {
+  organizationId: string
+  orgType: string
+}) {
+  if (orgType === 'supplier') {
+    return <SupplierOrders />
+  }
+
+  return <HorecaOrders organizationId={organizationId} />
+}
+
+function SupplierOrders() {
+  return (
+    <div>
+      <div>
+        <h2 className="text-lg font-semibold">Orders</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Orders placed by customers for your products
+        </p>
+      </div>
+      <Separator className="my-6" />
+      <p className="py-4 text-sm text-muted-foreground">
+        No orders received yet.
+      </p>
+    </div>
+  )
+}
+
+function HorecaOrders({ organizationId }: { organizationId: string }) {
   const { data: orders, isPending } = trpc.order.list.useQuery({
     organizationId,
   })

@@ -53,24 +53,21 @@ function getInitials(name: string | undefined): string {
 
 const TAB_CONFIG = [
   { value: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { value: 'agents', label: 'Agents', icon: Zap },
-  { value: 'suggestions', label: 'Suggestions', icon: Lightbulb },
-  {
-    value: 'orders',
-    label: 'Orders',
-    icon: ShoppingCart,
-    orgType: 'horeca' as const,
-  },
+  { value: 'orders', label: 'Orders', icon: ShoppingCart },
   {
     value: 'products',
     label: 'Products',
     icon: Package,
     orgType: 'supplier' as const,
   },
-  { value: 'members', label: 'Members', icon: Users },
-  { value: 'separator' as const, label: '', icon: null },
-  { value: 'settings', label: 'Settings', icon: Settings },
+  { value: 'sep-1' as const, label: '', icon: null },
+  { value: 'suggestions', label: 'Suggestions', icon: Lightbulb },
+  { value: 'agents', label: 'Agents', icon: Zap },
+  { value: 'sep-2' as const, label: '', icon: null },
   { value: 'notifications', label: 'Notifications', icon: Bell },
+  { value: 'sep-3' as const, label: '', icon: null },
+  { value: 'members', label: 'Members', icon: Users },
+  { value: 'settings', label: 'Settings', icon: Settings },
 ] as const
 
 export default function OrgPage() {
@@ -221,8 +218,8 @@ export default function OrgPage() {
           >
             <TabsList className="h-auto w-48 shrink-0 flex-col items-stretch gap-1 bg-transparent p-0">
               {visibleTabs.map((tab) => {
-                if (tab.value === 'separator') {
-                  return <Separator key="separator" className="my-2" />
+                if (tab.value.startsWith('sep-')) {
+                  return <Separator key={tab.value} className="my-2" />
                 }
                 const Icon = tab.icon!
                 return (
@@ -268,11 +265,12 @@ export default function OrgPage() {
                 <SuggestionsTab organizationId={activeOrg.id} />
               </TabsContent>
 
-              {activeOrg.type === 'horeca' && (
-                <TabsContent value="orders" className="mt-0">
-                  <OrdersTab organizationId={activeOrg.id} />
-                </TabsContent>
-              )}
+              <TabsContent value="orders" className="mt-0">
+                <OrdersTab
+                  organizationId={activeOrg.id}
+                  orgType={activeOrg.type}
+                />
+              </TabsContent>
 
               {activeOrg.type === 'supplier' && (
                 <TabsContent value="products" className="mt-0">

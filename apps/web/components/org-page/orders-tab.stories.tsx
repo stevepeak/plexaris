@@ -12,8 +12,16 @@ const meta: Meta<typeof OrdersTab> = {
 export default meta
 type Story = StoryObj<typeof OrdersTab>
 
-export const Default: Story = {
+export const Horeca: Story = {
   args: {
     organizationId: 'org-1',
+    orgType: 'horeca',
+  },
+}
+
+export const Supplier: Story = {
+  args: {
+    organizationId: 'org-1',
+    orgType: 'supplier',
   },
 }
