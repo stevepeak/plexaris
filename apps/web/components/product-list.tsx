@@ -108,46 +108,69 @@ function ProductCardGrid({
     )
   }
 
+  const grouped = new Map<string, Product[]>()
+  for (const product of products) {
+    const category = product.category ?? 'Uncategorized'
+    const group = grouped.get(category)
+    if (group) {
+      group.push(product)
+    } else {
+      grouped.set(category, [product])
+    }
+  }
+
   return (
-    <div className="grid grid-cols-3 gap-4">
-      {products.map((product) => (
-        <Card
-          key={product.id}
-          className={cn(
-            'overflow-hidden',
-            isOwner &&
-              onEditProduct &&
-              'cursor-pointer hover:border-foreground/20',
-          )}
-          onClick={
-            isOwner && onEditProduct ? () => onEditProduct(product) : undefined
-          }
-        >
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-medium leading-tight">{product.name}</h3>
-              <Badge
-                variant={statusBadgeVariant(product.status)}
-                className="shrink-0"
+    <div className="space-y-8">
+      {Array.from(grouped.entries()).map(([category, categoryProducts]) => (
+        <div key={category}>
+          <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+            {category}
+          </h3>
+          <div className="grid grid-cols-3 gap-4">
+            {categoryProducts.map((product) => (
+              <Card
+                key={product.id}
+                className={cn(
+                  'overflow-hidden',
+                  isOwner &&
+                    onEditProduct &&
+                    'cursor-pointer hover:border-foreground/20',
+                )}
+                onClick={
+                  isOwner && onEditProduct
+                    ? () => onEditProduct(product)
+                    : undefined
+                }
               >
-                {product.status}
-              </Badge>
-            </div>
-            {product.description && (
-              <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
-                {product.description}
-              </p>
-            )}
-            <div className="mt-3 flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                {product.category ?? 'Uncategorized'}
-              </span>
-              <span className="font-medium">
-                {formatPrice(product.price, product.unit)}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-medium leading-tight">
+                      {product.name}
+                    </h3>
+                    {product.status !== 'active' && (
+                      <Badge
+                        variant={statusBadgeVariant(product.status)}
+                        className="shrink-0"
+                      >
+                        {product.status}
+                      </Badge>
+                    )}
+                  </div>
+                  {product.description && (
+                    <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
+                      {product.description}
+                    </p>
+                  )}
+                  <div className="mt-3 text-right text-sm">
+                    <span className="font-medium">
+                      {formatPrice(product.price, product.unit)}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   )
@@ -230,9 +253,11 @@ function ProductTableView({
             </TableCell>
             <TableCell>{formatPrice(product.price, product.unit)}</TableCell>
             <TableCell>
-              <Badge variant={statusBadgeVariant(product.status)}>
-                {product.status}
-              </Badge>
+              {product.status !== 'active' && (
+                <Badge variant={statusBadgeVariant(product.status)}>
+                  {product.status}
+                </Badge>
+              )}
             </TableCell>
           </TableRow>
         ))}
@@ -264,7 +289,7 @@ export function ProductList({
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
   const filterOptions = useMemo(() => {
-    const statusSet = new Set<string>()
+    const statusSet = new Set<string>(['active', 'archived'])
     const categorySet = new Set<string>()
     for (const product of products) {
       statusSet.add(product.status)

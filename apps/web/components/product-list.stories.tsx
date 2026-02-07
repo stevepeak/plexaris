@@ -78,6 +78,19 @@ const sampleProducts: Product[] = [
     updatedAt: '2026-01-11T10:00:00Z',
     archivedAt: null,
   },
+  {
+    id: '6',
+    name: 'Old Recipe Bread',
+    description: 'Discontinued recipe',
+    price: '3.00',
+    unit: 'piece',
+    category: 'Bread',
+    status: 'archived',
+    images: [],
+    createdAt: '2025-06-01T10:00:00Z',
+    updatedAt: '2025-12-01T10:00:00Z',
+    archivedAt: '2025-12-01T10:00:00Z',
+  },
 ]
 
 export const Loading: Story = {
