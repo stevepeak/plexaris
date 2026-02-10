@@ -7,6 +7,7 @@ import {
 import { tasks } from '@trigger.dev/sdk'
 import { z } from 'zod'
 
+import { agentScheduleRouter } from './routers/agent-schedule'
 import { notificationRouter } from './routers/notification'
 import { orderRouter } from './routers/order'
 import { suggestionRouter } from './routers/suggestion'
@@ -212,6 +213,7 @@ export const appRouter = router({
   hello: helloRouter,
   trigger: triggerRouter,
   triggerRun: triggerRunRouter,
+  agentSchedule: agentScheduleRouter,
   suggestion: suggestionRouter,
   order: orderRouter,
   notification: notificationRouter,

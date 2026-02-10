@@ -25,5 +25,8 @@ export * from './trigger-run-schema'
 // Suggestion schema
 export * from './suggestion-schema'
 
+// Agent schedule schema
+export * from './agent-schedule-schema'
+
 // Data schemas (Zod validation schemas for organization and product data)
 export * from './data-schemas'

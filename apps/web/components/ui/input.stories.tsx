@@ -14,6 +14,9 @@ export const Default: Story = { args: { type: "text", placeholder: "Enter text..
 export const Email: Story = { args: { type: "email", placeholder: "Email address" } }
 export const Password: Story = { args: { type: "password", placeholder: "Password" } }
 export const Disabled: Story = { args: { placeholder: "Disabled", disabled: true } }
+export const WithAutoComplete: Story = {
+  args: { type: "email", placeholder: "you@example.com", autoComplete: "email" },
+}
 export const WithLabel: Story = {
   render: () => (
     <div className="grid w-full max-w-sm gap-1.5">
