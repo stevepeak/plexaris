@@ -18,6 +18,8 @@ export const notificationTypeEnum = pgEnum('notification_type', [
   'user_invited',
   'user_accepted_invite',
   'order_issues',
+  'agent_suggestion_found',
+  'agent_completed',
 ])
 
 export const notificationPreference = pgTable(

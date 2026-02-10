@@ -2,6 +2,8 @@
 
 import {
   AlertTriangle,
+  Bot,
+  Lightbulb,
   type LucideIcon,
   RotateCcw,
   ShoppingCart,
@@ -35,6 +37,8 @@ type NotificationType =
   | 'user_invited'
   | 'user_accepted_invite'
   | 'order_issues'
+  | 'agent_suggestion_found'
+  | 'agent_completed'
 
 type Channel = 'email' | 'sms' | 'inApp'
 
@@ -102,6 +106,23 @@ const NOTIFICATION_GROUPS: {
       },
     ],
   },
+  {
+    label: 'Agents',
+    items: [
+      {
+        type: 'agent_suggestion_found',
+        label: 'Suggestion found',
+        description: 'When an agent finds a new suggestion',
+        icon: Lightbulb,
+      },
+      {
+        type: 'agent_completed',
+        label: 'Agent completed',
+        description: 'When an agent finishes its task',
+        icon: Bot,
+      },
+    ],
+  },
 ]
 
 export function NotificationSettingsFormFields({
@@ -150,13 +171,11 @@ export function NotificationSettingsFormFields({
       <div className="space-y-8">
         {NOTIFICATION_GROUPS.map((group) => (
           <div key={group.label}>
-            <h3 className="mb-2 text-sm font-medium text-muted-foreground">
-              {group.label}
-            </h3>
+            <h3 className="mb-2 text-sm font-semibold">{group.label}</h3>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Event</TableHead>
+                  <TableHead />
                   <TableHead className="w-16 text-center">Email</TableHead>
                   <TableHead className="w-16 text-center">SMS</TableHead>
                   <TableHead className="w-16 text-center">In-app</TableHead>

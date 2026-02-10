@@ -49,6 +49,18 @@ const allEnabled = [
     sms: true,
     inApp: true,
   },
+  {
+    notificationType: 'agent_suggestion_found' as const,
+    email: true,
+    sms: true,
+    inApp: true,
+  },
+  {
+    notificationType: 'agent_completed' as const,
+    email: true,
+    sms: true,
+    inApp: true,
+  },
 ]
 
 const mixedPreferences = [
@@ -85,6 +97,18 @@ const mixedPreferences = [
   {
     notificationType: 'order_issues' as const,
     email: true,
+    sms: false,
+    inApp: true,
+  },
+  {
+    notificationType: 'agent_suggestion_found' as const,
+    email: true,
+    sms: true,
+    inApp: true,
+  },
+  {
+    notificationType: 'agent_completed' as const,
+    email: false,
     sms: false,
     inApp: true,
   },
