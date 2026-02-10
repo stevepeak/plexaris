@@ -425,9 +425,23 @@ export function ProductList({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <Button variant="outline" size="icon" className="h-8 w-8" disabled>
-            <Printer className="h-4 w-4" />
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    disabled
+                  >
+                    <Printer className="h-4 w-4" />
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Coming soon</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           {isOwner && (
             <Button size="sm" onClick={onAddProduct}>
               <Plus className="h-4 w-4" />

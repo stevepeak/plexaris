@@ -20,6 +20,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { trpc } from '@/lib/trpc'
 
 type NotificationType =
@@ -188,13 +194,20 @@ export function NotificationSettingsFormFields({
                         />
                       </TableCell>
                       <TableCell className="text-center">
-                        <Switch
-                          checked={pref.sms}
-                          onCheckedChange={(checked) =>
-                            onToggle(item.type, 'sms', checked)
-                          }
-                          aria-label={`${item.label} SMS`}
-                        />
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex">
+                                <Switch
+                                  checked={false}
+                                  disabled
+                                  aria-label={`${item.label} SMS`}
+                                />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>Coming soon</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </TableCell>
                       <TableCell className="text-center">
                         <Switch
