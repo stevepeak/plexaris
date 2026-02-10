@@ -22,6 +22,7 @@ type OrgDetails = {
   address: string | null
   deliveryAddress: string | null
   deliveryAreas: string | null
+  createdAt: string
 }
 
 function getInitials(name: string | undefined): string {
@@ -38,13 +39,11 @@ export function DashboardTab({
   organizationId,
   orgName,
   orgType,
-  orgRole,
   onInvitationAccepted,
 }: {
   organizationId: string
   orgName: string
   orgType: 'supplier' | 'horeca'
-  orgRole: string
   onInvitationAccepted?: () => void
 }) {
   const [orgDetails, setOrgDetails] = useState<OrgDetails | null>(null)
@@ -80,13 +79,19 @@ export function DashboardTab({
           </Avatar>
           <div className="grid gap-1">
             <h2 className="text-lg font-semibold">{orgName}</h2>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <Badge variant="secondary" className="capitalize">
                 {orgType}
               </Badge>
-              <Badge variant="outline" className="capitalize">
-                {orgRole}
-              </Badge>
+              {orgDetails?.createdAt && (
+                <span className="text-xs text-muted-foreground">
+                  Created{' '}
+                  {new Date(orgDetails.createdAt).toLocaleDateString(
+                    undefined,
+                    { year: 'numeric', month: 'short', day: 'numeric' },
+                  )}
+                </span>
+              )}
             </div>
           </div>
         </div>

@@ -17,7 +17,6 @@ export const Supplier: Story = {
     organizationId: 'org-1',
     orgName: 'Fresh Foods BV',
     orgType: 'supplier',
-    orgRole: 'owner',
   },
 }
 
@@ -26,6 +25,5 @@ export const Horeca: Story = {
     organizationId: 'org-2',
     orgName: 'Restaurant De Gouden Leeuw',
     orgType: 'horeca',
-    orgRole: 'member',
   },
 }

@@ -252,7 +252,6 @@ export default function OrgPage() {
                   organizationId={activeOrg.id}
                   orgName={activeOrg.name}
                   orgType={activeOrg.type}
-                  orgRole={activeOrg.role}
                   onInvitationAccepted={handleInvitationAccepted}
                 />
               </TabsContent>
