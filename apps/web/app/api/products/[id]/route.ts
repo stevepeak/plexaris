@@ -22,6 +22,7 @@ export async function GET(
       category: schema.product.category,
       status: schema.product.status,
       images: schema.product.images,
+      data: schema.product.data,
       organizationId: schema.product.organizationId,
       createdAt: schema.product.createdAt,
       updatedAt: schema.product.updatedAt,
@@ -51,6 +52,7 @@ export async function GET(
       category: row.category,
       status: row.status,
       images: row.images,
+      data: row.data,
       organizationId: row.organizationId,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
@@ -99,10 +101,25 @@ export async function PATCH(
   }
 
   const body = await request.json()
-  const { name, description, price, unit, category, status, images, note } =
-    body
+  const {
+    name,
+    description,
+    price,
+    unit,
+    category,
+    status,
+    images,
+    data,
+    note,
+  } = body
 
   const now = new Date()
+
+  // Merge data blob: spread existing + new so partial section updates work
+  let mergedData = existing.data
+  if (data !== undefined) {
+    mergedData = { ...(existing.data as Record<string, unknown>), ...data }
+  }
 
   await db
     .update(schema.product)
@@ -116,6 +133,7 @@ export async function PATCH(
       ...(category !== undefined && { category: category || null }),
       ...(status !== undefined && { status }),
       ...(images !== undefined && { images }),
+      ...(data !== undefined && { data: mergedData }),
       updatedAt: now,
     })
     .where(eq(schema.product.id, id))

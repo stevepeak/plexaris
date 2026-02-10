@@ -50,6 +50,7 @@ export type Product = {
   category: string | null
   status: string
   images: string[]
+  data?: Record<string, unknown> | null
   createdAt: string
   updatedAt: string
   archivedAt: string | null

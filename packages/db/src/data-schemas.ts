@@ -253,120 +253,189 @@ const unitPackagingTypeEnum = z.enum([
 ])
 const casePackagingTypeEnum = z.enum(['tray', 'box', 'bucket'])
 const palletTypeEnum = z.enum(['euro', 'chep'])
+const storageTypeEnum = z.enum(['ambient', 'chilled', 'frozen'])
+const currencyEnum = z
+  .string()
+  .length(3)
+  .regex(/^[A-Z]{3}$/)
+  .describe('ISO 4217 currency code (e.g. EUR, USD)')
 
 /** Net content expressed in volume and/or weight */
-const netContentSchema = z
-  .object({
-    milliliters: z
-      .number()
-      .nonnegative()
-      .optional()
-      .describe('Net content in milliliters'),
-    grams: z.number().nonnegative().optional().describe('Net content in grams'),
-  })
-  .refine((v) => v.milliliters !== undefined || v.grams !== undefined, {
-    message: 'At least one of milliliters or grams must be provided',
-  })
-
-/** Individual sellable unit (stuk) */
-const productUnitSchema = z.object({
-  gtin: gtinSchema.describe('GTIN / EAN code of the base unit (stuk)'),
-  dimensions: dimensionsSchema('mm').describe('Unit outer dimensions in mm'),
-  weight: weightSchema('grams').describe('Unit weight in grams'),
-  netContent: netContentSchema.describe('Net content of the unit'),
-  packagingType: unitPackagingTypeEnum.describe(
-    'Packaging type of the individual unit',
-  ),
-  packshots: z
-    .array(z.string().url())
+const netContentSchema = z.object({
+  milliliters: z
+    .number()
+    .nonnegative()
     .optional()
-    .describe('URLs to product packshot images'),
+    .describe('Net content in milliliters'),
+  grams: z.number().nonnegative().optional().describe('Net content in grams'),
 })
 
-/** Case / tray / box containing multiple units */
-const productCaseSchema = z.object({
-  gtin: gtinSchema.describe('GTIN / EAN code of the case or tray'),
-  dimensions: dimensionsSchema('mm').describe('Case outer dimensions in mm'),
-  weight: weightSchema('grams').describe('Case weight in grams'),
+// ─── Product Section Keys ───────────────────────────────────────────────────
+
+export const productSectionKeys = [
+  'general',
+  'photos',
+  'unit',
+  'case',
+  'pallet',
+  'ingredients',
+  'nutrition',
+  'allergens',
+  'dietary',
+  'storage',
+  'pricing',
+  'label',
+] as const
+
+export const productSectionKeyEnum = z.enum(productSectionKeys)
+
+export type ProductSectionKey = (typeof productSectionKeys)[number]
+
+export const PRODUCT_SECTION_LABELS: Record<ProductSectionKey, string> = {
+  general: 'General',
+  photos: 'Photos',
+  unit: 'Unit',
+  case: 'Case',
+  pallet: 'Pallet',
+  ingredients: 'Ingredients',
+  nutrition: 'Nutrition',
+  allergens: 'Allergens',
+  dietary: 'Dietary',
+  storage: 'Storage & Shelf Life',
+  pricing: 'Pricing',
+  label: 'Label',
+}
+
+// ─── Section Schemas (all fields optional) ──────────────────────────────────
+
+export const generalSectionSchema = z.object({
+  brand: z.string().optional().describe('Product brand name'),
+  variant: z.string().optional().describe('Product variant or flavour'),
+  description: z.string().optional().describe('Product description'),
+  articleNumber: z.string().optional().describe('Distributor article number'),
+  intrastatCode: z
+    .string()
+    .optional()
+    .describe('8-digit Intrastat / CN commodity code'),
+  countryOfOrigin: z
+    .string()
+    .optional()
+    .describe('ISO 3166-1 alpha-2 country of origin'),
+})
+
+export const photosSectionSchema = z.object({
+  images: z.array(z.string().url()).optional().describe('Product image URLs'),
+})
+
+export const unitSectionSchema = z.object({
+  gtin: gtinSchema.optional().describe('GTIN / EAN code of the base unit'),
+  dimensions: dimensionsSchema('mm')
+    .partial()
+    .optional()
+    .describe('Unit outer dimensions in mm'),
+  weight: weightSchema('grams')
+    .partial()
+    .optional()
+    .describe('Unit weight in grams'),
+  netContent: netContentSchema.optional().describe('Net content of the unit'),
+  packagingType: unitPackagingTypeEnum
+    .optional()
+    .describe('Packaging type of the individual unit'),
+})
+
+export const caseSectionSchema = z.object({
+  gtin: gtinSchema.optional().describe('GTIN / EAN code of the case'),
+  dimensions: dimensionsSchema('mm')
+    .partial()
+    .optional()
+    .describe('Case outer dimensions in mm'),
+  weight: weightSchema('grams')
+    .partial()
+    .optional()
+    .describe('Case weight in grams'),
   unitsPerCase: z
     .number()
     .int()
     .positive()
-    .describe('Number of individual units per case/tray'),
-  netContent: netContentSchema.describe('Total net content of the case'),
-  packagingType: casePackagingTypeEnum.describe('Case packaging type'),
+    .optional()
+    .describe('Number of individual units per case'),
+  netContent: netContentSchema.optional().describe('Net content of the case'),
+  packagingType: casePackagingTypeEnum
+    .optional()
+    .describe('Case packaging type'),
 })
 
-/** Pallet configuration for logistics */
-const productPalletSchema = z.object({
-  gtin: gtinSchema
+export const palletSectionSchema = z.object({
+  gtin: gtinSchema.optional().describe('GTIN / EAN code of the pallet'),
+  palletType: palletTypeEnum.optional().describe('Pallet standard'),
+  load: z
+    .object({
+      layersPerPallet: z.number().int().positive().optional(),
+      casesPerLayer: z.number().int().positive().optional(),
+      casesPerPallet: z.number().int().positive().optional(),
+    })
     .optional()
-    .describe('GTIN / EAN code of the pallet (if assigned)'),
-  palletType: palletTypeEnum.describe('Pallet standard (EURO or CHEP)'),
-  load: z.object({
-    layersPerPallet: z
-      .number()
-      .int()
-      .positive()
-      .describe('Number of layers on the pallet'),
-    casesPerLayer: z
-      .number()
-      .int()
-      .positive()
-      .describe('Cases/trays per layer'),
-    casesPerPallet: z
-      .number()
-      .int()
-      .positive()
-      .describe('Total cases per full pallet'),
-  }),
+    .describe('Pallet load configuration'),
   dimensions: z
     .object({
-      heightWithProduct: z
-        .number()
-        .positive()
-        .describe('Pallet height including product in cm'),
-      heightWithoutProduct: z
-        .number()
-        .positive()
-        .describe('Pallet height excluding product (wood only) in cm'),
-      width: z.number().positive().describe('Pallet width in cm'),
-      depth: z.number().positive().describe('Pallet depth in cm'),
+      heightWithProduct: z.number().positive().optional(),
+      heightWithoutProduct: z.number().positive().optional(),
+      width: z.number().positive().optional(),
+      depth: z.number().positive().optional(),
     })
-    .describe('Pallet dimensions in centimeters'),
-  weight: weightSchema('kg').describe('Pallet weight in kilograms'),
+    .optional()
+    .describe('Pallet dimensions in cm'),
+  weight: weightSchema('kg')
+    .partial()
+    .optional()
+    .describe('Pallet weight in kg'),
 })
 
-/** Macronutrient values per 100g or 100ml */
-const nutritionSchema = z.object({
-  energyKj: z
-    .number()
-    .nonnegative()
-    .describe('Energy in kilojoules per 100g/ml'),
-  energyKcal: z
-    .number()
-    .nonnegative()
-    .describe('Energy in kilocalories per 100g/ml'),
-  fatG: z.number().nonnegative().describe('Total fat in grams per 100g/ml'),
+export const ingredientsSectionSchema = z.object({
+  ingredients: z
+    .string()
+    .optional()
+    .describe('Full ingredient list as shown on label'),
+  warningStatements: z
+    .string()
+    .optional()
+    .describe('Warning statements on label'),
+  palmOil: z
+    .object({
+      origin: z.string().optional().describe('Origin of palm oil'),
+      amountPercent: z
+        .number()
+        .min(0)
+        .max(100)
+        .optional()
+        .describe('Palm oil percentage'),
+      rspoCertificate: z
+        .string()
+        .optional()
+        .describe('RSPO certificate reference'),
+    })
+    .optional()
+    .describe('Palm oil details'),
+})
+
+export const nutritionSectionSchema = z.object({
+  energyKj: z.number().nonnegative().optional().describe('Energy in kJ'),
+  energyKcal: z.number().nonnegative().optional().describe('Energy in kcal'),
+  fatG: z.number().nonnegative().optional().describe('Total fat (g)'),
   saturatedFatG: z
     .number()
     .nonnegative()
-    .describe('Saturated fat in grams per 100g/ml'),
+    .optional()
+    .describe('Saturated fat (g)'),
   carbohydratesG: z
     .number()
     .nonnegative()
-    .describe('Carbohydrates in grams per 100g/ml'),
-  sugarsG: z
-    .number()
-    .nonnegative()
-    .describe('Of which sugars in grams per 100g/ml'),
-  proteinG: z.number().nonnegative().describe('Protein in grams per 100g/ml'),
-  saltG: z.number().nonnegative().describe('Salt in grams per 100g/ml'),
-  fiberG: z
-    .number()
-    .nonnegative()
     .optional()
-    .describe('Dietary fiber (vezels) in grams per 100g/ml'),
+    .describe('Carbohydrates (g)'),
+  sugarsG: z.number().nonnegative().optional().describe('Of which sugars (g)'),
+  proteinG: z.number().nonnegative().optional().describe('Protein (g)'),
+  saltG: z.number().nonnegative().optional().describe('Salt (g)'),
+  fiberG: z.number().nonnegative().optional().describe('Dietary fiber (g)'),
   others: z
     .array(
       z.object({
@@ -375,53 +444,91 @@ const nutritionSchema = z.object({
       }),
     )
     .optional()
-    .describe('Additional nutrients not covered above'),
+    .describe('Additional nutrients'),
 })
 
-/** Product information: ingredients, nutrition, and allergens */
-const productInfoSchema = z.object({
-  ingredients: z
-    .string()
-    .min(1)
-    .describe('Full ingredient list as shown on label'),
-  nutrition: nutritionSchema.describe('Nutritional values per 100g or 100ml'),
+export const allergensSectionSchema = z.object({
   allergens: z
+    .record(allergenEnum, allergenStatusEnum)
+    .optional()
+    .describe(
+      "EU-14 allergen status map: 'contains', 'may_contain', or 'absent'",
+    ),
+})
+
+export const dietarySectionSchema = z.object({
+  kosher: z.boolean().optional().describe('Suitable for Kosher diets'),
+  halal: z.boolean().optional().describe('Suitable for Halal diets'),
+  vegetarian: z.boolean().optional().describe('Suitable for vegetarians'),
+  vegan: z.boolean().optional().describe('Suitable for vegans'),
+})
+
+export const storageSectionSchema = z.object({
+  temperatureRange: z
+    .object({
+      min: z.number().optional().describe('Min temperature (°C)'),
+      max: z.number().optional().describe('Max temperature (°C)'),
+    })
+    .optional()
+    .describe('Storage temperature range'),
+  storageType: storageTypeEnum.optional().describe('Storage condition'),
+  shelfLifeFromProductionDays: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('Shelf life from production in days'),
+  shelfLifeFromDeliveryDays: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('Shelf life from delivery in days'),
+})
+
+export const pricingSectionSchema = z.object({
+  currency: currencyEnum.optional(),
+  exWorksPerKg: z.number().nonnegative().optional(),
+  exWorksPerUnit: z.number().nonnegative().optional(),
+  deliveredPerKg: z.number().nonnegative().optional(),
+  deliveredPerUnit: z.number().nonnegative().optional(),
+})
+
+export const labelSectionSchema = z.object({
+  labelImages: z
+    .array(z.string().url())
+    .optional()
+    .describe('Label image URLs'),
+  cartonPrint: z
     .string()
     .optional()
-    .describe('Free-text allergen information statement'),
+    .describe('Text/info printed on the outer carton'),
 })
+
+// ─── Combined Product Schema ────────────────────────────────────────────────
 
 export const productSchema = z
   .object({
-    brand: z.string().min(1).describe('Product brand name'),
-    variant: z.string().min(1).describe('Product variant or flavour'),
-    intrastatCode: z
-      .string()
-      .regex(/^\d{8}$/)
-      .describe('8-digit Intrastat / CN commodity code'),
-    articleNumber: z.string().min(1).describe('Distributor article number'),
-    countryOfOrigin: z
-      .string()
-      .length(2)
-      .describe('ISO 3166-1 alpha-2 country of origin'),
-    description: z.string().min(1).describe('Product description'),
-    unit: productUnitSchema.describe('Individual sellable unit'),
-    case: productCaseSchema.describe('Case / tray / box packaging'),
-    pallet: productPalletSchema.describe('Pallet logistics configuration'),
-    productInfo: productInfoSchema.describe(
-      'Ingredients, nutrition, and allergen info',
-    ),
+    sections: z
+      .record(productSectionKeyEnum, z.boolean())
+      .optional()
+      .describe('Section visibility toggles'),
+    general: generalSectionSchema.optional(),
+    photos: photosSectionSchema.optional(),
+    unit: unitSectionSchema.optional(),
+    case: caseSectionSchema.optional(),
+    pallet: palletSectionSchema.optional(),
+    ingredients: ingredientsSectionSchema.optional(),
+    nutrition: nutritionSectionSchema.optional(),
+    allergens: allergensSectionSchema.optional(),
+    dietary: dietarySectionSchema.optional(),
+    storage: storageSectionSchema.optional(),
+    pricing: pricingSectionSchema.optional(),
+    label: labelSectionSchema.optional(),
   })
   .describe('A product in the supply chain (food/beverage item)')
 
 // ─── Supplier ───────────────────────────────────────────────────────────────
-
-const storageTypeEnum = z.enum(['ambient', 'chilled', 'frozen'])
-const currencyEnum = z
-  .string()
-  .length(3)
-  .regex(/^[A-Z]{3}$/)
-  .describe('ISO 4217 currency code (e.g. EUR, USD)')
 
 /** Pricing: per-kg and/or per-unit, at two Incoterms levels */
 const pricingSchema = z.object({
@@ -698,6 +805,34 @@ const distributionSchema = z.object({
       }),
     )
     .describe('List of distribution centers'),
+})
+
+/** Macronutrient values per 100g or 100ml (required fields for supplier food info) */
+const nutritionSchema = z.object({
+  energyKj: z.number().nonnegative().describe('Energy in kJ per 100g/ml'),
+  energyKcal: z.number().nonnegative().describe('Energy in kcal per 100g/ml'),
+  fatG: z.number().nonnegative().describe('Total fat (g) per 100g/ml'),
+  saturatedFatG: z
+    .number()
+    .nonnegative()
+    .describe('Saturated fat (g) per 100g/ml'),
+  carbohydratesG: z
+    .number()
+    .nonnegative()
+    .describe('Carbohydrates (g) per 100g/ml'),
+  sugarsG: z.number().nonnegative().describe('Sugars (g) per 100g/ml'),
+  proteinG: z.number().nonnegative().describe('Protein (g) per 100g/ml'),
+  saltG: z.number().nonnegative().describe('Salt (g) per 100g/ml'),
+  fiberG: z.number().nonnegative().optional().describe('Fiber (g) per 100g/ml'),
+  others: z
+    .array(
+      z.object({
+        name: z.string().min(1).describe('Nutrient name'),
+        valueG: z.number().nonnegative().describe('Value in grams per 100g/ml'),
+      }),
+    )
+    .optional()
+    .describe('Additional nutrients'),
 })
 
 /** Sheet 4: Food / allergen information per product */

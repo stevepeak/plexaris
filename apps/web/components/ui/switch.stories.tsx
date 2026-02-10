@@ -1,4 +1,4 @@
-import  { type Meta, type StoryObj } from "@storybook/react"
+import { type Meta, type StoryObj } from "@storybook/react"
 
 import { Label } from "./label"
 import { Switch } from "./switch"
@@ -15,6 +15,24 @@ export const Default: Story = {
     <div className="flex items-center space-x-2">
       <Switch id="airplane-mode" />
       <Label htmlFor="airplane-mode">Airplane Mode</Label>
+    </div>
+  ),
+}
+
+export const WithIcons: Story = {
+  render: () => (
+    <div className="flex items-center space-x-2">
+      <Switch id="visibility" icons />
+      <Label htmlFor="visibility">Visibility</Label>
+    </div>
+  ),
+}
+
+export const WithIconsChecked: Story = {
+  render: () => (
+    <div className="flex items-center space-x-2">
+      <Switch id="visibility-on" icons defaultChecked />
+      <Label htmlFor="visibility-on">Visible</Label>
     </div>
   ),
 }

@@ -6,7 +6,8 @@
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema.ts"
+    "./schema": "./src/schema.ts",
+    "./data-schemas": "./src/data-schemas.ts"
   },
   "scripts": {
     "clean": "rm -rf node_modules dist",

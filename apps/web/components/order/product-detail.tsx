@@ -1,6 +1,11 @@
 'use client'
 
 import {
+  PRODUCT_SECTION_LABELS,
+  type ProductSectionKey,
+  productSectionKeys,
+} from '@app/db/data-schemas'
+import {
   Apple,
   Beef,
   Croissant,
@@ -17,8 +22,16 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -41,6 +54,7 @@ interface ProductData {
   category: string | null
   status: string
   images: string[]
+  data?: Record<string, unknown> | null
   supplier: { id: string; name: string }
 }
 
@@ -261,7 +275,351 @@ export function ProductDetail({
             Add to Cart
           </Button>
         )}
+
+        <ProductSections data={product.data} />
       </div>
     </ScrollArea>
+  )
+}
+
+// ─── Product Section Display ─────────────────────────────────────────────────
+
+function ProductSections({ data }: { data?: Record<string, unknown> | null }) {
+  if (!data) return null
+
+  const sections = (data.sections ?? {}) as Record<string, boolean>
+  const visibleKeys = productSectionKeys.filter((key) => {
+    // Show section if explicitly enabled, or if sections config is missing (backwards compat)
+    if (Object.keys(sections).length === 0) {
+      return data[key] != null
+    }
+    return sections[key] !== false && data[key] != null
+  })
+
+  if (visibleKeys.length === 0) return null
+
+  return (
+    <>
+      <Separator />
+      <Accordion type="multiple" className="w-full">
+        {visibleKeys.map((key) => (
+          <AccordionItem key={key} value={key}>
+            <AccordionTrigger>{PRODUCT_SECTION_LABELS[key]}</AccordionTrigger>
+            <AccordionContent>
+              <SectionDisplay
+                sectionKey={key}
+                data={data[key] as Record<string, unknown>}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </>
+  )
+}
+
+function SectionDisplay({
+  sectionKey,
+  data,
+}: {
+  sectionKey: ProductSectionKey
+  data: Record<string, unknown>
+}) {
+  if (!data) return null
+
+  switch (sectionKey) {
+    case 'general':
+      return <GeneralDisplay data={data} />
+    case 'photos':
+      return <PhotosDisplay data={data} />
+    case 'unit':
+    case 'case':
+      return <PackagingDisplay data={data} sectionKey={sectionKey} />
+    case 'pallet':
+      return <PalletDisplay data={data} />
+    case 'ingredients':
+      return <IngredientsDisplay data={data} />
+    case 'nutrition':
+      return <NutritionDisplay data={data} />
+    case 'allergens':
+      return <AllergensDisplay data={data} />
+    case 'dietary':
+      return <DietaryDisplay data={data} />
+    case 'storage':
+      return <StorageDisplay data={data} />
+    case 'pricing':
+      return <PricingDisplay data={data} />
+    case 'label':
+      return <LabelDisplay data={data} />
+    default:
+      return null
+  }
+}
+
+function DataRow({ label, value }: { label: string; value: unknown }) {
+  if (value == null || value === '') return null
+  return (
+    <div className="flex justify-between gap-4 py-1">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-medium">{String(value)}</span>
+    </div>
+  )
+}
+
+function GeneralDisplay({ data }: { data: Record<string, unknown> }) {
+  return (
+    <div className="flex flex-col">
+      <DataRow label="Brand" value={data.brand} />
+      <DataRow label="Variant" value={data.variant} />
+      <DataRow label="Description" value={data.description} />
+      <DataRow label="Article number" value={data.articleNumber} />
+      <DataRow label="Intrastat code" value={data.intrastatCode} />
+      <DataRow label="Country of origin" value={data.countryOfOrigin} />
+    </div>
+  )
+}
+
+function PhotosDisplay({ data }: { data: Record<string, unknown> }) {
+  const images = (data.images as string[]) ?? []
+  if (images.length === 0) {
+    return <p className="text-sm text-muted-foreground">No images</p>
+  }
+  return (
+    <div className="flex flex-wrap gap-2">
+      {images.map((url, i) => (
+        <img
+          key={i}
+          src={url}
+          alt={`Product ${i + 1}`}
+          className="h-20 w-20 rounded-md border object-cover"
+        />
+      ))}
+    </div>
+  )
+}
+
+function PackagingDisplay({
+  data,
+  sectionKey,
+}: {
+  data: Record<string, unknown>
+  sectionKey: string
+}) {
+  const dims = data.dimensions as Record<string, unknown> | undefined
+  const weight = data.weight as Record<string, unknown> | undefined
+  const nc = data.netContent as Record<string, unknown> | undefined
+  const unit = sectionKey === 'unit' ? 'mm' : 'mm'
+  return (
+    <div className="flex flex-col">
+      <DataRow label="GTIN" value={data.gtin} />
+      {dims && (
+        <>
+          <DataRow label={`Height (${unit})`} value={dims.height} />
+          <DataRow label={`Width (${unit})`} value={dims.width} />
+          <DataRow label={`Depth (${unit})`} value={dims.depth} />
+        </>
+      )}
+      {weight && (
+        <>
+          <DataRow label="Gross weight" value={weight.gross} />
+          <DataRow label="Net weight" value={weight.net} />
+        </>
+      )}
+      {nc && (
+        <>
+          <DataRow label="Milliliters" value={nc.milliliters} />
+          <DataRow label="Grams" value={nc.grams} />
+        </>
+      )}
+      {sectionKey === 'case' && (
+        <DataRow label="Units per case" value={data.unitsPerCase} />
+      )}
+      <DataRow label="Packaging type" value={data.packagingType} />
+    </div>
+  )
+}
+
+function PalletDisplay({ data }: { data: Record<string, unknown> }) {
+  const load = data.load as Record<string, unknown> | undefined
+  const dims = data.dimensions as Record<string, unknown> | undefined
+  const weight = data.weight as Record<string, unknown> | undefined
+  return (
+    <div className="flex flex-col">
+      <DataRow label="GTIN" value={data.gtin} />
+      <DataRow label="Pallet type" value={data.palletType} />
+      {load && (
+        <>
+          <DataRow label="Layers / pallet" value={load.layersPerPallet} />
+          <DataRow label="Cases / layer" value={load.casesPerLayer} />
+          <DataRow label="Cases / pallet" value={load.casesPerPallet} />
+        </>
+      )}
+      {dims && (
+        <>
+          <DataRow
+            label="Height with product (cm)"
+            value={dims.heightWithProduct}
+          />
+          <DataRow
+            label="Height without product (cm)"
+            value={dims.heightWithoutProduct}
+          />
+          <DataRow label="Width (cm)" value={dims.width} />
+          <DataRow label="Depth (cm)" value={dims.depth} />
+        </>
+      )}
+      {weight && (
+        <>
+          <DataRow label="Gross weight (kg)" value={weight.gross} />
+          <DataRow label="Net weight (kg)" value={weight.net} />
+        </>
+      )}
+    </div>
+  )
+}
+
+function IngredientsDisplay({ data }: { data: Record<string, unknown> }) {
+  const palmOil = data.palmOil as Record<string, unknown> | undefined
+  return (
+    <div className="flex flex-col gap-2">
+      {typeof data.ingredients === 'string' && (
+        <p className="text-sm whitespace-pre-wrap">{data.ingredients}</p>
+      )}
+      <DataRow label="Warning statements" value={data.warningStatements} />
+      {palmOil && (
+        <>
+          <DataRow label="Palm oil origin" value={palmOil.origin} />
+          <DataRow label="Palm oil %" value={palmOil.amountPercent} />
+          <DataRow label="RSPO certificate" value={palmOil.rspoCertificate} />
+        </>
+      )}
+    </div>
+  )
+}
+
+function NutritionDisplay({ data }: { data: Record<string, unknown> }) {
+  const fields = [
+    ['energyKj', 'Energy (kJ)'],
+    ['energyKcal', 'Energy (kcal)'],
+    ['fatG', 'Fat (g)'],
+    ['saturatedFatG', 'Saturated fat (g)'],
+    ['carbohydratesG', 'Carbohydrates (g)'],
+    ['sugarsG', 'Sugars (g)'],
+    ['proteinG', 'Protein (g)'],
+    ['saltG', 'Salt (g)'],
+    ['fiberG', 'Fiber (g)'],
+  ] as const
+  return (
+    <div className="flex flex-col">
+      <p className="mb-1 text-xs text-muted-foreground">Per 100g / 100ml</p>
+      {fields.map(([key, label]) => (
+        <DataRow key={key} label={label} value={data[key]} />
+      ))}
+    </div>
+  )
+}
+
+function AllergensDisplay({ data }: { data: Record<string, unknown> }) {
+  const allergens = (data.allergens as Record<string, string>) ?? {}
+  const entries = Object.entries(allergens)
+  if (entries.length === 0) {
+    return <p className="text-sm text-muted-foreground">No allergen data</p>
+  }
+  return (
+    <div className="flex flex-wrap gap-2">
+      {entries.map(([name, status]) => (
+        <Badge
+          key={name}
+          variant={
+            status === 'contains'
+              ? 'destructive'
+              : status === 'may_contain'
+                ? 'secondary'
+                : 'outline'
+          }
+        >
+          {name}: {status.replace(/_/g, ' ')}
+        </Badge>
+      ))}
+    </div>
+  )
+}
+
+function DietaryDisplay({ data }: { data: Record<string, unknown> }) {
+  const flags = ['kosher', 'halal', 'vegetarian', 'vegan'] as const
+  return (
+    <div className="flex flex-wrap gap-2">
+      {flags.map((flag) =>
+        data[flag] != null ? (
+          <Badge key={flag} variant={data[flag] ? 'default' : 'outline'}>
+            {flag}: {data[flag] ? 'Yes' : 'No'}
+          </Badge>
+        ) : null,
+      )}
+    </div>
+  )
+}
+
+function StorageDisplay({ data }: { data: Record<string, unknown> }) {
+  const temp = data.temperatureRange as Record<string, unknown> | undefined
+  return (
+    <div className="flex flex-col">
+      {temp && (
+        <DataRow
+          label="Temperature range"
+          value={`${temp.min ?? '?'}°C – ${temp.max ?? '?'}°C`}
+        />
+      )}
+      <DataRow label="Storage type" value={data.storageType} />
+      <DataRow
+        label="Shelf life (production)"
+        value={
+          data.shelfLifeFromProductionDays
+            ? `${data.shelfLifeFromProductionDays} days`
+            : null
+        }
+      />
+      <DataRow
+        label="Shelf life (delivery)"
+        value={
+          data.shelfLifeFromDeliveryDays
+            ? `${data.shelfLifeFromDeliveryDays} days`
+            : null
+        }
+      />
+    </div>
+  )
+}
+
+function PricingDisplay({ data }: { data: Record<string, unknown> }) {
+  return (
+    <div className="flex flex-col">
+      <DataRow label="Currency" value={data.currency} />
+      <DataRow label="Ex Works / kg" value={data.exWorksPerKg} />
+      <DataRow label="Ex Works / unit" value={data.exWorksPerUnit} />
+      <DataRow label="Delivered / kg" value={data.deliveredPerKg} />
+      <DataRow label="Delivered / unit" value={data.deliveredPerUnit} />
+    </div>
+  )
+}
+
+function LabelDisplay({ data }: { data: Record<string, unknown> }) {
+  const labelImages = (data.labelImages as string[]) ?? []
+  return (
+    <div className="flex flex-col gap-2">
+      {labelImages.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {labelImages.map((url, i) => (
+            <img
+              key={i}
+              src={url}
+              alt={`Label ${i + 1}`}
+              className="h-20 w-20 rounded-md border object-cover"
+            />
+          ))}
+        </div>
+      )}
+      <DataRow label="Carton print" value={data.cartonPrint} />
+    </div>
   )
 }

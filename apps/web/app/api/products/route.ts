@@ -16,8 +16,16 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { organizationId, name, description, price, unit, category, images } =
-    body
+  const {
+    organizationId,
+    name,
+    description,
+    price,
+    unit,
+    category,
+    images,
+    data,
+  } = body
 
   if (!organizationId || !name || typeof name !== 'string' || !name.trim()) {
     return NextResponse.json(
@@ -55,6 +63,7 @@ export async function POST(request: Request) {
       category: category || null,
       status: 'draft',
       images: images || [],
+      data: data || null,
       createdAt: now,
       updatedAt: now,
     })

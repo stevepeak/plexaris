@@ -34,10 +34,8 @@ export function ProductsTab({
 
   const handleCreateProduct = async (data: {
     name: string
-    description: string
-    price: string
-    unit: string
     category: string
+    data?: Record<string, unknown>
   }): Promise<{ error?: string }> => {
     const res = await fetch('/api/products', {
       method: 'POST',
@@ -57,11 +55,9 @@ export function ProductsTab({
     productId: string,
     data: {
       name: string
-      description: string
-      price: string
-      unit: string
       category: string
       note?: string
+      data?: Record<string, unknown>
     },
   ): Promise<{ error?: string }> => {
     const res = await fetch(`/api/products/${productId}`, {
