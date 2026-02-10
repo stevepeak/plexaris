@@ -9,7 +9,6 @@ export function getSteps(_orgType: OrgType | null): StepDefinition[] {
   return [
     { id: 'type', label: 'Type' },
     { id: 'name', label: 'Name' },
-    { id: 'urls', label: 'URLs' },
-    { id: 'files', label: 'Files' },
+    { id: 'sources', label: 'Sources' },
   ]
 }

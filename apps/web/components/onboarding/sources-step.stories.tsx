@@ -1,20 +1,23 @@
 import { type Meta, type StoryObj } from '@storybook/react'
 
-import { FileUploadStep } from './file-upload-step'
+import { SourcesStep } from './sources-step'
 
-const meta: Meta<typeof FileUploadStep> = {
-  title: 'Onboarding / FileUploadStep',
-  component: FileUploadStep,
+const meta: Meta<typeof SourcesStep> = {
+  title: 'Onboarding / SourcesStep',
+  component: SourcesStep,
 }
 export default meta
-type Story = StoryObj<typeof FileUploadStep>
+type Story = StoryObj<typeof SourcesStep>
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {}
 
-export const Empty: Story = {
+export const SupplierEmpty: Story = {
   render: () => (
-    <FileUploadStep
+    <SourcesStep
+      orgType="supplier"
+      urls=""
+      onUrlsChange={noop}
       files={[]}
       onFilesChange={noop}
       onBack={noop}
@@ -25,9 +28,28 @@ export const Empty: Story = {
   ),
 }
 
-export const WithFiles: Story = {
+export const HorecaEmpty: Story = {
   render: () => (
-    <FileUploadStep
+    <SourcesStep
+      orgType="horeca"
+      urls=""
+      onUrlsChange={noop}
+      files={[]}
+      onFilesChange={noop}
+      onBack={noop}
+      onSubmit={noop}
+      isLoading={false}
+      error={null}
+    />
+  ),
+}
+
+export const Filled: Story = {
+  render: () => (
+    <SourcesStep
+      orgType="supplier"
+      urls={'https://example.com\nhttps://example.com/products'}
+      onUrlsChange={noop}
       files={[
         new File(['test content'], 'products.csv', { type: 'text/csv' }),
         new File(['pdf content'], 'catalog.pdf', {
@@ -45,7 +67,10 @@ export const WithFiles: Story = {
 
 export const Loading: Story = {
   render: () => (
-    <FileUploadStep
+    <SourcesStep
+      orgType="supplier"
+      urls="https://example.com"
+      onUrlsChange={noop}
       files={[new File(['test content'], 'products.csv', { type: 'text/csv' })]}
       onFilesChange={noop}
       onBack={noop}
@@ -58,7 +83,10 @@ export const Loading: Story = {
 
 export const WithError: Story = {
   render: () => (
-    <FileUploadStep
+    <SourcesStep
+      orgType="supplier"
+      urls=""
+      onUrlsChange={noop}
       files={[]}
       onFilesChange={noop}
       onBack={noop}

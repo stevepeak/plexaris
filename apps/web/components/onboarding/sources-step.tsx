@@ -5,6 +5,9 @@ import { useCallback, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+
+import { type OrgType } from './types'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
@@ -14,7 +17,10 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export function FileUploadStep({
+export function SourcesStep({
+  orgType,
+  urls,
+  onUrlsChange,
   files,
   onFilesChange,
   onBack,
@@ -22,6 +28,9 @@ export function FileUploadStep({
   isLoading,
   error,
 }: {
+  orgType: OrgType
+  urls: string
+  onUrlsChange: (urls: string) => void
   files: File[]
   onFilesChange: (files: File[]) => void
   onBack: () => void
@@ -69,7 +78,29 @@ export function FileUploadStep({
   )
 
   return (
-    <div className="grid w-full max-w-md gap-4">
+    <div className="grid w-full max-w-lg gap-6">
+      <p className="text-sm text-muted-foreground">
+        {orgType === 'supplier'
+          ? "We'll use these to find your business information and products. We'll also keep them up-to-date automatically."
+          : "We'll use these to find your business information and keep it up-to-date automatically."}
+      </p>
+
+      <div className="grid gap-2">
+        <Label htmlFor="urls">Website URLs</Label>
+        <Textarea
+          id="urls"
+          placeholder={
+            'https://example.com\nhttps://example.com/products\nhttps://example.com/menu.pdf'
+          }
+          value={urls}
+          onChange={(e) => onUrlsChange(e.target.value)}
+          rows={4}
+        />
+        <p className="text-xs text-muted-foreground">
+          One URL per line — website, product catalogs, menus, etc.
+        </p>
+      </div>
+
       <div className="grid gap-2">
         <Label>Upload documents</Label>
         <div
@@ -80,19 +111,19 @@ export function FileUploadStep({
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
+          className={`flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
             dragOver
               ? 'border-primary bg-primary/5'
               : 'border-border hover:border-primary/50'
           }`}
         >
-          <Upload className="h-8 w-8 text-muted-foreground" />
+          <Upload className="h-6 w-6 text-muted-foreground" />
           <div>
             <p className="text-sm font-medium">
               Drop files here or click to browse
             </p>
             <p className="text-xs text-muted-foreground">
-              CSV, Excel, PDF, images — all types accepted. 5MB max per file.
+              CSV, Excel, PDF, images — 5MB max per file
             </p>
           </div>
         </div>
@@ -139,34 +170,33 @@ export function FileUploadStep({
         </ul>
       )}
 
-      <div className="flex gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onBack}
-          disabled={isLoading}
-        >
-          Back
-        </Button>
-        <Button
-          type="button"
-          onClick={onSubmit}
-          disabled={isLoading}
-          className="flex-1"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Creating...
-            </>
-          ) : (
-            <>
-              <Building2 className="h-4 w-4" />
-              Create organization
-            </>
-          )}
-        </Button>
-      </div>
+      <Button
+        type="button"
+        onClick={onSubmit}
+        disabled={isLoading}
+        className="w-full"
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Creating...
+          </>
+        ) : (
+          <>
+            <Building2 className="h-4 w-4" />
+            Create organization
+          </>
+        )}
+      </Button>
+      <Button
+        type="button"
+        variant="link"
+        onClick={onBack}
+        disabled={isLoading}
+        className="w-full"
+      >
+        Back
+      </Button>
     </div>
   )
 }

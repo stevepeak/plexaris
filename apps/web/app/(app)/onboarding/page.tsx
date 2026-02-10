@@ -5,12 +5,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { FileUploadStep } from '@/components/onboarding/file-upload-step'
 import { OrgNameStep } from '@/components/onboarding/org-name-step'
 import { OrgTypeStep } from '@/components/onboarding/org-type-step'
+import { SourcesStep } from '@/components/onboarding/sources-step'
 import { StepProgress } from '@/components/onboarding/step-progress'
 import { getSteps, type OrgType } from '@/components/onboarding/types'
-import { UrlStep } from '@/components/onboarding/url-step'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -45,10 +44,8 @@ function getSubtitle(stepId: string): string {
       return 'What type of business are you?'
     case 'name':
       return 'Almost there — just give it a name'
-    case 'urls':
-      return 'Share your website and catalog links'
-    case 'files':
-      return 'Upload any documents with product or company details'
+    case 'sources':
+      return 'Share your website and any documents'
     default:
       return ''
   }
@@ -96,10 +93,6 @@ export default function OnboardingPage() {
   const handleNameNext = () => {
     if (!name.trim()) return
     setCurrentStepIndex(2)
-  }
-
-  const handleUrlsNext = () => {
-    setCurrentStepIndex(3)
   }
 
   const handleSubmit = async () => {
@@ -243,17 +236,11 @@ export default function OnboardingPage() {
           />
         )}
 
-        {currentStep.id === 'urls' && (
-          <UrlStep
+        {currentStep.id === 'sources' && orgType && (
+          <SourcesStep
+            orgType={orgType}
             urls={urls}
             onUrlsChange={setUrls}
-            onBack={handleBack}
-            onNext={handleUrlsNext}
-          />
-        )}
-
-        {currentStep.id === 'files' && (
-          <FileUploadStep
             files={files}
             onFilesChange={setFiles}
             onBack={handleBack}
