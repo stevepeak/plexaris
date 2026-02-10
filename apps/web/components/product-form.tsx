@@ -3,6 +3,7 @@
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import { ProductImageManager } from '@/components/product-image-manager'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -42,6 +43,7 @@ type ProductFormData = {
   price: string
   unit: string
   category: string
+  note?: string
 }
 
 type ProductFormProps = {
@@ -72,6 +74,7 @@ export function ProductForm({
   const [price, setPrice] = useState(product?.price ?? '')
   const [unit, setUnit] = useState(product?.unit ?? '')
   const [category, setCategory] = useState(product?.category ?? '')
+  const [note, setNote] = useState('')
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -83,6 +86,7 @@ export function ProductForm({
       setPrice(product.price ?? '')
       setUnit(product.unit ?? '')
       setCategory(product.category ?? '')
+      setNote('')
     }
   }, [product])
 
@@ -114,6 +118,7 @@ export function ProductForm({
       price,
       unit,
       category,
+      ...(isEditing && note ? { note } : {}),
     })
 
     if (result.error) {
@@ -212,6 +217,29 @@ export function ProductForm({
               </SelectContent>
             </Select>
           </div>
+
+          <div className="grid gap-2">
+            <Label>Product images</Label>
+            <ProductImageManager images={[]} disabled />
+          </div>
+
+          {isEditing && (
+            <div className="-mx-6 -mb-2 mt-2 rounded-b-lg bg-muted/50 px-6 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="product-note">Edit note</Label>
+                <Textarea
+                  id="product-note"
+                  placeholder="What changed?"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={2}
+                />
+                <p className="text-xs text-muted-foreground">
+                  For internal purposes only
+                </p>
+              </div>
+            </div>
+          )}
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 

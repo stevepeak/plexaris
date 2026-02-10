@@ -64,6 +64,22 @@ export const WithError: Story = {
   },
 }
 
+export const EditWithNote: Story = {
+  args: {
+    product: {
+      id: '3',
+      name: 'Croissant',
+      description: 'Butter croissant, freshly baked.',
+      price: '2.80',
+      unit: 'piece',
+      category: 'Pastry',
+      status: 'active',
+    },
+    onSubmit: async () => ({}),
+    onCancel: () => undefined,
+  },
+}
+
 export const NoCancel: Story = {
   args: {
     onSubmit: async () => ({}),

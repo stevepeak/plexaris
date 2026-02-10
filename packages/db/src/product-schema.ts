@@ -1,4 +1,5 @@
 import {
+  integer,
   jsonb,
   numeric,
   pgTable,
@@ -7,6 +8,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 
+import { user } from './auth-schema'
 import { organization } from './org-schema'
 
 export const product = pgTable('product', {
@@ -14,6 +16,7 @@ export const product = pgTable('product', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organization.id),
+  currentVersionId: uuid('current_version_id'),
   name: text('name').notNull(),
   description: text('description'),
   price: numeric('price', { precision: 10, scale: 2 }),
@@ -25,4 +28,24 @@ export const product = pgTable('product', {
   createdAt: timestamp('created_at').notNull(),
   updatedAt: timestamp('updated_at').notNull(),
   archivedAt: timestamp('archived_at'),
+})
+
+export const productVersion = pgTable('product_version', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => product.id),
+  version: integer('version').notNull(),
+  name: text('name').notNull(),
+  description: text('description'),
+  price: numeric('price', { precision: 10, scale: 2 }),
+  unit: text('unit'),
+  category: text('category'),
+  images: jsonb('images').$type<string[]>().default([]),
+  data: jsonb('data'),
+  editedBy: text('edited_by')
+    .notNull()
+    .references(() => user.id),
+  note: text('note'),
+  createdAt: timestamp('created_at').notNull(),
 })

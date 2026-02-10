@@ -142,6 +142,15 @@ function ProductCardGrid({
                     : undefined
                 }
               >
+                {product.images[0] && (
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-medium leading-tight">

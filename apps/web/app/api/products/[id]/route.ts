@@ -1,4 +1,4 @@
-import { and, createDb, eq, schema } from '@app/db'
+import { and, createDb, eq, schema, sql } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
@@ -99,7 +99,10 @@ export async function PATCH(
   }
 
   const body = await request.json()
-  const { name, description, price, unit, category, status, images } = body
+  const { name, description, price, unit, category, status, images, note } =
+    body
+
+  const now = new Date()
 
   await db
     .update(schema.product)
@@ -113,13 +116,48 @@ export async function PATCH(
       ...(category !== undefined && { category: category || null }),
       ...(status !== undefined && { status }),
       ...(images !== undefined && { images }),
-      updatedAt: new Date(),
+      updatedAt: now,
     })
     .where(eq(schema.product.id, id))
 
   const product = await db.query.product.findFirst({
     where: eq(schema.product.id, id),
   })
+
+  if (product) {
+    // Compute next version number
+    const [maxRow] = await db
+      .select({
+        maxVersion: sql<number>`COALESCE(MAX(${schema.productVersion.version}), 0)`,
+      })
+      .from(schema.productVersion)
+      .where(eq(schema.productVersion.productId, id))
+
+    const nextVersion = (maxRow?.maxVersion ?? 0) + 1
+
+    const [version] = await db
+      .insert(schema.productVersion)
+      .values({
+        productId: id,
+        version: nextVersion,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        unit: product.unit,
+        category: product.category,
+        images: product.images,
+        data: product.data,
+        editedBy: session.user.id,
+        note: note || null,
+        createdAt: now,
+      })
+      .returning({ id: schema.productVersion.id })
+
+    await db
+      .update(schema.product)
+      .set({ currentVersionId: version.id })
+      .where(eq(schema.product.id, id))
+  }
 
   return NextResponse.json({ product })
 }

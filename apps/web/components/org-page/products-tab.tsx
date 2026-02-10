@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { ProductForm } from '@/components/product-form'
 import { type Product, ProductList } from '@/components/product-list'
+import { ProductVersionHistory } from '@/components/product-version-history'
 
 export function ProductsTab({
   organizationId,
@@ -15,7 +16,7 @@ export function ProductsTab({
   const [products, setProducts] = useState<Product[]>([])
   const [isPending, setIsPending] = useState(false)
   const [productView, setProductView] = useState<
-    'list' | 'add' | { editing: Product }
+    'list' | 'add' | { editing: Product } | { history: Product }
   >('list')
 
   const refreshProducts = useCallback(() => {
@@ -60,6 +61,7 @@ export function ProductsTab({
       price: string
       unit: string
       category: string
+      note?: string
     },
   ): Promise<{ error?: string }> => {
     const res = await fetch(`/api/products/${productId}`, {
@@ -85,13 +87,31 @@ export function ProductsTab({
     )
   }
 
+  if (productView !== 'list' && 'history' in productView) {
+    return (
+      <ProductVersionHistory
+        productId={productView.history.id}
+        onBack={() => setProductView({ editing: productView.history })}
+      />
+    )
+  }
+
   if (productView !== 'list' && 'editing' in productView) {
     return (
-      <ProductForm
-        product={productView.editing}
-        onSubmit={(data) => handleUpdateProduct(productView.editing.id, data)}
-        onCancel={() => setProductView('list')}
-      />
+      <div className="space-y-4">
+        <ProductForm
+          product={productView.editing}
+          onSubmit={(data) => handleUpdateProduct(productView.editing.id, data)}
+          onCancel={() => setProductView('list')}
+        />
+        <button
+          type="button"
+          className="text-sm text-muted-foreground hover:text-foreground"
+          onClick={() => setProductView({ history: productView.editing })}
+        >
+          View version history
+        </button>
+      </div>
     )
   }
 

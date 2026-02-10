@@ -60,7 +60,33 @@ export async function POST(request: Request) {
     })
     .returning()
 
-  return NextResponse.json({ product }, { status: 201 })
+  // Insert version 1
+  const [version] = await db
+    .insert(schema.productVersion)
+    .values({
+      productId: product.id,
+      version: 1,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      unit: product.unit,
+      category: product.category,
+      images: product.images,
+      data: product.data,
+      editedBy: session.user.id,
+      createdAt: now,
+    })
+    .returning({ id: schema.productVersion.id })
+
+  await db
+    .update(schema.product)
+    .set({ currentVersionId: version.id })
+    .where(eq(schema.product.id, product.id))
+
+  return NextResponse.json(
+    { product: { ...product, currentVersionId: version.id } },
+    { status: 201 },
+  )
 }
 
 // GET /api/products?organizationId= — List products for an organization

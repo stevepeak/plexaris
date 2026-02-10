@@ -232,6 +232,30 @@ export const suggestionRouter = router({
           })
           .returning({ id: schema.product.id })
 
+        // Insert version 1
+        const [version] = await ctx.db
+          .insert(schema.productVersion)
+          .values({
+            productId: inserted[0].id,
+            version: 1,
+            name,
+            description,
+            price,
+            unit: typeof unit === 'string' ? unit : null,
+            category,
+            data: productData,
+            editedBy: ctx.session.user.id,
+            note: 'Created via suggestion',
+            createdAt: now,
+          })
+          .returning({ id: schema.productVersion.id })
+
+        // Update product with currentVersionId
+        await ctx.db
+          .update(schema.product)
+          .set({ currentVersionId: version.id })
+          .where(eq(schema.product.id, inserted[0].id))
+
         // Update suggestion with the new product's ID
         await ctx.db
           .update(schema.suggestion)
@@ -262,6 +286,45 @@ export const suggestionRouter = router({
             updatedAt: now,
           })
           .where(eq(schema.product.id, s.targetId))
+
+        // Insert a new version after the update
+        const updatedProduct = await ctx.db.query.product.findFirst({
+          where: eq(schema.product.id, s.targetId),
+        })
+
+        if (updatedProduct) {
+          const [maxRow] = await ctx.db
+            .select({
+              maxVersion: sql<number>`COALESCE(MAX(${schema.productVersion.version}), 0)`,
+            })
+            .from(schema.productVersion)
+            .where(eq(schema.productVersion.productId, s.targetId))
+
+          const nextVersion = (maxRow?.maxVersion ?? 0) + 1
+
+          const [version] = await ctx.db
+            .insert(schema.productVersion)
+            .values({
+              productId: s.targetId,
+              version: nextVersion,
+              name: updatedProduct.name,
+              description: updatedProduct.description,
+              price: updatedProduct.price,
+              unit: updatedProduct.unit,
+              category: updatedProduct.category,
+              images: updatedProduct.images,
+              data: updatedProduct.data,
+              editedBy: ctx.session.user.id,
+              note: 'Updated via suggestion',
+              createdAt: now,
+            })
+            .returning({ id: schema.productVersion.id })
+
+          await ctx.db
+            .update(schema.product)
+            .set({ currentVersionId: version.id })
+            .where(eq(schema.product.id, s.targetId))
+        }
       }
 
       if (s.targetType === 'organization' && s.action === 'update_field') {
