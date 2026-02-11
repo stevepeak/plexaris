@@ -47,7 +47,7 @@
     "@radix-ui/react-toggle-group": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.8",
     "@tanstack/react-query": "catalog:",
-    "@trigger.dev/react-hooks": "^4.3.2",
+    "@trigger.dev/react-hooks": "catalog:",
     "@trpc/client": "catalog:",
     "@trpc/react-query": "catalog:",
     "@trpc/server": "catalog:",
