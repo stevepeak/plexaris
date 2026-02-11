@@ -7,7 +7,7 @@
     "@opentelemetry/sdk-node": "catalog:",
     "@sentry/node": "catalog:",
     "@sentry/opentelemetry": "catalog:",
-    "@trigger.dev/sdk": "^4.3.0",
+    "@trigger.dev/sdk": "4.3.3",
     "ai": "catalog:",
     "import-in-the-middle": "catalog:",
     "zod": "catalog:"
@@ -18,7 +18,7 @@
     "@babel/preset-typescript": "^7.28.5",
     "@plexaris/eslint-config": "workspace:*",
     "@sentry/esbuild-plugin": "^4.6.0",
-    "@trigger.dev/build": "^4.3.0",
+    "@trigger.dev/build": "4.3.3",
     "@types/node": "catalog:",
     "typescript": "catalog:"
   },

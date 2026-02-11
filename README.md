@@ -56,7 +56,6 @@ A modern, type-safe monorepo template for building full-stack applications with 
    BETTER_AUTH_SECRET="your-secret-here"  # Generate with: openssl rand -base64 32
 
    # Trigger.dev
-   TRIGGER_PROJECT_ID="proj_xxxxx"  # Get from Trigger.dev dashboard
    TRIGGER_SECRET_KEY="tr_dev_xxxxx"  # Get from Trigger.dev dashboard
 
    # AI Services (choose one)

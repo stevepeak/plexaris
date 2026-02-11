@@ -10,8 +10,7 @@ import { setupTelemetry } from './src/telemetry'
 
 export default defineConfig({
   // Your project ref (you can see it on the Project settings page in the dashboard)
-  // eslint-disable-next-line no-process-env
-  project: process.env.TRIGGER_PROJECT_ID || '',
+  project: 'proj_wlhsywkggmbiojnhfqnf',
   // The paths for your trigger folders
   dirs: ['./src/tasks'],
   build: {
