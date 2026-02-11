@@ -1,10 +1,13 @@
 'use client'
 
+import { Eye } from 'lucide-react'
+import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
 import { ProductForm } from '@/components/product-form'
 import { type Product, ProductList } from '@/components/product-list'
 import { ProductVersionHistory } from '@/components/product-version-history'
+import { Button } from '@/components/ui/button'
 
 export function ProductsTab({
   organizationId,
@@ -95,6 +98,14 @@ export function ProductsTab({
   if (productView !== 'list' && 'editing' in productView) {
     return (
       <div className="space-y-4">
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/products/${productView.editing.id}/preview`}>
+              <Eye className="mr-2 h-4 w-4" />
+              Preview as HoReCa
+            </Link>
+          </Button>
+        </div>
         <ProductForm
           product={productView.editing}
           onSubmit={(data) => handleUpdateProduct(productView.editing.id, data)}

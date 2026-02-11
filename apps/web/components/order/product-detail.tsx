@@ -301,7 +301,7 @@ function ProductSections({ data }: { data?: Record<string, unknown> | null }) {
   return (
     <>
       <Separator />
-      <Accordion type="multiple" className="w-full">
+      <Accordion type="multiple" defaultValue={visibleKeys} className="w-full">
         {visibleKeys.map((key) => (
           <AccordionItem key={key} value={key}>
             <AccordionTrigger>{PRODUCT_SECTION_LABELS[key]}</AccordionTrigger>
@@ -366,6 +366,14 @@ function DataRow({ label, value }: { label: string; value: unknown }) {
   )
 }
 
+function SubHeader({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mt-2 mb-1 text-xs font-medium text-muted-foreground">
+      {children}
+    </p>
+  )
+}
+
 function GeneralDisplay({ data }: { data: Record<string, unknown> }) {
   return (
     <div className="flex flex-col">
@@ -408,25 +416,27 @@ function PackagingDisplay({
   const dims = data.dimensions as Record<string, unknown> | undefined
   const weight = data.weight as Record<string, unknown> | undefined
   const nc = data.netContent as Record<string, unknown> | undefined
-  const unit = sectionKey === 'unit' ? 'mm' : 'mm'
   return (
     <div className="flex flex-col">
       <DataRow label="GTIN" value={data.gtin} />
       {dims && (
         <>
-          <DataRow label={`Height (${unit})`} value={dims.height} />
-          <DataRow label={`Width (${unit})`} value={dims.width} />
-          <DataRow label={`Depth (${unit})`} value={dims.depth} />
+          <SubHeader>Dimensions (mm)</SubHeader>
+          <DataRow label="Height" value={dims.height} />
+          <DataRow label="Width" value={dims.width} />
+          <DataRow label="Depth" value={dims.depth} />
         </>
       )}
       {weight && (
         <>
-          <DataRow label="Gross weight" value={weight.gross} />
-          <DataRow label="Net weight" value={weight.net} />
+          <SubHeader>Weight (grams)</SubHeader>
+          <DataRow label="Gross" value={weight.gross} />
+          <DataRow label="Net" value={weight.net} />
         </>
       )}
       {nc && (
         <>
+          <SubHeader>Net content</SubHeader>
           <DataRow label="Milliliters" value={nc.milliliters} />
           <DataRow label="Grams" value={nc.grams} />
         </>
@@ -449,6 +459,7 @@ function PalletDisplay({ data }: { data: Record<string, unknown> }) {
       <DataRow label="Pallet type" value={data.palletType} />
       {load && (
         <>
+          <SubHeader>Load configuration</SubHeader>
           <DataRow label="Layers / pallet" value={load.layersPerPallet} />
           <DataRow label="Cases / layer" value={load.casesPerLayer} />
           <DataRow label="Cases / pallet" value={load.casesPerPallet} />
@@ -456,22 +467,24 @@ function PalletDisplay({ data }: { data: Record<string, unknown> }) {
       )}
       {dims && (
         <>
+          <SubHeader>Dimensions (cm)</SubHeader>
           <DataRow
-            label="Height with product (cm)"
+            label="Height (with product)"
             value={dims.heightWithProduct}
           />
           <DataRow
-            label="Height without product (cm)"
+            label="Height (without product)"
             value={dims.heightWithoutProduct}
           />
-          <DataRow label="Width (cm)" value={dims.width} />
-          <DataRow label="Depth (cm)" value={dims.depth} />
+          <DataRow label="Width" value={dims.width} />
+          <DataRow label="Depth" value={dims.depth} />
         </>
       )}
       {weight && (
         <>
-          <DataRow label="Gross weight (kg)" value={weight.gross} />
-          <DataRow label="Net weight (kg)" value={weight.net} />
+          <SubHeader>Weight (kg)</SubHeader>
+          <DataRow label="Gross" value={weight.gross} />
+          <DataRow label="Net" value={weight.net} />
         </>
       )}
     </div>
@@ -488,8 +501,9 @@ function IngredientsDisplay({ data }: { data: Record<string, unknown> }) {
       <DataRow label="Warning statements" value={data.warningStatements} />
       {palmOil && (
         <>
-          <DataRow label="Palm oil origin" value={palmOil.origin} />
-          <DataRow label="Palm oil %" value={palmOil.amountPercent} />
+          <SubHeader>Palm oil</SubHeader>
+          <DataRow label="Origin" value={palmOil.origin} />
+          <DataRow label="Amount (%)" value={palmOil.amountPercent} />
           <DataRow label="RSPO certificate" value={palmOil.rspoCertificate} />
         </>
       )}
@@ -564,13 +578,14 @@ function StorageDisplay({ data }: { data: Record<string, unknown> }) {
   const temp = data.temperatureRange as Record<string, unknown> | undefined
   return (
     <div className="flex flex-col">
-      {temp && (
-        <DataRow
-          label="Temperature range"
-          value={`${temp.min ?? '?'}°C – ${temp.max ?? '?'}°C`}
-        />
-      )}
       <DataRow label="Storage type" value={data.storageType} />
+      {temp && (
+        <>
+          <SubHeader>Temperature range (°C)</SubHeader>
+          <DataRow label="Min" value={temp.min} />
+          <DataRow label="Max" value={temp.max} />
+        </>
+      )}
       <DataRow
         label="Shelf life (production)"
         value={
