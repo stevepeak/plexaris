@@ -1,4 +1,4 @@
-import { createDb, schema } from '@app/db'
+import { createDb, schema, sql } from '@app/db'
 import { tool } from 'ai'
 import { z } from 'zod'
 
@@ -66,12 +66,100 @@ export function createSuggestProductTool(triggerRunId: string) {
       reasoning,
     }) => {
       const now = new Date()
+      let targetId = productId ?? null
+
+      // For create actions, insert a draft product alongside the suggestion
+      if (action === 'create') {
+        const proposed = (proposedValue ?? {}) as Record<string, unknown>
+
+        // Duplicate check by articleNumber
+        const data = (proposed.data ?? {}) as Record<string, unknown>
+        const articleNumber = (data.articleNumber ?? proposed.articleNumber) as
+          | string
+          | undefined
+        const gtin = ((data.unit as Record<string, unknown> | undefined)
+          ?.gtin ??
+          (proposed.unit as Record<string, unknown> | undefined)?.gtin) as
+          | string
+          | undefined
+
+        if (articleNumber) {
+          const [existing] = await db
+            .select({ id: schema.product.id })
+            .from(schema.product)
+            .where(
+              sql`${schema.product.organizationId} = ${organizationId} AND ${schema.product.data}->>'articleNumber' = ${articleNumber}`,
+            )
+            .limit(1)
+          if (existing) {
+            return JSON.stringify({
+              error: `Product with articleNumber ${articleNumber} already exists`,
+              existingProductId: existing.id,
+            })
+          }
+        }
+
+        if (gtin) {
+          const [existing] = await db
+            .select({ id: schema.product.id })
+            .from(schema.product)
+            .where(
+              sql`${schema.product.organizationId} = ${organizationId} AND ${schema.product.data}->'unit'->>'gtin' = ${gtin}`,
+            )
+            .limit(1)
+          if (existing) {
+            return JSON.stringify({
+              error: `Product with GTIN ${gtin} already exists`,
+              existingProductId: existing.id,
+            })
+          }
+        }
+
+        // Extract top-level columns from proposedValue
+        const name = (proposed.name as string) ?? 'Unnamed Product'
+        const description = (proposed.description as string) ?? null
+        const price = (proposed.price as string) ?? null
+        const unit = (proposed.unit as string) ?? null
+        const category = (proposed.category as string) ?? null
+
+        // Everything else goes into data
+        const {
+          name: _n,
+          description: _d,
+          price: _p,
+          unit: _u,
+          category: _c,
+          ...rest
+        } = proposed
+        const productData =
+          Object.keys(rest).length > 0 ? (rest.data ? rest.data : rest) : null
+
+        const [draftProduct] = await db
+          .insert(schema.product)
+          .values({
+            organizationId,
+            name,
+            description,
+            price,
+            unit: typeof unit === 'string' ? unit : null,
+            category,
+            data: productData,
+            status: 'draft',
+            currentVersionId: null,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .returning({ id: schema.product.id })
+
+        targetId = draftProduct.id
+      }
+
       const inserted = await db
         .insert(schema.suggestion)
         .values({
           organizationId,
           targetType: 'product',
-          targetId: productId ?? null,
+          targetId,
           action,
           field,
           label,
@@ -86,7 +174,11 @@ export function createSuggestProductTool(triggerRunId: string) {
         })
         .returning({ id: schema.suggestion.id })
 
-      return JSON.stringify({ suggestionId: inserted[0].id, created: true })
+      return JSON.stringify({
+        suggestionId: inserted[0].id,
+        created: true,
+        ...(targetId && action === 'create' ? { productId: targetId } : {}),
+      })
     },
   })
 }

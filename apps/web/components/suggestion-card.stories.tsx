@@ -100,3 +100,13 @@ export const LowConfidence: Story = {
     },
   },
 }
+
+export const ReviewProductLink: Story = {
+  args: {
+    suggestion: {
+      ...baseSuggestion,
+      targetId: 'prod-draft-456',
+    },
+    organizationId: 'org-123',
+  },
+}

@@ -90,6 +90,8 @@ export default function OrgPage() {
 
   const activeTab = searchParams.get('tab') ?? 'dashboard'
 
+  const initialProductId = searchParams.get('productId')
+
   const setActiveTab = useCallback(
     (tab: string) => {
       const params = new URLSearchParams(searchParams.toString())
@@ -98,6 +100,7 @@ export default function OrgPage() {
       } else {
         params.set('tab', tab)
       }
+      params.delete('productId')
       const qs = params.toString()
       router.replace(`/orgs/${orgId}${qs ? `?${qs}` : ''}`)
     },
@@ -276,6 +279,7 @@ export default function OrgPage() {
                   <ProductsTab
                     organizationId={activeOrg.id}
                     isOwner={activeOrg.role === 'owner'}
+                    initialProductId={initialProductId}
                   />
                 </TabsContent>
               )}

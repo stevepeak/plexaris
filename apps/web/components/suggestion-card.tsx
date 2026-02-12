@@ -1,6 +1,13 @@
 'use client'
 
-import { Building2, Check, EyeOff, Package, Zap } from 'lucide-react'
+import {
+  Building2,
+  Check,
+  ExternalLink,
+  EyeOff,
+  Package,
+  Zap,
+} from 'lucide-react'
 import Link from 'next/link'
 
 import { Badge } from '@/components/ui/badge'
@@ -33,6 +40,7 @@ export interface SuggestionCardData {
 
 interface SuggestionCardProps {
   suggestion: SuggestionCardData
+  organizationId?: string
   onAccept?: (id: string) => void
   onDismiss?: (id: string) => void
   isLoading?: boolean
@@ -72,12 +80,19 @@ function formatValue(value: unknown): string {
 
 export function SuggestionCard({
   suggestion,
+  organizationId,
   onAccept,
   onDismiss,
   isLoading,
 }: SuggestionCardProps) {
   const isPending = suggestion.status === 'pending'
   const Icon = suggestion.targetType === 'product' ? Package : Building2
+
+  // Product create with a linked draft — show review link instead of raw JSON
+  const hasLinkedDraft =
+    suggestion.targetType === 'product' &&
+    suggestion.action === 'create' &&
+    suggestion.targetId != null
 
   return (
     <Card className={cn('transition-opacity', !isPending && 'opacity-60')}>
@@ -140,7 +155,7 @@ export function SuggestionCard({
           </div>
         )}
 
-        {suggestion.action === 'create' && (
+        {suggestion.action === 'create' && !hasLinkedDraft && (
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground">
               Proposed data
@@ -197,15 +212,26 @@ export function SuggestionCard({
 
       {isPending && (
         <CardFooter className="gap-2 pt-0">
-          <Button
-            size="sm"
-            variant="default"
-            onClick={() => onAccept?.(suggestion.id)}
-            disabled={isLoading}
-          >
-            <Check className="mr-1 h-3 w-3" />
-            Accept
-          </Button>
+          {hasLinkedDraft && organizationId ? (
+            <Button size="sm" variant="default" asChild>
+              <Link
+                href={`/orgs/${organizationId}?tab=products&productId=${suggestion.targetId}`}
+              >
+                <ExternalLink className="mr-1 h-3 w-3" />
+                Review product
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => onAccept?.(suggestion.id)}
+              disabled={isLoading}
+            >
+              <Check className="mr-1 h-3 w-3" />
+              Accept
+            </Button>
+          )}
           <Button
             size="sm"
             variant="ghost"

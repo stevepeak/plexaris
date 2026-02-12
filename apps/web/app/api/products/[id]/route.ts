@@ -177,5 +177,25 @@ export async function PATCH(
       .where(eq(schema.product.id, id))
   }
 
+  // Auto-accept linked suggestion when a draft product is activated
+  if (existing.status === 'draft' && status === 'active') {
+    await db
+      .update(schema.suggestion)
+      .set({
+        status: 'accepted',
+        reviewedBy: session.user.id,
+        reviewedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(schema.suggestion.targetId, id),
+          eq(schema.suggestion.targetType, 'product'),
+          eq(schema.suggestion.action, 'create'),
+          eq(schema.suggestion.status, 'pending'),
+        ),
+      )
+  }
+
   return NextResponse.json({ product })
 }

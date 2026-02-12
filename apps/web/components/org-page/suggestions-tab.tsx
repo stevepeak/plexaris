@@ -106,6 +106,7 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
             <SuggestionCard
               key={s.id}
               suggestion={s}
+              organizationId={organizationId}
               onAccept={(id) => acceptMutation.mutate({ id })}
               onDismiss={(id) => dismissMutation.mutate({ id })}
               isLoading={isMutating}

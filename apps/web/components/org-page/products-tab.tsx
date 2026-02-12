@@ -8,13 +8,16 @@ import { type Product, ProductList } from '@/components/product-list'
 export function ProductsTab({
   organizationId,
   isOwner,
+  initialProductId,
 }: {
   organizationId: string
   isOwner: boolean
+  initialProductId?: string | null
 }) {
   const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [isPending, setIsPending] = useState(false)
+  const [consumedProductId, setConsumedProductId] = useState(false)
 
   const refreshProducts = useCallback(() => {
     setIsPending(true)
@@ -27,6 +30,14 @@ export function ProductsTab({
   useEffect(() => {
     refreshProducts()
   }, [refreshProducts])
+
+  // Deep-link: auto-navigate to product editor when initialProductId is set
+  useEffect(() => {
+    if (initialProductId && !consumedProductId) {
+      setConsumedProductId(true)
+      router.push(`/orgs/${organizationId}/products/${initialProductId}`)
+    }
+  }, [initialProductId, consumedProductId, organizationId, router])
 
   return (
     <ProductList

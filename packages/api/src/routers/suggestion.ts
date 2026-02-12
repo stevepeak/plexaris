@@ -152,6 +152,60 @@ export const suggestionRouter = router({
 
       // Apply the change based on targetType and action
       if (s.targetType === 'product' && s.action === 'create') {
+        if (s.targetId) {
+          // Draft product already created by agent — activate it and create version 1
+          const draft = await ctx.db.query.product.findFirst({
+            where: eq(schema.product.id, s.targetId),
+          })
+
+          if (!draft) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'Linked draft product not found',
+            })
+          }
+
+          const [version] = await ctx.db
+            .insert(schema.productVersion)
+            .values({
+              productId: draft.id,
+              version: 1,
+              name: draft.name,
+              description: draft.description,
+              price: draft.price,
+              unit: draft.unit,
+              category: draft.category,
+              images: draft.images,
+              data: draft.data,
+              editedBy: ctx.session.user.id,
+              note: 'Activated from agent suggestion',
+              createdAt: now,
+            })
+            .returning({ id: schema.productVersion.id })
+
+          await ctx.db
+            .update(schema.product)
+            .set({
+              status: 'active',
+              currentVersionId: version.id,
+              updatedAt: now,
+            })
+            .where(eq(schema.product.id, draft.id))
+
+          await ctx.db
+            .update(schema.suggestion)
+            .set({
+              status: 'accepted',
+              reviewedBy: ctx.session.user.id,
+              reviewedAt: now,
+              updatedAt: now,
+            })
+            .where(eq(schema.suggestion.id, input.id))
+
+          return { success: true, productId: draft.id }
+        }
+
+        // Legacy fallback: no draft product exists, create from scratch
         // Check for duplicates by articleNumber/GTIN before creating
         const data = (proposed.data ?? {}) as Record<string, unknown>
         const articleNumber = (data.articleNumber ?? proposed.articleNumber) as
@@ -404,6 +458,18 @@ export const suggestionRouter = router({
           updatedAt: now,
         })
         .where(eq(schema.suggestion.id, input.id))
+
+      // Archive linked draft product when dismissing a product create suggestion
+      if (s.targetType === 'product' && s.action === 'create' && s.targetId) {
+        await ctx.db
+          .update(schema.product)
+          .set({
+            status: 'archived',
+            archivedAt: now,
+            updatedAt: now,
+          })
+          .where(eq(schema.product.id, s.targetId))
+      }
 
       return { success: true }
     }),

@@ -25,3 +25,11 @@ export const Member: Story = {
     isOwner: false,
   },
 }
+
+export const WithInitialProductId: Story = {
+  args: {
+    organizationId: 'org-1',
+    isOwner: true,
+    initialProductId: 'prod-draft-456',
+  },
+}
