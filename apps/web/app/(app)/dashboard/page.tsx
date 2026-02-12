@@ -1,12 +1,18 @@
 'use client'
 
-import { LogOut, Settings } from 'lucide-react'
+import { LogOut, Plus, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -103,12 +109,52 @@ export default function DashboardPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8">
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <h2 className="text-xl font-semibold">Dashboard</h2>
-          <p className="mt-2 max-w-md text-sm text-muted-foreground">
-            This is where you'll find important updates and action items. This
-            feature is coming soon.
-          </p>
+        <h2 className="text-xl font-semibold">Organizations</h2>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {orgsPending
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i}>
+                  <CardHeader className="flex flex-row items-center gap-4">
+                    <Skeleton className="h-12 w-12 rounded-lg" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-3 w-16" />
+                    </div>
+                  </CardHeader>
+                </Card>
+              ))
+            : organizations.map((org) => (
+                <Link key={org.id} href={`/orgs/${org.id}`}>
+                  <Card className="transition-colors hover:bg-accent">
+                    <CardHeader className="flex flex-row items-center gap-4">
+                      <Avatar className="h-12 w-12 rounded-lg text-lg">
+                        {org.logoUrl && (
+                          <AvatarImage src={org.logoUrl} alt={org.name} />
+                        )}
+                        <AvatarFallback className="rounded-lg">
+                          {getInitials(org.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <CardTitle className="text-base">{org.name}</CardTitle>
+                        <CardDescription className="capitalize">
+                          {org.type}
+                        </CardDescription>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              ))}
+          <Link href="/onboarding">
+            <Card className="flex h-full items-center justify-center transition-colors hover:bg-accent">
+              <CardHeader className="flex flex-row items-center gap-2 text-muted-foreground">
+                <Plus className="h-5 w-5" />
+                <CardTitle className="text-base font-normal">
+                  Create organization
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </Link>
         </div>
       </main>
     </div>

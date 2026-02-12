@@ -946,6 +946,126 @@ export const productDataSchema = z.object({
   scrapeIssues: z.array(scrapeIssueSchema).default([]),
 })
 
+// ─── Product Section Field Labels (type-safe, schema-derived) ───────────────
+
+/** Maps an object type's leaf primitives to string labels, nested objects to sub-trees. */
+type LeafLabels<T> = {
+  [K in keyof Required<T>]: NonNullable<T[K]> extends (infer _U)[]
+    ? never // skip arrays
+    : NonNullable<T[K]> extends Record<string, unknown>
+      ? LeafLabels<NonNullable<T[K]>>
+      : string
+}
+
+/** Remove keys mapped to `never` (arrays) */
+type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] }
+
+const generalFieldLabels = {
+  brand: 'Brand',
+  variant: 'Variant',
+  description: 'Description',
+  articleNumber: 'Article number',
+  intrastatCode: 'Intrastat code',
+  countryOfOrigin: 'Country of origin',
+} satisfies OmitNever<LeafLabels<z.infer<typeof generalSectionSchema>>>
+
+const unitFieldLabels = {
+  gtin: 'GTIN / EAN',
+  dimensions: { height: 'Height', width: 'Width', depth: 'Depth' },
+  weight: { gross: 'Gross', net: 'Net' },
+  netContent: { milliliters: 'Milliliters', grams: 'Grams' },
+  packagingType: 'Packaging type',
+} satisfies OmitNever<LeafLabels<z.infer<typeof unitSectionSchema>>>
+
+const caseFieldLabels = {
+  gtin: 'GTIN / EAN',
+  dimensions: { height: 'Height', width: 'Width', depth: 'Depth' },
+  weight: { gross: 'Gross', net: 'Net' },
+  unitsPerCase: 'Units per case',
+  netContent: { milliliters: 'Milliliters', grams: 'Grams' },
+  packagingType: 'Packaging type',
+} satisfies OmitNever<LeafLabels<z.infer<typeof caseSectionSchema>>>
+
+const palletFieldLabels = {
+  gtin: 'GTIN / EAN',
+  palletType: 'Pallet type',
+  load: {
+    layersPerPallet: 'Layers / pallet',
+    casesPerLayer: 'Cases / layer',
+    casesPerPallet: 'Cases / pallet',
+  },
+  dimensions: {
+    heightWithProduct: 'Height (with product)',
+    heightWithoutProduct: 'Height (without product)',
+    width: 'Width',
+    depth: 'Depth',
+  },
+  weight: { gross: 'Gross', net: 'Net' },
+} satisfies OmitNever<LeafLabels<z.infer<typeof palletSectionSchema>>>
+
+const ingredientsFieldLabels = {
+  ingredients: 'Ingredients list',
+  warningStatements: 'Warning statements',
+  palmOil: {
+    origin: 'Origin',
+    amountPercent: 'Amount (%)',
+    rspoCertificate: 'RSPO certificate',
+  },
+} satisfies OmitNever<LeafLabels<z.infer<typeof ingredientsSectionSchema>>>
+
+const nutritionFieldLabels = {
+  energyKj: 'Energy (kJ)',
+  energyKcal: 'Energy (kcal)',
+  fatG: 'Fat (g)',
+  saturatedFatG: 'Saturated fat (g)',
+  carbohydratesG: 'Carbohydrates (g)',
+  sugarsG: 'Sugars (g)',
+  proteinG: 'Protein (g)',
+  saltG: 'Salt (g)',
+  fiberG: 'Fiber (g)',
+} satisfies OmitNever<LeafLabels<z.infer<typeof nutritionSectionSchema>>>
+
+const dietaryFieldLabels = {
+  kosher: 'Kosher',
+  halal: 'Halal',
+  vegetarian: 'Vegetarian',
+  vegan: 'Vegan',
+} satisfies OmitNever<LeafLabels<z.infer<typeof dietarySectionSchema>>>
+
+const storageFieldLabels = {
+  temperatureRange: { min: 'Min', max: 'Max' },
+  storageType: 'Storage type',
+  shelfLifeFromProductionDays: 'Shelf life from production (days)',
+  shelfLifeFromDeliveryDays: 'Shelf life from delivery (days)',
+} satisfies OmitNever<LeafLabels<z.infer<typeof storageSectionSchema>>>
+
+const pricingFieldLabels = {
+  currency: 'Currency',
+  exWorksPerKg: 'Ex Works / kg',
+  exWorksPerUnit: 'Ex Works / unit',
+  deliveredPerKg: 'Delivered / kg',
+  deliveredPerUnit: 'Delivered / unit',
+} satisfies OmitNever<LeafLabels<z.infer<typeof pricingSectionSchema>>>
+
+const labelFieldLabels = {
+  cartonPrint: 'Carton print',
+} satisfies OmitNever<LeafLabels<z.infer<typeof labelSectionSchema>>>
+
+export const PRODUCT_SECTION_FIELD_LABELS = {
+  general: generalFieldLabels,
+  unit: unitFieldLabels,
+  case: caseFieldLabels,
+  pallet: palletFieldLabels,
+  ingredients: ingredientsFieldLabels,
+  nutrition: nutritionFieldLabels,
+  dietary: dietaryFieldLabels,
+  storage: storageFieldLabels,
+  pricing: pricingFieldLabels,
+  label: labelFieldLabels,
+} as const
+
+export { allergenEnum }
+
 // ─── Type Exports ───────────────────────────────────────────────────────────
 
 export type Horeca = z.infer<typeof horecaSchema>

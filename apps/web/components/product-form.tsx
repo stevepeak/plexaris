@@ -6,9 +6,20 @@ import {
   type ProductSectionKey,
   productSectionKeys,
 } from '@app/db/data-schemas'
-import { ArrowLeft, Leaf, Loader2, Moon, Sprout, Star } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import {
+  ArrowLeft,
+  Eye,
+  Leaf,
+  Loader2,
+  Moon,
+  Sprout,
+  Star,
+  Undo2,
+} from 'lucide-react'
+import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
 
+import { ProductChangesPopover } from '@/components/product-changes-popover'
 import { ProductImageManager } from '@/components/product-image-manager'
 import {
   Accordion,
@@ -35,6 +46,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import {
+  type FieldChange,
+  useProductChanges,
+} from '@/hooks/use-product-changes'
+import { getNestedValue, setNestedValue } from '@/lib/nested-value'
 import { cn } from '@/lib/utils'
 
 const CATEGORIES = [
@@ -76,6 +92,7 @@ type ProductFormData = {
 }
 
 type ProductFormProps = {
+  productId?: string
   product?: {
     id: string
     name: string
@@ -91,38 +108,8 @@ type ProductFormProps = {
   isPending?: boolean
 }
 
-// Helper to update a nested path in the data blob
-function setNestedValue(
-  obj: Record<string, unknown>,
-  path: string[],
-  value: unknown,
-): Record<string, unknown> {
-  const result = { ...obj }
-  if (path.length === 1) {
-    result[path[0]] = value
-    return result
-  }
-  const [head, ...rest] = path
-  result[head] = setNestedValue(
-    (result[head] as Record<string, unknown>) ?? {},
-    rest,
-    value,
-  )
-  return result
-}
-
-function getNestedValue(obj: unknown, path: string[]): unknown {
-  let current = obj
-  for (const key of path) {
-    if (current == null || typeof current !== 'object') {
-      return undefined
-    }
-    current = (current as Record<string, unknown>)[key]
-  }
-  return current
-}
-
 export function ProductForm({
+  productId,
   product,
   onSubmit,
   onCancel,
@@ -145,14 +132,34 @@ export function ProductForm({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Snapshot of original values for change tracking
+  const originalNameRef = useRef(product?.name ?? '')
+  const originalCategoryRef = useRef(product?.category ?? '')
+  const originalDataRef = useRef<Record<string, unknown>>(
+    (product?.data as Record<string, unknown>) ?? {},
+  )
+
   useEffect(() => {
     if (product) {
       setName(product.name)
       setCategory(product.category ?? '')
       setNote('')
-      setData((product.data as Record<string, unknown>) ?? {})
+      const d = (product.data as Record<string, unknown>) ?? {}
+      setData(d)
+      originalNameRef.current = product.name
+      originalCategoryRef.current = product.category ?? ''
+      originalDataRef.current = d
     }
   }, [product])
+
+  const { changes, changeCount, changesMap } = useProductChanges({
+    originalName: originalNameRef.current,
+    originalCategory: originalCategoryRef.current,
+    originalData: originalDataRef.current,
+    currentName: name,
+    currentCategory: category,
+    currentData: data,
+  })
 
   if (isPending) {
     return (
@@ -200,6 +207,41 @@ export function ProductForm({
     return v != null ? String(v) : ''
   }
 
+  const getFieldChange = (path: string[]): FieldChange | undefined =>
+    changesMap[path.join('.')]
+
+  const undoChange = (change: FieldChange) => {
+    if (change.type === 'top-level') {
+      if (change.key === 'name') setName(change.originalValue as string)
+      if (change.key === 'category') {
+        setCategory(change.originalValue as string)
+      }
+    } else {
+      updateField(change.path, change.originalValue)
+    }
+  }
+
+  const navigateToChange = (change: FieldChange) => {
+    const fieldId = `field-${change.path.join('-')}`
+    const el = document.getElementById(fieldId)
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    setTimeout(() => {
+      el.style.boxShadow = '0 0 0 2px rgb(251 191 36 / 0.5)'
+      el.style.borderRadius = '6px'
+      el.style.transition = 'box-shadow 0.3s ease-in'
+      setTimeout(() => {
+        el.style.transition =
+          'box-shadow 1s ease-out, border-radius 1s ease-out'
+        el.style.boxShadow = ''
+        setTimeout(() => {
+          el.style.transition = ''
+          el.style.borderRadius = ''
+        }, 1000)
+      }, 1200)
+    }, 300)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!onSubmit) {
@@ -229,7 +271,7 @@ export function ProductForm({
             <ArrowLeft className="h-4 w-4" />
           </Button>
         )}
-        <div>
+        <div className="flex-1">
           <h2 className="text-lg font-semibold">
             {isEditing ? 'Edit product' : 'Add product'}
           </h2>
@@ -239,11 +281,40 @@ export function ProductForm({
               : 'Add a new product to your catalog'}
           </p>
         </div>
+        {isEditing && (
+          <div className="flex items-center gap-2">
+            <ProductChangesPopover
+              changes={changes}
+              onUndo={undoChange}
+              onNavigate={navigateToChange}
+            />
+            {productId && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/products/${productId}/preview`}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Preview
+                </Link>
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <Label htmlFor="product-name">Name</Label>
+        <div className="grid gap-2" id="field-name">
+          <FieldLabel
+            htmlFor="product-name"
+            change={
+              getFieldChange(['name'])
+                ? {
+                    originalValue: getFieldChange(['name'])!.originalValue,
+                    onUndo: () => undoChange(getFieldChange(['name'])!),
+                  }
+                : undefined
+            }
+          >
+            Name
+          </FieldLabel>
           <Input
             id="product-name"
             type="text"
@@ -253,8 +324,20 @@ export function ProductForm({
             required
           />
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="product-category">Category</Label>
+        <div className="grid gap-2" id="field-category">
+          <FieldLabel
+            htmlFor="product-category"
+            change={
+              getFieldChange(['category'])
+                ? {
+                    originalValue: getFieldChange(['category'])!.originalValue,
+                    onUndo: () => undoChange(getFieldChange(['category'])!),
+                  }
+                : undefined
+            }
+          >
+            Category
+          </FieldLabel>
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger id="product-category">
               <SelectValue placeholder="Select category" />
@@ -281,7 +364,10 @@ export function ProductForm({
           const enabled = isSectionEnabled(key)
           return (
             <AccordionItem key={key} value={key} className="border-b-0">
-              <Card className={cn(!enabled && 'opacity-50')}>
+              <Card
+                id={`field-sections-${key}`}
+                className={cn(!enabled && 'opacity-50')}
+              >
                 <CardHeader className="py-3">
                   <div className="flex items-center gap-2">
                     <div className="min-w-0 flex-1">
@@ -316,6 +402,8 @@ export function ProductForm({
                         getFieldNumber={getFieldNumber}
                         updateField={updateField}
                         data={data}
+                        fc={getFieldChange}
+                        onUndo={undoChange}
                       />
                     </div>
                   </CardContent>
@@ -355,6 +443,8 @@ export function ProductForm({
               <Loader2 className="h-4 w-4 animate-spin" />
               Saving...
             </>
+          ) : isEditing && changeCount > 0 ? (
+            `Save (${changeCount}) ${changeCount === 1 ? 'change' : 'changes'}`
           ) : isEditing ? (
             'Save changes'
           ) : (
@@ -376,7 +466,55 @@ export function ProductForm({
   )
 }
 
+// ─── Field Label with Undo ──────────────────────────────────────────────────
+
+function formatChangeValue(value: unknown): string {
+  if (value === null || value === undefined || value === '') return '(empty)'
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+  return String(value)
+}
+
+function FieldLabel({
+  children,
+  htmlFor,
+  change,
+}: {
+  children: React.ReactNode
+  htmlFor?: string
+  change?: { originalValue: unknown; onUndo: () => void }
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <Label htmlFor={htmlFor}>{children}</Label>
+      {change && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={change.onUndo}
+                className="rounded p-0.5 hover:bg-muted"
+              >
+                <Undo2 className="h-3 w-3 text-amber-500" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Was: {formatChangeValue(change.originalValue)}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+    </div>
+  )
+}
+
 // ─── Per-Section Field Components ──────────────────────────────────────────
+
+type ChangeInfo = {
+  originalValue: unknown
+  onUndo: () => void
+  fieldId: string
+}
 
 type SectionFieldsProps = {
   sectionKey: ProductSectionKey
@@ -384,6 +522,23 @@ type SectionFieldsProps = {
   getFieldNumber: (path: string[]) => string
   updateField: (path: string[], value: unknown) => void
   data: Record<string, unknown>
+  fc: (path: string[]) => FieldChange | undefined
+  onUndo: (change: FieldChange) => void
+}
+
+/** Build a ChangeInfo from a FieldChange, or undefined */
+function ci(
+  fc: (path: string[]) => FieldChange | undefined,
+  onUndo: (change: FieldChange) => void,
+  path: string[],
+): ChangeInfo | undefined {
+  const change = fc(path)
+  if (!change) return undefined
+  return {
+    originalValue: change.originalValue,
+    onUndo: () => onUndo(change),
+    fieldId: `field-${path.join('-')}`,
+  }
 }
 
 function SectionFields({
@@ -392,10 +547,19 @@ function SectionFields({
   getFieldNumber,
   updateField,
   data,
+  fc,
+  onUndo,
 }: SectionFieldsProps) {
   switch (sectionKey) {
     case 'general':
-      return <GeneralFields g={getFieldString} u={updateField} />
+      return (
+        <GeneralFields
+          g={getFieldString}
+          u={updateField}
+          fc={fc}
+          undo={onUndo}
+        />
+      )
     case 'photos':
       return <PhotosFields data={data} />
     case 'unit':
@@ -408,6 +572,8 @@ function SectionFields({
           weightUnit="grams"
           dimUnit="mm"
           showUnitsPerCase={false}
+          fc={fc}
+          undo={onUndo}
         />
       )
     case 'case':
@@ -420,11 +586,19 @@ function SectionFields({
           weightUnit="grams"
           dimUnit="mm"
           showUnitsPerCase
+          fc={fc}
+          undo={onUndo}
         />
       )
     case 'pallet':
       return (
-        <PalletFields gn={getFieldNumber} g={getFieldString} u={updateField} />
+        <PalletFields
+          gn={getFieldNumber}
+          g={getFieldString}
+          u={updateField}
+          fc={fc}
+          undo={onUndo}
+        />
       )
     case 'ingredients':
       return (
@@ -432,22 +606,54 @@ function SectionFields({
           g={getFieldString}
           gn={getFieldNumber}
           u={updateField}
+          fc={fc}
+          undo={onUndo}
         />
       )
     case 'nutrition':
-      return <NutritionFields gn={getFieldNumber} u={updateField} />
+      return (
+        <NutritionFields
+          gn={getFieldNumber}
+          u={updateField}
+          fc={fc}
+          undo={onUndo}
+        />
+      )
     case 'allergens':
-      return <AllergensFields data={data} u={updateField} />
+      return (
+        <AllergensFields data={data} u={updateField} fc={fc} undo={onUndo} />
+      )
     case 'dietary':
-      return <DietaryFields data={data} u={updateField} />
+      return <DietaryFields data={data} u={updateField} fc={fc} undo={onUndo} />
     case 'storage':
       return (
-        <StorageFields g={getFieldString} gn={getFieldNumber} u={updateField} />
+        <StorageFields
+          g={getFieldString}
+          gn={getFieldNumber}
+          u={updateField}
+          fc={fc}
+          undo={onUndo}
+        />
       )
     case 'pricing':
-      return <PricingFields gn={getFieldNumber} u={updateField} />
+      return (
+        <PricingFields
+          gn={getFieldNumber}
+          u={updateField}
+          fc={fc}
+          undo={onUndo}
+        />
+      )
     case 'label':
-      return <LabelFields g={getFieldString} u={updateField} data={data} />
+      return (
+        <LabelFields
+          g={getFieldString}
+          u={updateField}
+          data={data}
+          fc={fc}
+          undo={onUndo}
+        />
+      )
     default:
       return null
   }
@@ -455,13 +661,20 @@ function SectionFields({
 
 // ─── General ─────────────────────────────────────────────────────────────────
 
+type FCProp = {
+  fc: (path: string[]) => FieldChange | undefined
+  undo: (change: FieldChange) => void
+}
+
 function GeneralFields({
   g,
   u,
+  fc,
+  undo,
 }: {
   g: (p: string[]) => string
   u: (p: string[], v: unknown) => void
-}) {
+} & FCProp) {
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -469,15 +682,19 @@ function GeneralFields({
           label="Brand"
           value={g(['general', 'brand'])}
           onChange={(v) => u(['general', 'brand'], v)}
+          change={ci(fc, undo, ['general', 'brand'])}
         />
         <FieldInput
           label="Variant"
           value={g(['general', 'variant'])}
           onChange={(v) => u(['general', 'variant'], v)}
+          change={ci(fc, undo, ['general', 'variant'])}
         />
       </div>
-      <div className="grid gap-2">
-        <Label>Description</Label>
+      <div className="grid gap-2" id="field-general-description">
+        <FieldLabel change={ci(fc, undo, ['general', 'description'])}>
+          Description
+        </FieldLabel>
         <Textarea
           value={g(['general', 'description'])}
           onChange={(e) => u(['general', 'description'], e.target.value)}
@@ -490,18 +707,21 @@ function GeneralFields({
           label="Article number"
           value={g(['general', 'articleNumber'])}
           onChange={(v) => u(['general', 'articleNumber'], v)}
+          change={ci(fc, undo, ['general', 'articleNumber'])}
         />
         <FieldInput
           label="Intrastat code"
           value={g(['general', 'intrastatCode'])}
           onChange={(v) => u(['general', 'intrastatCode'], v)}
           placeholder="8 digits"
+          change={ci(fc, undo, ['general', 'intrastatCode'])}
         />
         <FieldInput
           label="Country of origin"
           value={g(['general', 'countryOfOrigin'])}
           onChange={(v) => u(['general', 'countryOfOrigin'], v)}
           placeholder="e.g. NL"
+          change={ci(fc, undo, ['general', 'countryOfOrigin'])}
         />
       </div>
     </>
@@ -526,6 +746,8 @@ function PackagingFields({
   weightUnit,
   dimUnit,
   showUnitsPerCase,
+  fc,
+  undo,
 }: {
   section: 'unit' | 'case'
   g: (p: string[]) => string
@@ -534,7 +756,7 @@ function PackagingFields({
   weightUnit: string
   dimUnit: string
   showUnitsPerCase: boolean
-}) {
+} & FCProp) {
   const packagingOptions =
     section === 'unit'
       ? ['bottle_glass', 'pet_bottle', 'bag', 'bucket']
@@ -547,6 +769,7 @@ function PackagingFields({
         value={g([section, 'gtin'])}
         onChange={(v) => u([section, 'gtin'], v)}
         placeholder="8, 12, 13, or 14 digits"
+        change={ci(fc, undo, [section, 'gtin'])}
       />
       <p className="text-xs font-medium text-muted-foreground">
         Dimensions ({dimUnit})
@@ -556,16 +779,19 @@ function PackagingFields({
           label="Height"
           value={gn([section, 'dimensions', 'height'])}
           onChange={(v) => u([section, 'dimensions', 'height'], v)}
+          change={ci(fc, undo, [section, 'dimensions', 'height'])}
         />
         <FieldNumber
           label="Width"
           value={gn([section, 'dimensions', 'width'])}
           onChange={(v) => u([section, 'dimensions', 'width'], v)}
+          change={ci(fc, undo, [section, 'dimensions', 'width'])}
         />
         <FieldNumber
           label="Depth"
           value={gn([section, 'dimensions', 'depth'])}
           onChange={(v) => u([section, 'dimensions', 'depth'], v)}
+          change={ci(fc, undo, [section, 'dimensions', 'depth'])}
         />
       </div>
       <p className="text-xs font-medium text-muted-foreground">
@@ -576,11 +802,13 @@ function PackagingFields({
           label="Gross"
           value={gn([section, 'weight', 'gross'])}
           onChange={(v) => u([section, 'weight', 'gross'], v)}
+          change={ci(fc, undo, [section, 'weight', 'gross'])}
         />
         <FieldNumber
           label="Net"
           value={gn([section, 'weight', 'net'])}
           onChange={(v) => u([section, 'weight', 'net'], v)}
+          change={ci(fc, undo, [section, 'weight', 'net'])}
         />
       </div>
       <p className="text-xs font-medium text-muted-foreground">Net content</p>
@@ -589,11 +817,13 @@ function PackagingFields({
           label="Milliliters"
           value={gn([section, 'netContent', 'milliliters'])}
           onChange={(v) => u([section, 'netContent', 'milliliters'], v)}
+          change={ci(fc, undo, [section, 'netContent', 'milliliters'])}
         />
         <FieldNumber
           label="Grams"
           value={gn([section, 'netContent', 'grams'])}
           onChange={(v) => u([section, 'netContent', 'grams'], v)}
+          change={ci(fc, undo, [section, 'netContent', 'grams'])}
         />
       </div>
       {showUnitsPerCase && (
@@ -601,10 +831,13 @@ function PackagingFields({
           label="Units per case"
           value={gn([section, 'unitsPerCase'])}
           onChange={(v) => u([section, 'unitsPerCase'], v)}
+          change={ci(fc, undo, [section, 'unitsPerCase'])}
         />
       )}
-      <div className="grid gap-2">
-        <Label>Packaging type</Label>
+      <div className="grid gap-2" id={`field-${section}-packagingType`}>
+        <FieldLabel change={ci(fc, undo, [section, 'packagingType'])}>
+          Packaging type
+        </FieldLabel>
         <Select
           value={g([section, 'packagingType'])}
           onValueChange={(v) => u([section, 'packagingType'], v)}
@@ -631,20 +864,25 @@ function PalletFields({
   gn,
   g,
   u,
+  fc,
+  undo,
 }: {
   gn: (p: string[]) => string
   g: (p: string[]) => string
   u: (p: string[], v: unknown) => void
-}) {
+} & FCProp) {
   return (
     <>
       <FieldInput
         label="GTIN / EAN"
         value={g(['pallet', 'gtin'])}
         onChange={(v) => u(['pallet', 'gtin'], v)}
+        change={ci(fc, undo, ['pallet', 'gtin'])}
       />
-      <div className="grid gap-2">
-        <Label>Pallet type</Label>
+      <div className="grid gap-2" id="field-pallet-palletType">
+        <FieldLabel change={ci(fc, undo, ['pallet', 'palletType'])}>
+          Pallet type
+        </FieldLabel>
         <Select
           value={g(['pallet', 'palletType'])}
           onValueChange={(v) => u(['pallet', 'palletType'], v)}
@@ -666,16 +904,19 @@ function PalletFields({
           label="Layers / pallet"
           value={gn(['pallet', 'load', 'layersPerPallet'])}
           onChange={(v) => u(['pallet', 'load', 'layersPerPallet'], v)}
+          change={ci(fc, undo, ['pallet', 'load', 'layersPerPallet'])}
         />
         <FieldNumber
           label="Cases / layer"
           value={gn(['pallet', 'load', 'casesPerLayer'])}
           onChange={(v) => u(['pallet', 'load', 'casesPerLayer'], v)}
+          change={ci(fc, undo, ['pallet', 'load', 'casesPerLayer'])}
         />
         <FieldNumber
           label="Cases / pallet"
           value={gn(['pallet', 'load', 'casesPerPallet'])}
           onChange={(v) => u(['pallet', 'load', 'casesPerPallet'], v)}
+          change={ci(fc, undo, ['pallet', 'load', 'casesPerPallet'])}
         />
       </div>
       <p className="text-xs font-medium text-muted-foreground">
@@ -686,6 +927,7 @@ function PalletFields({
           label="Height (with product)"
           value={gn(['pallet', 'dimensions', 'heightWithProduct'])}
           onChange={(v) => u(['pallet', 'dimensions', 'heightWithProduct'], v)}
+          change={ci(fc, undo, ['pallet', 'dimensions', 'heightWithProduct'])}
         />
         <FieldNumber
           label="Height (without product)"
@@ -693,16 +935,23 @@ function PalletFields({
           onChange={(v) =>
             u(['pallet', 'dimensions', 'heightWithoutProduct'], v)
           }
+          change={ci(fc, undo, [
+            'pallet',
+            'dimensions',
+            'heightWithoutProduct',
+          ])}
         />
         <FieldNumber
           label="Width"
           value={gn(['pallet', 'dimensions', 'width'])}
           onChange={(v) => u(['pallet', 'dimensions', 'width'], v)}
+          change={ci(fc, undo, ['pallet', 'dimensions', 'width'])}
         />
         <FieldNumber
           label="Depth"
           value={gn(['pallet', 'dimensions', 'depth'])}
           onChange={(v) => u(['pallet', 'dimensions', 'depth'], v)}
+          change={ci(fc, undo, ['pallet', 'dimensions', 'depth'])}
         />
       </div>
       <p className="text-xs font-medium text-muted-foreground">Weight (kg)</p>
@@ -711,11 +960,13 @@ function PalletFields({
           label="Gross"
           value={gn(['pallet', 'weight', 'gross'])}
           onChange={(v) => u(['pallet', 'weight', 'gross'], v)}
+          change={ci(fc, undo, ['pallet', 'weight', 'gross'])}
         />
         <FieldNumber
           label="Net"
           value={gn(['pallet', 'weight', 'net'])}
           onChange={(v) => u(['pallet', 'weight', 'net'], v)}
+          change={ci(fc, undo, ['pallet', 'weight', 'net'])}
         />
       </div>
     </>
@@ -728,15 +979,19 @@ function IngredientsFields({
   g,
   gn,
   u,
+  fc,
+  undo,
 }: {
   g: (p: string[]) => string
   gn: (p: string[]) => string
   u: (p: string[], v: unknown) => void
-}) {
+} & FCProp) {
   return (
     <>
-      <div className="grid gap-2">
-        <Label>Ingredients list</Label>
+      <div className="grid gap-2" id="field-ingredients-ingredients">
+        <FieldLabel change={ci(fc, undo, ['ingredients', 'ingredients'])}>
+          Ingredients list
+        </FieldLabel>
         <Textarea
           value={g(['ingredients', 'ingredients'])}
           onChange={(e) => u(['ingredients', 'ingredients'], e.target.value)}
@@ -744,8 +999,10 @@ function IngredientsFields({
           placeholder="Full ingredient list as shown on label"
         />
       </div>
-      <div className="grid gap-2">
-        <Label>Warning statements</Label>
+      <div className="grid gap-2" id="field-ingredients-warningStatements">
+        <FieldLabel change={ci(fc, undo, ['ingredients', 'warningStatements'])}>
+          Warning statements
+        </FieldLabel>
         <Textarea
           value={g(['ingredients', 'warningStatements'])}
           onChange={(e) =>
@@ -761,16 +1018,19 @@ function IngredientsFields({
           label="Origin"
           value={g(['ingredients', 'palmOil', 'origin'])}
           onChange={(v) => u(['ingredients', 'palmOil', 'origin'], v)}
+          change={ci(fc, undo, ['ingredients', 'palmOil', 'origin'])}
         />
         <FieldNumber
           label="Amount (%)"
           value={gn(['ingredients', 'palmOil', 'amountPercent'])}
           onChange={(v) => u(['ingredients', 'palmOil', 'amountPercent'], v)}
+          change={ci(fc, undo, ['ingredients', 'palmOil', 'amountPercent'])}
         />
         <FieldInput
           label="RSPO certificate"
           value={g(['ingredients', 'palmOil', 'rspoCertificate'])}
           onChange={(v) => u(['ingredients', 'palmOil', 'rspoCertificate'], v)}
+          change={ci(fc, undo, ['ingredients', 'palmOil', 'rspoCertificate'])}
         />
       </div>
     </>
@@ -794,10 +1054,12 @@ const NUTRITION_FIELDS = [
 function NutritionFields({
   gn,
   u,
+  fc,
+  undo,
 }: {
   gn: (p: string[]) => string
   u: (p: string[], v: unknown) => void
-}) {
+} & FCProp) {
   return (
     <>
       <p className="text-xs text-muted-foreground">Per 100g / 100ml</p>
@@ -808,6 +1070,7 @@ function NutritionFields({
             label={label}
             value={gn(['nutrition', key])}
             onChange={(v) => u(['nutrition', key], v)}
+            change={ci(fc, undo, ['nutrition', key])}
           />
         ))}
       </div>
@@ -820,10 +1083,12 @@ function NutritionFields({
 function AllergensFields({
   data,
   u,
+  fc,
+  undo,
 }: {
   data: Record<string, unknown>
   u: (p: string[], v: unknown) => void
-}) {
+} & FCProp) {
   const allergenData = (data.allergens as Record<string, unknown>) ?? {}
   const allergenMap = (allergenData.allergens as Record<string, string>) ?? {}
 
@@ -831,8 +1096,16 @@ function AllergensFields({
     <div className="grid gap-2">
       <p className="text-xs text-muted-foreground">EU-14 allergens</p>
       {EU_ALLERGENS.map((allergen) => (
-        <div key={allergen} className="flex items-center gap-3">
-          <span className="w-24 text-sm capitalize">{allergen}</span>
+        <div
+          key={allergen}
+          id={`field-allergens-allergens-${allergen}`}
+          className="flex items-center gap-3"
+        >
+          <FieldLabel
+            change={ci(fc, undo, ['allergens', 'allergens', allergen])}
+          >
+            <span className="w-24 text-sm capitalize">{allergen}</span>
+          </FieldLabel>
           <Select
             value={allergenMap[allergen] ?? ''}
             onValueChange={(v) => {
@@ -893,24 +1166,46 @@ const DIETARY_CONFIG = [
 function DietaryFields({
   data,
   u,
+  fc,
+  undo,
 }: {
   data: Record<string, unknown>
   u: (p: string[], v: unknown) => void
-}) {
+} & FCProp) {
   const dietary = (data.dietary as Record<string, boolean>) ?? {}
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       {DIETARY_CONFIG.map((item) => {
         const isActive = dietary[item.key] ?? false
+        const change = ci(fc, undo, ['dietary', item.key])
         return (
           <div
             key={item.key}
+            id={`field-dietary-${item.key}`}
             className={cn(
-              'flex flex-col items-center gap-2 rounded-lg border p-3 transition-all',
+              'relative flex flex-col items-center gap-2 rounded-lg border p-3 transition-all',
               isActive ? item.activeClasses : 'opacity-40',
             )}
           >
+            {change && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={change.onUndo}
+                      className="absolute top-1.5 right-1.5 rounded p-0.5 hover:bg-muted"
+                    >
+                      <Undo2 className="h-3 w-3 text-amber-500" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Was: {formatChangeValue(change.originalValue)}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
             <item.icon
               className={cn(
                 'h-6 w-6',
@@ -935,11 +1230,13 @@ function StorageFields({
   g,
   gn,
   u,
+  fc,
+  undo,
 }: {
   g: (p: string[]) => string
   gn: (p: string[]) => string
   u: (p: string[], v: unknown) => void
-}) {
+} & FCProp) {
   return (
     <>
       <p className="text-xs font-medium text-muted-foreground">
@@ -950,15 +1247,19 @@ function StorageFields({
           label="Min"
           value={gn(['storage', 'temperatureRange', 'min'])}
           onChange={(v) => u(['storage', 'temperatureRange', 'min'], v)}
+          change={ci(fc, undo, ['storage', 'temperatureRange', 'min'])}
         />
         <FieldNumber
           label="Max"
           value={gn(['storage', 'temperatureRange', 'max'])}
           onChange={(v) => u(['storage', 'temperatureRange', 'max'], v)}
+          change={ci(fc, undo, ['storage', 'temperatureRange', 'max'])}
         />
       </div>
-      <div className="grid gap-2">
-        <Label>Storage type</Label>
+      <div className="grid gap-2" id="field-storage-storageType">
+        <FieldLabel change={ci(fc, undo, ['storage', 'storageType'])}>
+          Storage type
+        </FieldLabel>
         <Select
           value={g(['storage', 'storageType'])}
           onValueChange={(v) => u(['storage', 'storageType'], v)}
@@ -978,11 +1279,13 @@ function StorageFields({
           label="Shelf life from production (days)"
           value={gn(['storage', 'shelfLifeFromProductionDays'])}
           onChange={(v) => u(['storage', 'shelfLifeFromProductionDays'], v)}
+          change={ci(fc, undo, ['storage', 'shelfLifeFromProductionDays'])}
         />
         <FieldNumber
           label="Shelf life from delivery (days)"
           value={gn(['storage', 'shelfLifeFromDeliveryDays'])}
           onChange={(v) => u(['storage', 'shelfLifeFromDeliveryDays'], v)}
+          change={ci(fc, undo, ['storage', 'shelfLifeFromDeliveryDays'])}
         />
       </div>
     </>
@@ -994,10 +1297,12 @@ function StorageFields({
 function PricingFields({
   gn,
   u,
+  fc,
+  undo,
 }: {
   gn: (p: string[]) => string
   u: (p: string[], v: unknown) => void
-}) {
+} & FCProp) {
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -1005,21 +1310,25 @@ function PricingFields({
           label="Ex Works / kg"
           value={gn(['pricing', 'exWorksPerKg'])}
           onChange={(v) => u(['pricing', 'exWorksPerKg'], v)}
+          change={ci(fc, undo, ['pricing', 'exWorksPerKg'])}
         />
         <FieldNumber
           label="Ex Works / unit"
           value={gn(['pricing', 'exWorksPerUnit'])}
           onChange={(v) => u(['pricing', 'exWorksPerUnit'], v)}
+          change={ci(fc, undo, ['pricing', 'exWorksPerUnit'])}
         />
         <FieldNumber
           label="Delivered / kg"
           value={gn(['pricing', 'deliveredPerKg'])}
           onChange={(v) => u(['pricing', 'deliveredPerKg'], v)}
+          change={ci(fc, undo, ['pricing', 'deliveredPerKg'])}
         />
         <FieldNumber
           label="Delivered / unit"
           value={gn(['pricing', 'deliveredPerUnit'])}
           onChange={(v) => u(['pricing', 'deliveredPerUnit'], v)}
+          change={ci(fc, undo, ['pricing', 'deliveredPerUnit'])}
         />
       </div>
     </>
@@ -1032,11 +1341,13 @@ function LabelFields({
   g,
   u,
   data,
+  fc,
+  undo,
 }: {
   g: (p: string[]) => string
   u: (p: string[], v: unknown) => void
   data: Record<string, unknown>
-}) {
+} & FCProp) {
   const labelData = (data.label as Record<string, unknown>) ?? {}
   const labelImages = (labelData.labelImages as string[]) ?? []
 
@@ -1046,8 +1357,10 @@ function LabelFields({
         <Label>Label images</Label>
         <ProductImageManager images={labelImages} disabled />
       </div>
-      <div className="grid gap-2">
-        <Label>Carton print</Label>
+      <div className="grid gap-2" id="field-label-cartonPrint">
+        <FieldLabel change={ci(fc, undo, ['label', 'cartonPrint'])}>
+          Carton print
+        </FieldLabel>
         <Textarea
           value={g(['label', 'cartonPrint'])}
           onChange={(e) => u(['label', 'cartonPrint'], e.target.value)}
@@ -1066,15 +1379,17 @@ function FieldInput({
   value,
   onChange,
   placeholder,
+  change,
 }: {
   label: string
   value: string
   onChange: (v: string) => void
   placeholder?: string
+  change?: ChangeInfo
 }) {
   return (
-    <div className="grid gap-2">
-      <Label>{label}</Label>
+    <div className="grid gap-2" id={change?.fieldId}>
+      <FieldLabel change={change}>{label}</FieldLabel>
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -1088,14 +1403,16 @@ function FieldNumber({
   label,
   value,
   onChange,
+  change,
 }: {
   label: string
   value: string
   onChange: (v: number | undefined) => void
+  change?: ChangeInfo
 }) {
   return (
-    <div className="grid gap-2">
-      <Label>{label}</Label>
+    <div className="grid gap-2" id={change?.fieldId}>
+      <FieldLabel change={change}>{label}</FieldLabel>
       <Input
         type="number"
         step="any"
