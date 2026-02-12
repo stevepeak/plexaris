@@ -102,7 +102,7 @@ export function ProductsTab({
           <Button variant="outline" size="sm" asChild>
             <Link href={`/products/${productView.editing.id}/preview`}>
               <Eye className="mr-2 h-4 w-4" />
-              Preview as HoReCa
+              Preview
             </Link>
           </Button>
         </div>

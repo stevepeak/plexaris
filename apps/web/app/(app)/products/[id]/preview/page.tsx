@@ -120,7 +120,7 @@ export default function ProductPreviewPage() {
             </Button>
             <Separator orientation="vertical" className="h-6" />
             <span className="font-mono text-sm text-muted-foreground">
-              HoReCa Preview
+              Preview
             </span>
           </div>
         </div>

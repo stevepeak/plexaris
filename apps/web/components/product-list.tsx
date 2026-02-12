@@ -289,7 +289,7 @@ export function ProductList({
   onAddProduct?: () => void
   onEditProduct?: (product: Product) => void
 }) {
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table')
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<ProductFilters>({
     statuses: new Set(),
