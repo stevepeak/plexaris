@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
+import { uploadFiles } from '@/lib/upload'
 
 type OrgDetails = {
   id: string
@@ -118,22 +119,9 @@ export function SettingsTab({
     file: File | null,
   ): Promise<{ error?: string }> => {
     if (!file) return {}
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('organizationId', organizationId)
-
-    const res = await fetch('/api/upload/organization-logo', {
-      method: 'POST',
-      body: formData,
-    })
-
-    if (!res.ok) {
-      const json = await res.json()
-      return { error: json.error ?? 'Failed to upload image' }
-    }
-
-    const json = await res.json()
-    setOrg((prev) => (prev ? { ...prev, logoUrl: json.url } : prev))
+    const { urls, error } = await uploadFiles([file], 'logos')
+    if (error || !urls[0]) return { error: error ?? 'Upload failed' }
+    setOrg((prev) => (prev ? { ...prev, logoUrl: urls[0] } : prev))
     return {}
   }
 

@@ -64,6 +64,7 @@ import {
   useProductChanges,
 } from '@/hooks/use-product-changes'
 import { getNestedValue, setNestedValue } from '@/lib/nested-value'
+import { uploadFiles } from '@/lib/upload'
 import { cn } from '@/lib/utils'
 
 const CATEGORIES = [
@@ -654,7 +655,7 @@ function SectionFields({
         />
       )
     case 'photos':
-      return <PhotosFields data={data} />
+      return <PhotosFields data={data} u={updateField} />
     case 'unit':
       return (
         <PackagingFields
@@ -823,10 +824,39 @@ function GeneralFields({
 
 // ─── Photos ──────────────────────────────────────────────────────────────────
 
-function PhotosFields({ data }: { data: Record<string, unknown> }) {
+function PhotosFields({
+  data,
+  u,
+}: {
+  data: Record<string, unknown>
+  u: (p: string[], v: unknown) => void
+}) {
   const photos = (data.photos as Record<string, unknown>) ?? {}
   const images = (photos.images as string[]) ?? []
-  return <ProductImageManager images={images} disabled />
+
+  const handleAdd = async (files: File[]): Promise<{ error?: string }> => {
+    const { urls, error } = await uploadFiles(files, 'products')
+    if (error) return { error }
+    u(['photos', 'images'], [...images, ...urls])
+    return {}
+  }
+
+  const handleRemove = async (index: number): Promise<{ error?: string }> => {
+    u(
+      ['photos', 'images'],
+      images.filter((_, i) => i !== index),
+    )
+    return {}
+  }
+
+  return (
+    <ProductImageManager
+      images={images}
+      disabled={false}
+      onAdd={handleAdd}
+      onRemove={handleRemove}
+    />
+  )
 }
 
 // ─── Packaging (Unit & Case) ─────────────────────────────────────────────────
@@ -1461,11 +1491,35 @@ function LabelFields({
   const labelData = (data.label as Record<string, unknown>) ?? {}
   const labelImages = (labelData.labelImages as string[]) ?? []
 
+  const handleAddLabelImages = async (
+    files: File[],
+  ): Promise<{ error?: string }> => {
+    const { urls, error } = await uploadFiles(files, 'products')
+    if (error) return { error }
+    u(['label', 'labelImages'], [...labelImages, ...urls])
+    return {}
+  }
+
+  const handleRemoveLabelImage = async (
+    index: number,
+  ): Promise<{ error?: string }> => {
+    u(
+      ['label', 'labelImages'],
+      labelImages.filter((_, i) => i !== index),
+    )
+    return {}
+  }
+
   return (
     <>
       <div className="grid gap-2">
         <Label>Label images</Label>
-        <ProductImageManager images={labelImages} disabled />
+        <ProductImageManager
+          images={labelImages}
+          disabled={false}
+          onAdd={handleAddLabelImages}
+          onRemove={handleRemoveLabelImage}
+        />
       </div>
       <div className="grid gap-2" id="field-label-cartonPrint">
         <FieldLabel change={ci(fc, undo, ['label', 'cartonPrint'])}>

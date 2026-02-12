@@ -58,6 +58,10 @@ const config: KnipConfig = {
       project: ['src/**/*.ts'],
       ignore: ['**/node_modules/**', '**/dist/**', '**/*.d.ts'],
     },
+    'packages/cloudinary': {
+      project: ['src/**/*.ts'],
+      ignore: ['**/node_modules/**', '**/dist/**', '**/*.d.ts'],
+    },
   },
   ignore: [
     'apps/web/components/ui/**',

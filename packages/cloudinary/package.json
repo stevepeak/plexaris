@@ -1,0 +1,25 @@
+{
+  "name": "@app/cloudinary",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Cloudinary image upload and URL building",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . && prettier --ignore-path='../../.prettierignore' --check .",
+    "fix": "eslint --fix --quiet . && prettier --ignore-path='../../.prettierignore' --log-level=silent --write ."
+  },
+  "dependencies": {
+    "@app/config": "workspace:*"
+  },
+  "devDependencies": {
+    "@plexaris/eslint-config": "workspace:*",
+    "@types/node": "catalog:",
+    "tsconfig": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

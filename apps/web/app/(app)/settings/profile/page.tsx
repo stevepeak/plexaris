@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
+import { uploadFiles } from '@/lib/upload'
 
 function getInitials(name: string | undefined): string {
   if (!name) return '?'
@@ -30,6 +31,20 @@ export default function ProfileSettingsPage() {
     switchOrg,
     isPending: orgsPending,
   } = useActiveOrg()
+
+  const handleUpdateImage = useCallback(
+    async (file: File | null): Promise<{ error?: string }> => {
+      if (!file) return {}
+      const { urls, error: uploadError } = await uploadFiles([file], 'avatars')
+      if (uploadError || !urls[0]) {
+        return { error: uploadError ?? 'Upload failed' }
+      }
+      const { error } = await authClient.updateUser({ image: urls[0] })
+      if (error) return { error: error.message ?? 'Failed to update avatar' }
+      return {}
+    },
+    [],
+  )
 
   const handleUpdateName = useCallback(
     async (name: string): Promise<{ error?: string }> => {
@@ -108,6 +123,7 @@ export default function ProfileSettingsPage() {
           image={session?.user.image}
           isPending={isPending}
           onUpdateName={handleUpdateName}
+          onUpdateImage={handleUpdateImage}
           onChangePassword={handleChangePassword}
           onArchiveAccount={handleArchiveAccount}
         />

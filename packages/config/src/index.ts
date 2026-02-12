@@ -31,6 +31,9 @@ const envSchema = z.object({
   TRIGGER_PROJECT_REF: z.string().min(1).startsWith('proj_'),
   TRIGGER_SECRET_KEY: z.string().min(1).startsWith('tr_'),
 
+  // Cloudinary (cloudinary://API_KEY:API_SECRET@CLOUD_NAME)
+  CLOUDINARY_URL: z.string().startsWith('cloudinary://'),
+
   // PostHog
   POSTHOG_API_KEY: z.string().nullable(),
   POSTHOG_HOST: z.string().url().default('https://us.i.posthog.com'),
