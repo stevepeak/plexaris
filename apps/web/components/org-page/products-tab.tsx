@@ -94,21 +94,13 @@ export function ProductsTab({
 
   if (productView !== 'list' && 'editing' in productView) {
     return (
-      <div className="space-y-4">
-        <ProductForm
-          productId={productView.editing.id}
-          product={productView.editing}
-          onSubmit={(data) => handleUpdateProduct(productView.editing.id, data)}
-          onCancel={() => setProductView('list')}
-        />
-        <button
-          type="button"
-          className="text-sm text-muted-foreground hover:text-foreground"
-          onClick={() => setProductView({ history: productView.editing })}
-        >
-          View version history
-        </button>
-      </div>
+      <ProductForm
+        productId={productView.editing.id}
+        product={productView.editing}
+        onSubmit={(data) => handleUpdateProduct(productView.editing.id, data)}
+        onCancel={() => setProductView('list')}
+        onViewHistory={() => setProductView({ history: productView.editing })}
+      />
     )
   }
 

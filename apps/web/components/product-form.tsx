@@ -9,16 +9,18 @@ import {
 import {
   ArrowLeft,
   Eye,
+  History,
   Leaf,
   Loader2,
   Moon,
+  Pencil,
   Sprout,
   Star,
   Undo2,
 } from 'lucide-react'
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
+import { ProductSections } from '@/components/order/product-detail'
 import { ProductChangesPopover } from '@/components/product-changes-popover'
 import { ProductImageManager } from '@/components/product-image-manager'
 import {
@@ -105,6 +107,7 @@ type ProductFormProps = {
   } | null
   onSubmit?: (data: ProductFormData) => Promise<{ error?: string }>
   onCancel?: () => void
+  onViewHistory?: () => void
   isPending?: boolean
 }
 
@@ -113,6 +116,7 @@ export function ProductForm({
   product,
   onSubmit,
   onCancel,
+  onViewHistory,
   isPending,
 }: ProductFormProps) {
   const isEditing = !!product
@@ -129,6 +133,7 @@ export function ProductForm({
     return [...productSectionKeys.filter((key) => s[key] !== false)]
   })
 
+  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -242,29 +247,43 @@ export function ProductForm({
     }, 300)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!onSubmit) {
-      return
-    }
+  const doSubmit = async () => {
+    if (!onSubmit) return
     setIsLoading(true)
     setError(null)
-
     const result = await onSubmit({
       name,
       category,
       ...(isEditing && note ? { note } : {}),
       data: data as Partial<Product>,
     })
-
     if (result.error) {
       setError(result.error)
     }
     setIsLoading(false)
   }
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    void doSubmit()
+  }
+
+  const saveLabel = isLoading ? (
+    <>
+      <Loader2 className="h-4 w-4 animate-spin" />
+      Saving...
+    </>
+  ) : isEditing && changeCount > 0 ? (
+    `Save (${changeCount}) ${changeCount === 1 ? 'change' : 'changes'}`
+  ) : isEditing ? (
+    'Save changes'
+  ) : (
+    'Add product'
+  )
+
   return (
-    <form onSubmit={handleSubmit} className="grid gap-4">
+    <div className="grid gap-4 pb-16">
+      {/* Header */}
       <div className="flex items-center gap-3">
         {onCancel && (
           <Button variant="ghost" size="icon" onClick={onCancel} type="button">
@@ -281,188 +300,237 @@ export function ProductForm({
               : 'Add a new product to your catalog'}
           </p>
         </div>
-        {isEditing && (
-          <div className="flex items-center gap-2">
+      </div>
+
+      {/* Content: edit form or preview */}
+      {viewMode === 'preview' ? (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col gap-4">
+              <div>
+                {category && (
+                  <span className="text-xs text-muted-foreground">
+                    {category}
+                  </span>
+                )}
+                <h3 className="text-lg font-semibold">
+                  {name || 'Untitled product'}
+                </h3>
+              </div>
+              <ProductSections data={data} />
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <form
+          id="product-edit-form"
+          onSubmit={handleSubmit}
+          className="grid gap-4"
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-2" id="field-name">
+              <FieldLabel
+                htmlFor="product-name"
+                change={
+                  getFieldChange(['name'])
+                    ? {
+                        originalValue: getFieldChange(['name'])!.originalValue,
+                        onUndo: () => undoChange(getFieldChange(['name'])!),
+                      }
+                    : undefined
+                }
+              >
+                Name
+              </FieldLabel>
+              <Input
+                id="product-name"
+                type="text"
+                placeholder="e.g. Sourdough Bread"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="grid gap-2" id="field-category">
+              <FieldLabel
+                htmlFor="product-category"
+                change={
+                  getFieldChange(['category'])
+                    ? {
+                        originalValue: getFieldChange(['category'])!
+                          .originalValue,
+                        onUndo: () => undoChange(getFieldChange(['category'])!),
+                      }
+                    : undefined
+                }
+              >
+                Category
+              </FieldLabel>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger id="product-category">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Section cards */}
+          <Accordion
+            type="multiple"
+            value={openSections}
+            onValueChange={setOpenSections}
+            className="grid gap-4"
+          >
+            {productSectionKeys.map((key) => {
+              const enabled = isSectionEnabled(key)
+              return (
+                <AccordionItem key={key} value={key} className="border-b-0">
+                  <Card
+                    id={`field-sections-${key}`}
+                    className={cn(!enabled && 'opacity-50')}
+                  >
+                    <CardHeader className="py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="min-w-0 flex-1">
+                          <AccordionTrigger className="hover:no-underline">
+                            {PRODUCT_SECTION_LABELS[key]}
+                          </AccordionTrigger>
+                        </div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <Switch
+                                  icons
+                                  checked={enabled}
+                                  onCheckedChange={() => toggleSection(key)}
+                                />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="left">
+                              {enabled ? 'Disable section' : 'Enable section'}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </CardHeader>
+                    <AccordionContent className="pb-0">
+                      <CardContent className="pt-0">
+                        <div className="grid gap-3">
+                          <SectionFields
+                            sectionKey={key}
+                            getFieldString={getFieldString}
+                            getFieldNumber={getFieldNumber}
+                            updateField={updateField}
+                            data={data}
+                            fc={getFieldChange}
+                            onUndo={undoChange}
+                          />
+                        </div>
+                      </CardContent>
+                    </AccordionContent>
+                  </Card>
+                </AccordionItem>
+              )
+            })}
+          </Accordion>
+
+          {isEditing && (
+            <Card className="bg-muted/50">
+              <CardContent className="py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="product-note">Edit note</Label>
+                  <Textarea
+                    id="product-note"
+                    placeholder="What changed?"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    rows={2}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    For internal purposes only
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </form>
+      )}
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      {/* Sticky bottom action bar */}
+      <div className="sticky bottom-0 -mx-1 border-t bg-background px-1 py-3">
+        <div className="flex items-center gap-2">
+          {isEditing && (
             <ProductChangesPopover
               changes={changes}
               onUndo={undoChange}
               onNavigate={navigateToChange}
             />
-            {productId && (
-              <Button variant="outline" size="sm" asChild>
-                <Link href={`/products/${productId}/preview`}>
+          )}
+          {isEditing && (
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() =>
+                setViewMode((m) => (m === 'edit' ? 'preview' : 'edit'))
+              }
+            >
+              {viewMode === 'edit' ? (
+                <>
                   <Eye className="mr-2 h-4 w-4" />
                   Preview
-                </Link>
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-2" id="field-name">
-          <FieldLabel
-            htmlFor="product-name"
-            change={
-              getFieldChange(['name'])
-                ? {
-                    originalValue: getFieldChange(['name'])!.originalValue,
-                    onUndo: () => undoChange(getFieldChange(['name'])!),
-                  }
-                : undefined
-            }
-          >
-            Name
-          </FieldLabel>
-          <Input
-            id="product-name"
-            type="text"
-            placeholder="e.g. Sourdough Bread"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="grid gap-2" id="field-category">
-          <FieldLabel
-            htmlFor="product-category"
-            change={
-              getFieldChange(['category'])
-                ? {
-                    originalValue: getFieldChange(['category'])!.originalValue,
-                    onUndo: () => undoChange(getFieldChange(['category'])!),
-                  }
-                : undefined
-            }
-          >
-            Category
-          </FieldLabel>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger id="product-category">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Section cards */}
-      <Accordion
-        type="multiple"
-        value={openSections}
-        onValueChange={setOpenSections}
-        className="grid gap-4"
-      >
-        {productSectionKeys.map((key) => {
-          const enabled = isSectionEnabled(key)
-          return (
-            <AccordionItem key={key} value={key} className="border-b-0">
-              <Card
-                id={`field-sections-${key}`}
-                className={cn(!enabled && 'opacity-50')}
-              >
-                <CardHeader className="py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="min-w-0 flex-1">
-                      <AccordionTrigger className="hover:no-underline">
-                        {PRODUCT_SECTION_LABELS[key]}
-                      </AccordionTrigger>
-                    </div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div>
-                            <Switch
-                              icons
-                              checked={enabled}
-                              onCheckedChange={() => toggleSection(key)}
-                            />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="left">
-                          {enabled ? 'Disable section' : 'Enable section'}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </CardHeader>
-                <AccordionContent className="pb-0">
-                  <CardContent className="pt-0">
-                    <div className="grid gap-3">
-                      <SectionFields
-                        sectionKey={key}
-                        getFieldString={getFieldString}
-                        getFieldNumber={getFieldNumber}
-                        updateField={updateField}
-                        data={data}
-                        fc={getFieldChange}
-                        onUndo={undoChange}
-                      />
-                    </div>
-                  </CardContent>
-                </AccordionContent>
-              </Card>
-            </AccordionItem>
-          )
-        })}
-      </Accordion>
-
-      {isEditing && (
-        <Card className="bg-muted/50">
-          <CardContent className="py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="product-note">Edit note</Label>
-              <Textarea
-                id="product-note"
-                placeholder="What changed?"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                rows={2}
-              />
-              <p className="text-xs text-muted-foreground">
-                For internal purposes only
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
-
-      <div className="flex gap-3">
-        <Button type="submit" disabled={isLoading} className="w-fit">
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : isEditing && changeCount > 0 ? (
-            `Save (${changeCount}) ${changeCount === 1 ? 'change' : 'changes'}`
-          ) : isEditing ? (
-            'Save changes'
-          ) : (
-            'Add product'
+                </>
+              ) : (
+                <>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </>
+              )}
+            </Button>
           )}
-        </Button>
-        {onCancel && (
+          <div className="flex-1" />
+          {onViewHistory && (
+            <Button
+              variant="ghost"
+              size="sm"
+              type="button"
+              onClick={onViewHistory}
+            >
+              <History className="mr-2 h-4 w-4" />
+              History
+            </Button>
+          )}
+          {onCancel && (
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={onCancel}
+            >
+              Cancel
+            </Button>
+          )}
           <Button
+            size="sm"
+            disabled={isLoading}
             type="button"
-            variant="outline"
-            onClick={onCancel}
-            className="w-fit"
+            onClick={() => void doSubmit()}
           >
-            Cancel
+            {saveLabel}
           </Button>
-        )}
+        </div>
       </div>
-    </form>
+    </div>
   )
 }
 

@@ -284,7 +284,11 @@ export function ProductDetail({
 
 // ─── Product Section Display ─────────────────────────────────────────────────
 
-function ProductSections({ data }: { data?: Record<string, unknown> | null }) {
+export function ProductSections({
+  data,
+}: {
+  data?: Record<string, unknown> | null
+}) {
   if (!data) return null
 
   const sections = (data.sections ?? {}) as Record<string, boolean>
