@@ -252,7 +252,7 @@ const unitPackagingTypeEnum = z.enum([
   'bucket',
 ])
 const casePackagingTypeEnum = z.enum(['tray', 'box', 'bucket'])
-const palletTypeEnum = z.enum(['euro', 'chep'])
+const palletTypeEnum = z.enum(['euro', 'chep', 'block'])
 const storageTypeEnum = z.enum(['ambient', 'chilled', 'frozen'])
 const currencyEnum = z
   .string()

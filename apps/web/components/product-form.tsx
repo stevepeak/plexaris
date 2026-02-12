@@ -8,15 +8,26 @@ import {
 } from '@app/db/data-schemas'
 import {
   ArrowLeft,
+  Box,
+  Camera,
+  CircleDollarSign,
   Eye,
   History,
+  Info,
   Leaf,
   Loader2,
   Moon,
+  Package,
   Pencil,
+  ShieldAlert,
   Sprout,
   Star,
+  Tag,
+  Thermometer,
   Undo2,
+  UtensilsCrossed,
+  Warehouse,
+  WheatOff,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -30,7 +41,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -40,6 +50,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -66,6 +77,24 @@ const CATEGORIES = [
   'Ingredients',
   'Other',
 ] as const
+
+const SECTION_ICONS: Record<
+  ProductSectionKey,
+  React.ComponentType<{ className?: string }>
+> = {
+  general: Info,
+  photos: Camera,
+  unit: Package,
+  case: Box,
+  pallet: Warehouse,
+  ingredients: UtensilsCrossed,
+  nutrition: WheatOff,
+  allergens: ShieldAlert,
+  dietary: Leaf,
+  storage: Thermometer,
+  pricing: CircleDollarSign,
+  label: Tag,
+}
 
 const EU_ALLERGENS = [
   'milk',
@@ -168,17 +197,13 @@ export function ProductForm({
 
   if (isPending) {
     return (
-      <Card>
-        <CardHeader>
-          <div className="h-5 w-40 animate-pulse rounded bg-muted" />
-          <div className="h-4 w-56 animate-pulse rounded bg-muted" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="h-9 animate-pulse rounded bg-muted" />
-          <div className="h-20 animate-pulse rounded bg-muted" />
-          <div className="h-9 animate-pulse rounded bg-muted" />
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <div className="h-5 w-40 animate-pulse rounded bg-muted" />
+        <div className="h-4 w-56 animate-pulse rounded bg-muted" />
+        <div className="h-9 animate-pulse rounded bg-muted" />
+        <div className="h-20 animate-pulse rounded bg-muted" />
+        <div className="h-9 animate-pulse rounded bg-muted" />
+      </div>
     )
   }
 
@@ -194,9 +219,12 @@ export function ProductForm({
         [key]: !wasEnabled,
       }),
     )
-    // Collapse when disabling
     if (wasEnabled) {
+      // Collapse when disabling
       setOpenSections((prev) => prev.filter((k) => k !== key))
+    } else {
+      // Expand when enabling
+      setOpenSections((prev) => (prev.includes(key) ? prev : [...prev, key]))
     }
   }
 
@@ -304,23 +332,17 @@ export function ProductForm({
 
       {/* Content: edit form or preview */}
       {viewMode === 'preview' ? (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col gap-4">
-              <div>
-                {category && (
-                  <span className="text-xs text-muted-foreground">
-                    {category}
-                  </span>
-                )}
-                <h3 className="text-lg font-semibold">
-                  {name || 'Untitled product'}
-                </h3>
-              </div>
-              <ProductSections data={data} />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col gap-4">
+          <div>
+            {category && (
+              <span className="text-xs text-muted-foreground">{category}</span>
+            )}
+            <h3 className="text-lg font-semibold">
+              {name || 'Untitled product'}
+            </h3>
+          </div>
+          <ProductSections data={data} />
+        </div>
       ) : (
         <form
           id="product-edit-form"
@@ -391,75 +413,78 @@ export function ProductForm({
             {productSectionKeys.map((key) => {
               const enabled = isSectionEnabled(key)
               return (
-                <AccordionItem key={key} value={key} className="border-b-0">
-                  <Card
-                    id={`field-sections-${key}`}
-                    className={cn(!enabled && 'opacity-50')}
-                  >
-                    <CardHeader className="py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="min-w-0 flex-1">
-                          <AccordionTrigger className="hover:no-underline">
-                            {PRODUCT_SECTION_LABELS[key]}
-                          </AccordionTrigger>
-                        </div>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div>
-                                <Switch
-                                  icons
-                                  checked={enabled}
-                                  onCheckedChange={() => toggleSection(key)}
-                                />
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="left">
-                              {enabled ? 'Disable section' : 'Enable section'}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </CardHeader>
-                    <AccordionContent className="pb-0">
-                      <CardContent className="pt-0">
-                        <div className="grid gap-3">
-                          <SectionFields
-                            sectionKey={key}
-                            getFieldString={getFieldString}
-                            getFieldNumber={getFieldNumber}
-                            updateField={updateField}
-                            data={data}
-                            fc={getFieldChange}
-                            onUndo={undoChange}
-                          />
-                        </div>
-                      </CardContent>
-                    </AccordionContent>
-                  </Card>
+                <AccordionItem
+                  key={key}
+                  value={key}
+                  id={`field-sections-${key}`}
+                  className={cn('border-b-0', !enabled && 'opacity-50')}
+                >
+                  <Separator />
+                  <div className="flex items-center gap-2 pt-6 pb-2">
+                    <div className="min-w-0 flex-1">
+                      <AccordionTrigger className="text-base font-semibold hover:no-underline">
+                        <span className="flex items-center gap-2">
+                          {(() => {
+                            const Icon = SECTION_ICONS[key]
+                            return (
+                              <Icon className="h-4 w-4 text-muted-foreground" />
+                            )
+                          })()}
+                          {PRODUCT_SECTION_LABELS[key]}
+                        </span>
+                      </AccordionTrigger>
+                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <Switch
+                              icons
+                              checked={enabled}
+                              onCheckedChange={() => toggleSection(key)}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="left">
+                          {enabled ? 'Disable section' : 'Enable section'}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <AccordionContent>
+                    <div className="grid gap-3 pt-2">
+                      <SectionFields
+                        sectionKey={key}
+                        getFieldString={getFieldString}
+                        getFieldNumber={getFieldNumber}
+                        updateField={updateField}
+                        data={data}
+                        fc={getFieldChange}
+                        onUndo={undoChange}
+                      />
+                    </div>
+                  </AccordionContent>
                 </AccordionItem>
               )
             })}
           </Accordion>
 
           {isEditing && (
-            <Card className="bg-muted/50">
-              <CardContent className="py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="product-note">Edit note</Label>
-                  <Textarea
-                    id="product-note"
-                    placeholder="What changed?"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    rows={2}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    For internal purposes only
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="pt-6">
+              <Separator />
+              <div className="grid gap-2 pt-6">
+                <Label htmlFor="product-note">Edit note</Label>
+                <Textarea
+                  id="product-note"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={2}
+                />
+                <p className="text-xs text-muted-foreground">
+                  For internal purposes only
+                </p>
+              </div>
+            </div>
           )}
         </form>
       )}
@@ -928,6 +953,16 @@ function PackagingFields({
 
 // ─── Pallet ──────────────────────────────────────────────────────────────────
 
+const PALLET_TYPES = [
+  { value: 'euro', label: 'Euro Pallet (EPAL/EUR)', size: '120 x 80 cm' },
+  { value: 'chep', label: 'CHEP Pallet', size: '120 x 100 cm' },
+  {
+    value: 'block',
+    label: 'Block Pallet / Industrial',
+    size: '120 x 100 cm',
+  },
+] as const
+
 function PalletFields({
   gn,
   g,
@@ -939,6 +974,8 @@ function PalletFields({
   g: (p: string[]) => string
   u: (p: string[], v: unknown) => void
 } & FCProp) {
+  const currentType = g(['pallet', 'palletType'])
+
   return (
     <>
       <FieldInput
@@ -952,15 +989,18 @@ function PalletFields({
           Pallet type
         </FieldLabel>
         <Select
-          value={g(['pallet', 'palletType'])}
+          value={currentType}
           onValueChange={(v) => u(['pallet', 'palletType'], v)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select type" />
+            <SelectValue placeholder="Select pallet type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="euro">Euro</SelectItem>
-            <SelectItem value="chep">CHEP</SelectItem>
+            {PALLET_TYPES.map((pt) => (
+              <SelectItem key={pt.value} value={pt.value}>
+                {pt.label} ({pt.size})
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -1161,39 +1201,41 @@ function AllergensFields({
   const allergenMap = (allergenData.allergens as Record<string, string>) ?? {}
 
   return (
-    <div className="grid gap-2">
+    <div className="grid gap-4">
       <p className="text-xs text-muted-foreground">EU-14 allergens</p>
-      {EU_ALLERGENS.map((allergen) => (
-        <div
-          key={allergen}
-          id={`field-allergens-allergens-${allergen}`}
-          className="flex items-center gap-3"
-        >
-          <FieldLabel
-            change={ci(fc, undo, ['allergens', 'allergens', allergen])}
+      <div className="grid grid-cols-2 gap-4">
+        {EU_ALLERGENS.map((allergen) => (
+          <div
+            key={allergen}
+            id={`field-allergens-allergens-${allergen}`}
+            className="flex items-center gap-3"
           >
-            <span className="w-24 text-sm capitalize">{allergen}</span>
-          </FieldLabel>
-          <Select
-            value={allergenMap[allergen] ?? ''}
-            onValueChange={(v) => {
-              const updated = { ...allergenMap, [allergen]: v }
-              u(['allergens', 'allergens'], updated)
-            }}
-          >
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Not set" />
-            </SelectTrigger>
-            <SelectContent>
-              {ALLERGEN_STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s.replace(/_/g, ' ')}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      ))}
+            <FieldLabel
+              change={ci(fc, undo, ['allergens', 'allergens', allergen])}
+            >
+              <span className="w-24 text-sm capitalize">{allergen}</span>
+            </FieldLabel>
+            <Select
+              value={allergenMap[allergen] ?? ''}
+              onValueChange={(v) => {
+                const updated = { ...allergenMap, [allergen]: v }
+                u(['allergens', 'allergens'], updated)
+              }}
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Not set" />
+              </SelectTrigger>
+              <SelectContent>
+                {ALLERGEN_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s.replace(/_/g, ' ')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -1205,28 +1247,28 @@ const DIETARY_CONFIG = [
     key: 'kosher',
     label: 'Kosher',
     icon: Star,
-    activeClasses: 'border-blue-400 bg-blue-50 dark:bg-blue-950/30',
+    activeClasses: 'border-blue-400',
     iconColor: 'text-blue-600',
   },
   {
     key: 'halal',
     label: 'Halal',
     icon: Moon,
-    activeClasses: 'border-green-400 bg-green-50 dark:bg-green-950/30',
+    activeClasses: 'border-green-400',
     iconColor: 'text-green-600',
   },
   {
     key: 'vegetarian',
     label: 'Vegetarian',
     icon: Leaf,
-    activeClasses: 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30',
+    activeClasses: 'border-emerald-400',
     iconColor: 'text-emerald-600',
   },
   {
     key: 'vegan',
     label: 'Vegan',
     icon: Sprout,
-    activeClasses: 'border-teal-400 bg-teal-50 dark:bg-teal-950/30',
+    activeClasses: 'border-teal-400',
     iconColor: 'text-teal-600',
   },
 ] as const
