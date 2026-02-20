@@ -5,21 +5,7 @@ import {
   type ProductSectionKey,
   productSectionKeys,
 } from '@app/db/data-schemas'
-import {
-  Apple,
-  Beef,
-  Croissant,
-  CupSoda,
-  Egg,
-  Fish,
-  type LucideIcon,
-  Milk,
-  Package,
-  ShoppingCart,
-  Star,
-  Store,
-  Wheat,
-} from 'lucide-react'
+import { Package, ShoppingCart, Star, Store } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import {
@@ -33,17 +19,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  Bread: Wheat,
-  Pastry: Croissant,
-  Dairy: Milk,
-  Meat: Beef,
-  Fish,
-  Produce: Apple,
-  Beverages: CupSoda,
-  Ingredients: Egg,
-}
+import { getCategoryIcon } from '@/lib/product-categories'
 
 interface ProductData {
   id: string
@@ -200,7 +176,7 @@ export function ProductDetail({
             {product.category && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 {(() => {
-                  const Icon = CATEGORY_ICONS[product.category]
+                  const Icon = getCategoryIcon(product.category)
                   return Icon ? <Icon className="h-3 w-3" /> : null
                 })()}
                 {product.category}

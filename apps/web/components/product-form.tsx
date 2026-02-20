@@ -64,20 +64,9 @@ import {
   useProductChanges,
 } from '@/hooks/use-product-changes'
 import { getNestedValue, setNestedValue } from '@/lib/nested-value'
+import { getCategoryIcon, PRODUCT_CATEGORIES } from '@/lib/product-categories'
 import { uploadFiles } from '@/lib/upload'
 import { cn } from '@/lib/utils'
-
-const CATEGORIES = [
-  'Bread',
-  'Pastry',
-  'Dairy',
-  'Meat',
-  'Fish',
-  'Produce',
-  'Beverages',
-  'Ingredients',
-  'Other',
-] as const
 
 const SECTION_ICONS: Record<
   ProductSectionKey,
@@ -391,12 +380,27 @@ export function ProductForm({
               </FieldLabel>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger id="product-category">
-                  <SelectValue placeholder="Select category" />
+                  {category ? (
+                    <span className="!flex items-center gap-2">
+                      {(() => {
+                        const Icon = getCategoryIcon(category)
+                        return Icon ? (
+                          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        ) : null
+                      })()}
+                      {category}
+                    </span>
+                  ) : (
+                    <SelectValue placeholder="Select category" />
+                  )}
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
+                  {PRODUCT_CATEGORIES.map((c) => (
+                    <SelectItem key={c.label} value={c.label}>
+                      <span className="flex items-center gap-2">
+                        <c.icon className="h-4 w-4 text-muted-foreground" />
+                        {c.label}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>

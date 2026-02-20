@@ -1,28 +1,20 @@
 'use client'
 
 import {
-  Apple,
-  Beef,
   BookOpen,
   ChefHat,
   ChevronRight,
   Croissant,
-  CupSoda,
-  Egg,
-  Fish,
   Heart,
   Home,
   LayoutGrid,
   type LucideIcon,
-  Milk,
-  MoreHorizontal,
   Search,
   ShoppingBag,
   Star,
   Store,
   TrendingUp,
   Truck,
-  Wheat,
 } from 'lucide-react'
 
 import { Kbd } from '@/components/kbd'
@@ -32,6 +24,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
+import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
 
 interface CategoryDef {
   label: string
@@ -41,15 +34,7 @@ interface CategoryDef {
 const SECTION_CATEGORIES: Record<BrowseSection, CategoryDef[]> = {
   products: [
     { label: 'All products', icon: LayoutGrid },
-    { label: 'Bread', icon: Wheat },
-    { label: 'Pastry', icon: Croissant },
-    { label: 'Dairy', icon: Milk },
-    { label: 'Meat', icon: Beef },
-    { label: 'Fish', icon: Fish },
-    { label: 'Produce', icon: Apple },
-    { label: 'Beverages', icon: CupSoda },
-    { label: 'Ingredients', icon: Egg },
-    { label: 'Other', icon: MoreHorizontal },
+    ...PRODUCT_CATEGORIES,
   ],
   suppliers: [
     { label: 'All suppliers', icon: LayoutGrid },
