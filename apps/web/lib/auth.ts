@@ -1,5 +1,5 @@
 import { createDb, schema } from '@app/db'
-import { PasswordResetEmail } from '@app/email'
+import { PasswordResetEmail, WelcomeEmail } from '@app/email'
 import { sendEmail } from '@app/resend'
 import { passkey } from '@better-auth/passkey'
 import { betterAuth } from 'better-auth'
@@ -28,6 +28,22 @@ export const auth = betterAuth({
         type: 'string',
         required: false,
         fieldName: 'contact_preference',
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          await sendEmail(
+            user.email,
+            'Welcome to Plexaris',
+            createElement(WelcomeEmail, {
+              userName: user.name,
+              loginLink: `${baseURL}/login`,
+            }),
+          )
+        },
       },
     },
   },
