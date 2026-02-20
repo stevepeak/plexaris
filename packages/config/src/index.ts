@@ -25,7 +25,11 @@ const envSchema = z.object({
   OPENROUTER_API_KEY: z.string().startsWith('sk-or-v1-'),
 
   // Sentry
-  // SENTRY_DSN: z.string().startsWith('https://'),
+  SENTRY_DSN: z.string().startsWith('https://'),
+  SENTRY_AUTH_TOKEN: z.string().min(1).startsWith('auth_'),
+
+  // Resend
+  RESEND_API_KEY: z.string().startsWith('re_'),
 
   // Trigger.dev
   TRIGGER_PROJECT_REF: z.string().min(1).startsWith('proj_'),
