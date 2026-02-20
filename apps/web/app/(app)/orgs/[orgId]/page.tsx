@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  BarChart3,
   Bell,
   LayoutDashboard,
   Lightbulb,
@@ -17,6 +18,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { AgentsTab } from '@/components/org-page/agents-tab'
 import { DashboardTab } from '@/components/org-page/dashboard-tab'
+import { InsightsTab } from '@/components/org-page/insights-tab'
 import { MembersTab } from '@/components/org-page/members-tab'
 import { NotificationsTab } from '@/components/org-page/notifications-tab'
 import { OrdersTab } from '@/components/org-page/orders-tab'
@@ -58,6 +60,7 @@ const TAB_CONFIG = [
     icon: LayoutDashboard,
     iconColor: 'text-blue-500',
   },
+  { value: 'sep-1' as const, label: '', icon: null, iconColor: '' },
   {
     value: 'orders',
     label: 'Orders',
@@ -71,32 +74,37 @@ const TAB_CONFIG = [
     iconColor: 'text-amber-500',
     orgType: 'supplier' as const,
   },
-  { value: 'sep-1' as const, label: '', icon: null, iconColor: '' },
+  { value: 'sep-2' as const, label: '', icon: null, iconColor: '' },
+  {
+    value: 'insights',
+    label: 'Insights',
+    icon: BarChart3,
+    iconColor: 'text-indigo-500',
+  },
   {
     value: 'suggestions',
     label: 'Suggestions',
     icon: Lightbulb,
     iconColor: 'text-yellow-500',
   },
+  { value: 'sep-3' as const, label: '', icon: null, iconColor: '' },
   {
     value: 'agents',
     label: 'Agents',
     icon: Zap,
     iconColor: 'text-violet-500',
   },
-  { value: 'sep-2' as const, label: '', icon: null, iconColor: '' },
+  {
+    value: 'members',
+    label: 'Team',
+    icon: Users,
+    iconColor: 'text-cyan-500',
+  },
   {
     value: 'notifications',
     label: 'Notifications',
     icon: Bell,
     iconColor: 'text-rose-500',
-  },
-  { value: 'sep-3' as const, label: '', icon: null, iconColor: '' },
-  {
-    value: 'members',
-    label: 'Members',
-    icon: Users,
-    iconColor: 'text-cyan-500',
   },
   {
     value: 'settings',
@@ -338,6 +346,10 @@ export default function OrgPage() {
                   onOrgLeft={handleOrgLeft}
                   onOrgArchived={handleOrgArchived}
                 />
+              </TabsContent>
+
+              <TabsContent value="insights" className="mt-0">
+                <InsightsTab organizationId={activeOrg.id} />
               </TabsContent>
 
               <TabsContent value="notifications" className="mt-0">
