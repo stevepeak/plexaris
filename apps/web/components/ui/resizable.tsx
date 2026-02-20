@@ -1,12 +1,11 @@
 "use client"
 
 import { GripVertical } from "lucide-react"
-import {
+import  { type GroupProps, Panel ,
   Group as PanelGroup,
-  Panel,
   Separator as PanelResizeHandle,
+  type SeparatorProps,
 } from "react-resizable-panels"
-import type { GroupProps, SeparatorProps } from "react-resizable-panels"
 
 import { cn } from "@/lib/utils"
 

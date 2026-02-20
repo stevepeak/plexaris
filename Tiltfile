@@ -48,13 +48,27 @@ cmd_button(
 )
 
 local_resource(
-    name='🐘 PostgreSQL',
+    name='Email',
+    labels=["Development"],
+    serve_cmd="bun run --cwd packages/email dev",
+    links=[ link("http://localhost:3002/", "Email") ],
+)
+cmd_button(
+    name="btn-email-kill",
+    resource="Email",
+    icon_name="terminal",
+    text="Kill Port",
+    argv=["sh", "-c", "lsof -i :3002 -t | xargs kill"],
+)
+
+local_resource(
+    name='PostgreSQL',
     labels=["Development"],
     serve_cmd="bash scripts/start-postgres.sh",
 )
 cmd_button(
     name="btn-postgres-delete-data",
-    resource="🐘 PostgreSQL",
+    resource="PostgreSQL",
     icon_name="delete",
     text="Delete Data",
     argv=["sh", "-c", "rm -rf .postgres-data && echo 'PostgreSQL data deleted. Restart the resource to reinitialize.'"],

@@ -5,75 +5,48 @@ const config: KnipConfig = {
     '.': {
       entry: ['**/*.config.{js,ts}', 'turbo.json'],
       project: ['**/*.{js,ts,tsx}'],
-      ignore: [
-        '**/node_modules/**',
-        '**/dist/**',
-        '**/.turbo/**',
-        '**/coverage/**',
-        '**/*.d.ts',
-        '**/*.config.ts',
-        '**/*.config.cjs',
-        '**/*.config.js',
-        '**/seed.sql',
-        '**/schema.sql',
-        '**/migrations/**',
-      ],
+      ignore: ['**/*.config.cjs', '**/*.config.js'],
       ignoreDependencies: [],
     },
     'apps/web': {
       entry: ['app/**/*.{ts,tsx}'],
-      ignore: [
-        '**/node_modules/**',
-        '**/dist/**',
-        '**/*.d.ts',
-        '**/.eslintrc.json',
-      ],
     },
     'apps/trigger': {
       entry: ['trigger.config.ts'],
       project: ['src/**/*.ts'],
-      ignore: ['**/node_modules/**', '**/dist/**', '**/*.d.ts'],
-      ignoreDependencies: ['@babel/preset-typescript', 'import-in-the-middle'],
+      ignoreDependencies: [
+        '@babel/preset-typescript',
+        'import-in-the-middle',
+        'trigger.dev',
+      ],
     },
     'packages/api': {
       project: ['src/**/*.ts'],
-      ignore: ['**/node_modules/**', '**/dist/**', '**/*.d.ts'],
     },
     'packages/db': {
       project: ['src/**/*.ts'],
-      ignore: [
-        '**/node_modules/**',
-        '**/dist/**',
-        '**/types.gen.ts',
-        '**/*.d.ts',
-        '**/migrations/**',
-        '**/migrate.ts',
-      ],
     },
     'packages/utils': {
       project: ['src/**/*.ts'],
-      ignore: ['**/node_modules/**', '**/dist/**', '**/*.d.ts'],
     },
     'packages/agents': {
       project: ['src/**/*.ts'],
-      ignore: ['**/node_modules/**', '**/dist/**', '**/*.d.ts'],
     },
     'packages/cloudinary': {
       project: ['src/**/*.ts'],
-      ignore: ['**/node_modules/**', '**/dist/**', '**/*.d.ts'],
+    },
+    'packages/email': {
+      entry: ['emails/*.tsx'],
+      ignoreDependencies: [
+        'react-dom',
+        '@react-email/preview-server',
+        '@types/react-dom',
+        'esbuild',
+      ],
+      project: ['src/**/*.{ts,tsx}', 'emails/**/*.tsx'],
     },
   },
-  ignore: [
-    'apps/web/components/ui/**',
-    'apps/web/hooks/**',
-    '**/node_modules/**',
-    '**/dist/**',
-    '**/.turbo/**',
-    '**/coverage/**',
-    '**/*.d.ts',
-    '**/types.gen.ts',
-    '**/migrations/**',
-  ],
+  ignore: ['apps/web/components/ui/**', 'apps/web/hooks/**'],
   ignoreDependencies: [],
 }
 

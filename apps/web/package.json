@@ -90,7 +90,7 @@
     "@types/react-dom": "^19.2.2",
     "@vitest/browser": "4.0.18",
     "autoprefixer": "^10.4.23",
-    "eslint": "^10.0.0",
+    "eslint": "catalog:",
     "storybook": "^10.1.4",
     "tailwindcss": "^4.1.16",
     "typescript": "catalog:",

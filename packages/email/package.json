@@ -1,0 +1,32 @@
+{
+  "name": "@app/email",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Email templates using react-email",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "postinstall": "sh fix-esbuild.sh",
+    "dev": "email dev -p 3002",
+    "clean": "rm -rf node_modules dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . && prettier --ignore-path='../../.prettierignore' --check .",
+    "fix": "eslint --fix --quiet . && prettier --ignore-path='../../.prettierignore' --log-level=silent --write ."
+  },
+  "dependencies": {
+    "@react-email/components": "^1.0.8",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@plexaris/eslint-config": "workspace:*",
+    "@react-email/preview-server": "^5.2.8",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "react-email": "^5.2.8",
+    "tsconfig": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
