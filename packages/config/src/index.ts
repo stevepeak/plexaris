@@ -4,10 +4,11 @@ const envSchema = z.object({
   // Better Auth
   BETTER_AUTH_SECRET: z
     .string()
-    .min(1, 'BETTER_AUTH_SECRET is required')
+    .min(32, 'BETTER_AUTH_SECRET is required')
     .describe(
       'Secret key for Better Auth encryption/decryption. Generate with: openssl rand -base64 32',
     ),
+  BETTER_AUTH_BASE_URL: z.string().url(),
 
   // Database
   DATABASE_URL: z
