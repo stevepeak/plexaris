@@ -82,6 +82,13 @@ export default function OnboardingPage() {
     }
   }, [])
 
+  // Skip passkey step when user already has organizations (not first login)
+  useEffect(() => {
+    if (!orgsPending && organizations.length > 0) {
+      setPasskeyDone(true)
+    }
+  }, [orgsPending, organizations.length])
+
   const handlePasskeySetup = async () => {
     setPasskeyLoading(true)
     setPasskeyError(null)
