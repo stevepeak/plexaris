@@ -31,6 +31,16 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: bun run build
+
+  deploy:
+    name: Deploy to Vercel
+    needs: [lint, typecheck, knip, build]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -38,24 +48,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: bun run build
       - name: Pull Vercel environment
-        if: github.ref == 'refs/heads/main'
         run: bunx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
       - name: Build Vercel production output
-        if: github.ref == 'refs/heads/main'
         run: bunx vercel build --prod --token=$VERCEL_TOKEN
-      - name: Upload Vercel build artifacts
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v4
-        with:
-          name: vercel-output
-          path: .vercel/output
-          retention-days: 1
+      - name: Deploy to Vercel
+        run: bunx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
+      - name: Upload Sentry sourcemaps
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: bunx @sentry/cli sourcemaps upload --release=${{ github.sha }} .vercel/output
 
   migrate:
     name: Run Database Migrations
     needs: [lint, typecheck, knip, build]
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -69,45 +76,10 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: bun --cwd packages/db db:migrate
 
-  vercel:
-    name: Deploy to Vercel
-    needs: [lint, typecheck, knip, build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: vercel-output
-          path: .vercel/output
-      - name: Deploy to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: bunx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
-
-  sentry:
-    name: Upload Sentry Sourcemaps
-    needs: [lint, typecheck, knip, build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: vercel-output
-          path: .vercel/output
-      - name: Upload sourcemaps
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: bunx @sentry/cli sourcemaps upload --release=${{ github.sha }} .vercel/output
-
   trigger:
     name: Deploy to Trigger.dev
     needs: [lint, typecheck, knip, build]
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
