@@ -1,8 +1,0 @@
-{
-  "buildCommand": "bun run build",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
-  "git": {
-    "deploymentEnabled": false
-  }
-}
