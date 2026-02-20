@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
 
 type Member = {
   id: string
@@ -158,7 +159,9 @@ export function MembersTab({
         )}
       </div>
 
-      <div className="mt-6">
+      <Separator className="my-6" />
+
+      <div>
         {isPending ? (
           <div className="space-y-3">
             <div className="h-12 animate-pulse rounded bg-muted" />
