@@ -17,7 +17,7 @@
     "trigger.dev": "catalog:",
     "@babel/preset-typescript": "^7.28.5",
     "@plexaris/eslint-config": "workspace:*",
-    "@sentry/esbuild-plugin": "^4.6.0",
+    "@sentry/esbuild-plugin": "^4.9.1",
     "@trigger.dev/build": "catalog:",
     "@types/node": "catalog:",
     "typescript": "catalog:"

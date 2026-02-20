@@ -45,7 +45,7 @@ function getSubtitle(stepId: string): string {
     case 'name':
       return 'Almost there — just give it a name'
     case 'sources':
-      return 'Share your website and any documents'
+      return 'Optionally share your website and documents'
     default:
       return ''
   }

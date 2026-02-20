@@ -81,12 +81,14 @@ export function SourcesStep({
     <div className="grid w-full max-w-lg gap-6">
       <p className="text-sm text-muted-foreground">
         {orgType === 'supplier'
-          ? "We'll use these to find your business information and products. We'll also keep them up-to-date automatically."
-          : "We'll use these to find your business information and keep it up-to-date automatically."}
+          ? "If you have a website or documents, we'll use them to find your business information and products. You can always add these later."
+          : "If you have a website or documents, we'll use them to find your business information. You can always add these later."}
       </p>
 
       <div className="grid gap-2">
-        <Label htmlFor="urls">Website URLs</Label>
+        <Label htmlFor="urls">
+          Website URLs <span className="text-muted-foreground">(optional)</span>
+        </Label>
         <Textarea
           id="urls"
           placeholder={
@@ -102,7 +104,10 @@ export function SourcesStep({
       </div>
 
       <div className="grid gap-2">
-        <Label>Upload documents</Label>
+        <Label>
+          Upload documents{' '}
+          <span className="text-muted-foreground">(optional)</span>
+        </Label>
         <div
           onDragOver={(e) => {
             e.preventDefault()
