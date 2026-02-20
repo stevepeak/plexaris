@@ -30,13 +30,8 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { getPasskeyDisplayName } from '@/lib/passkey-utils'
+import { cn } from '@/lib/utils'
 
 function getInitials(name: string | undefined): string {
   if (!name) return '?'
@@ -79,6 +74,7 @@ export function ProfileFormFields({
   organizations,
   organizationsLoading,
   onLeaveOrg,
+  onArchiveOrg,
   passkeys,
   passkeysLoading,
   onAddPasskey,
@@ -104,6 +100,7 @@ export function ProfileFormFields({
   organizations?: OrgMembership[]
   organizationsLoading?: boolean
   onLeaveOrg?: (id: string) => Promise<{ error?: string }>
+  onArchiveOrg?: (id: string) => Promise<{ error?: string }>
   passkeys?: PasskeyItem[]
   passkeysLoading?: boolean
   onAddPasskey?: () => void
@@ -133,6 +130,8 @@ export function ProfileFormFields({
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [leaveLoadingId, setLeaveLoadingId] = useState<string | null>(null)
   const [leaveError, setLeaveError] = useState<string | null>(null)
+  const [archiveLoadingId, setArchiveLoadingId] = useState<string | null>(null)
+  const [archiveError, setArchiveError] = useState<string | null>(null)
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -279,7 +278,7 @@ export function ProfileFormFields({
               className="justify-start gap-2 data-[state=active]:bg-muted data-[state=active]:shadow-none"
             >
               <TriangleAlert className="h-4 w-4 text-rose-500" />
-              Danger zone
+              Delete account
             </TabsTrigger>
           </>
         )}
@@ -563,188 +562,287 @@ export function ProfileFormFields({
         {onDeleteAccount && (
           <TabsContent value="danger" className="mt-0">
             <div>
-              <h2 className="text-lg font-semibold text-destructive">
-                Danger zone
-              </h2>
+              <h2 className="text-lg font-semibold">Delete your account</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Irreversible actions that affect your account
+                Follow these steps to permanently delete your account. This
+                cannot be undone.
               </p>
               <Separator className="my-6" />
 
-              {/* Section A — Your organizations */}
+              {/* Step 1 — Resolve organizations */}
               <div className="mb-8">
-                <h3 className="text-sm font-semibold">Your organizations</h3>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Leave all organizations before deleting your account
-                </p>
-                <div className="mt-3 grid gap-2">
-                  {organizationsLoading ? (
-                    <div className="flex items-center gap-3 rounded-md border px-4 py-3">
-                      <div className="h-4 w-32 animate-pulse rounded bg-muted" />
-                    </div>
-                  ) : organizations && organizations.length > 0 ? (
-                    organizations.map((org) => (
-                      <div
-                        key={org.id}
-                        className="flex items-center justify-between rounded-md border px-4 py-3"
-                      >
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium">{org.name}</p>
-                          <Badge variant="secondary" className="capitalize">
-                            {org.role}
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
+                    {!organizationsLoading &&
+                    (!organizations || organizations.length === 0) ? (
+                      <CheckCircle2 className="h-6 w-6 text-green-500" />
+                    ) : (
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-muted-foreground text-xs font-semibold text-muted-foreground">
+                        1
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-semibold">
+                        Resolve your organizations
+                      </h3>
+                      {!organizationsLoading &&
+                        organizations &&
+                        organizations.length > 0 && (
+                          <Badge variant="secondary">
+                            {organizations.length} remaining
                           </Badge>
-                        </div>
-                        {org.soleOwner ? (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span tabIndex={0}>
-                                  <Button variant="outline" size="sm" disabled>
-                                    Leave
-                                  </Button>
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>
-                                  You&apos;re the sole owner. Transfer ownership
-                                  or archive the organization first.
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        ) : (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={leaveLoadingId === org.id}
-                              >
-                                {leaveLoadingId === org.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  'Leave'
-                                )}
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Leave {org.name}?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  You will lose access to this organization. You
-                                  can rejoin later if invited.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={async () => {
-                                    if (!onLeaveOrg) return
-                                    setLeaveLoadingId(org.id)
-                                    setLeaveError(null)
-                                    const result = await onLeaveOrg(org.id)
-                                    if (result.error) {
-                                      setLeaveError(result.error)
-                                    }
-                                    setLeaveLoadingId(null)
-                                  }}
-                                >
-                                  Leave organization
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
                         )}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="flex items-center gap-2 rounded-md border px-4 py-3 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      You&apos;re not a member of any organizations
                     </div>
-                  )}
-                  {leaveError && (
-                    <p className="text-sm text-destructive">{leaveError}</p>
-                  )}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      You must leave or archive all organizations before you can
+                      delete your account.
+                    </p>
+                    <div className="mt-3 grid gap-2">
+                      {organizationsLoading ? (
+                        <div className="flex items-center gap-3 rounded-md border px-4 py-3">
+                          <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+                        </div>
+                      ) : organizations && organizations.length > 0 ? (
+                        organizations.map((org) => (
+                          <div
+                            key={org.id}
+                            className="flex items-center justify-between rounded-md border px-4 py-3"
+                          >
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium">
+                                  {org.name}
+                                </p>
+                                <Badge
+                                  variant="secondary"
+                                  className="capitalize"
+                                >
+                                  {org.soleOwner ? 'sole owner' : org.role}
+                                </Badge>
+                              </div>
+                              {org.soleOwner && (
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                  You are the only owner. Archive this
+                                  organization to proceed.
+                                </p>
+                              )}
+                            </div>
+                            {org.soleOwner ? (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    disabled={archiveLoadingId === org.id}
+                                  >
+                                    {archiveLoadingId === org.id ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      'Archive'
+                                    )}
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Archive {org.name}?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This organization and all its data will be
+                                      archived. Members will lose access. This
+                                      action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      onClick={async () => {
+                                        if (!onArchiveOrg) return
+                                        setArchiveLoadingId(org.id)
+                                        setArchiveError(null)
+                                        const result = await onArchiveOrg(
+                                          org.id,
+                                        )
+                                        if (result.error) {
+                                          setArchiveError(result.error)
+                                        }
+                                        setArchiveLoadingId(null)
+                                      }}
+                                    >
+                                      Archive organization
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            ) : (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={leaveLoadingId === org.id}
+                                  >
+                                    {leaveLoadingId === org.id ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      'Leave'
+                                    )}
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Leave {org.name}?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      You will lose access to this organization.
+                                      You can rejoin later if invited.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={async () => {
+                                        if (!onLeaveOrg) return
+                                        setLeaveLoadingId(org.id)
+                                        setLeaveError(null)
+                                        const result = await onLeaveOrg(org.id)
+                                        if (result.error) {
+                                          setLeaveError(result.error)
+                                        }
+                                        setLeaveLoadingId(null)
+                                      }}
+                                    >
+                                      Leave organization
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="flex items-center gap-2 rounded-md border px-4 py-3 text-sm text-muted-foreground">
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          No organization memberships remaining.
+                        </div>
+                      )}
+                      {leaveError && (
+                        <p className="text-sm text-destructive">{leaveError}</p>
+                      )}
+                      {archiveError && (
+                        <p className="text-sm text-destructive">
+                          {archiveError}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Section B — Delete account */}
-              <div>
-                <h3 className="text-sm font-semibold">Delete account</h3>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Permanently delete your account and personal data. This cannot
-                  be undone.
-                </p>
-                <div className="mt-3 grid gap-2">
-                  {deleteError && (
-                    <p className="text-sm text-destructive">{deleteError}</p>
-                  )}
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="destructive"
-                        className="w-fit"
-                        disabled={
-                          deleteLoading ||
-                          organizationsLoading ||
-                          (organizations != null && organizations.length > 0)
-                        }
-                      >
-                        {deleteLoading ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Deleting...
-                          </>
-                        ) : (
-                          'Delete my account'
+              {/* Step 2 — Delete account */}
+              {(() => {
+                const step1Complete =
+                  !organizationsLoading &&
+                  (!organizations || organizations.length === 0)
+                return (
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
+                      <span
+                        className={cn(
+                          'flex h-6 w-6 items-center justify-center rounded-full border-2 text-xs font-semibold',
+                          step1Complete
+                            ? 'border-destructive text-destructive'
+                            : 'border-muted text-muted',
                         )}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Delete your account?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Your account and personal data will be permanently
-                          deleted. You will be signed out and will not be able
-                          to sign in again.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          disabled={deleteLoading}
-                          onClick={async () => {
-                            setDeleteLoading(true)
-                            setDeleteError(null)
-                            const result = await onDeleteAccount()
-                            if (result.error) {
-                              setDeleteError(result.error)
-                            }
-                            setDeleteLoading(false)
-                          }}
-                        >
-                          {deleteLoading ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            'Delete my account'
-                          )}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                  {organizations != null && organizations.length > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      Leave all organizations before deleting your account
-                    </p>
-                  )}
-                </div>
-              </div>
+                      >
+                        2
+                      </span>
+                    </div>
+                    <div
+                      className={cn(
+                        'min-w-0 flex-1',
+                        !step1Complete && 'opacity-50',
+                      )}
+                    >
+                      <h3 className="text-sm font-semibold">
+                        Delete your account
+                      </h3>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {step1Complete
+                          ? 'Permanently delete your account and all personal data.'
+                          : 'Complete Step 1 before you can delete your account.'}
+                      </p>
+                      <div className="mt-3 grid gap-2">
+                        {deleteError && (
+                          <p className="text-sm text-destructive">
+                            {deleteError}
+                          </p>
+                        )}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              className="w-fit"
+                              disabled={deleteLoading || !step1Complete}
+                            >
+                              {deleteLoading ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  Deleting...
+                                </>
+                              ) : (
+                                'Delete my account'
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Delete your account?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Your account and personal data will be
+                                permanently deleted. You will be signed out and
+                                will not be able to sign in again.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                disabled={deleteLoading}
+                                onClick={async () => {
+                                  setDeleteLoading(true)
+                                  setDeleteError(null)
+                                  const result = await onDeleteAccount()
+                                  if (result.error) {
+                                    setDeleteError(result.error)
+                                  }
+                                  setDeleteLoading(false)
+                                }}
+                              >
+                                {deleteLoading ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  'Delete my account'
+                                )}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
           </TabsContent>
         )}

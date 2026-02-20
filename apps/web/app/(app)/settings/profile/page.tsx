@@ -134,6 +134,21 @@ export default function ProfileSettingsPage() {
     [fetchUserOrgs],
   )
 
+  const handleArchiveOrg = useCallback(
+    async (orgId: string): Promise<{ error?: string }> => {
+      const res = await fetch(`/api/organizations/${orgId}/archive`, {
+        method: 'POST',
+      })
+      if (!res.ok) {
+        const json = await res.json()
+        return { error: json.error ?? 'Failed to archive organization' }
+      }
+      void fetchUserOrgs()
+      return {}
+    },
+    [fetchUserOrgs],
+  )
+
   const handleUpdateImage = useCallback(
     async (file: File | null): Promise<{ error?: string }> => {
       if (!file) return {}
@@ -281,6 +296,7 @@ export default function ProfileSettingsPage() {
           organizations={userOrgs}
           organizationsLoading={userOrgsLoading}
           onLeaveOrg={handleLeaveOrg}
+          onArchiveOrg={handleArchiveOrg}
           passkeys={passkeys}
           passkeysLoading={passkeysLoading}
           onAddPasskey={handleAddPasskey}

@@ -32,6 +32,7 @@ export const Default: Story = {
       organizations={sampleOrgs}
       organizationsLoading={false}
       onLeaveOrg={noop}
+      onArchiveOrg={noop}
     />
   ),
 }
@@ -51,6 +52,7 @@ export const WithAvatar: Story = {
       organizations={sampleOrgs}
       organizationsLoading={false}
       onLeaveOrg={noop}
+      onArchiveOrg={noop}
     />
   ),
 }
@@ -70,6 +72,7 @@ export const WithPhoneNumber: Story = {
       organizations={[]}
       organizationsLoading={false}
       onLeaveOrg={noop}
+      onArchiveOrg={noop}
     />
   ),
 }
@@ -103,6 +106,7 @@ export const WithPasskeys: Story = {
       organizations={[]}
       organizationsLoading={false}
       onLeaveOrg={noop}
+      onArchiveOrg={noop}
       passkeys={[
         {
           id: '1',
@@ -136,6 +140,7 @@ export const NoPasskeys: Story = {
       organizations={[]}
       organizationsLoading={false}
       onLeaveOrg={noop}
+      onArchiveOrg={noop}
       passkeys={[]}
       passkeysLoading={false}
       onAddPasskey={voidNoop}
@@ -156,6 +161,7 @@ export const PasskeysLoading: Story = {
       organizations={[]}
       organizationsLoading={false}
       onLeaveOrg={noop}
+      onArchiveOrg={noop}
       passkeysLoading={true}
       onAddPasskey={voidNoop}
       onDeletePasskey={voidNoop}
@@ -175,6 +181,27 @@ export const DangerZoneWithOrgs: Story = {
       organizations={sampleOrgs}
       organizationsLoading={false}
       onLeaveOrg={noop}
+      onArchiveOrg={noop}
+    />
+  ),
+}
+
+export const DangerZoneSoleOwnerOnly: Story = {
+  render: () => (
+    <ProfileFormFields
+      name="Demo User"
+      email="demo@plexaris.com"
+      isPending={false}
+      onUpdateName={noop}
+      onChangePassword={noop}
+      onDeleteAccount={noop}
+      organizations={[
+        { id: '1', name: 'Acme Corp', role: 'owner', soleOwner: true },
+        { id: '3', name: 'Personal Workspace', role: 'owner', soleOwner: true },
+      ]}
+      organizationsLoading={false}
+      onLeaveOrg={noop}
+      onArchiveOrg={noop}
     />
   ),
 }
@@ -191,6 +218,7 @@ export const DangerZoneNoOrgs: Story = {
       organizations={[]}
       organizationsLoading={false}
       onLeaveOrg={noop}
+      onArchiveOrg={noop}
     />
   ),
 }
@@ -206,6 +234,7 @@ export const DangerZoneOrgsLoading: Story = {
       onDeleteAccount={noop}
       organizationsLoading={true}
       onLeaveOrg={noop}
+      onArchiveOrg={noop}
     />
   ),
 }
