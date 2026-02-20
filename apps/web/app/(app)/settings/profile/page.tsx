@@ -1,12 +1,22 @@
 'use client'
 
+import { LogOut, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
-import { ProfileFormFields } from '@/components/profile-form'
+import { type PasskeyItem, ProfileFormFields } from '@/components/profile-form'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
@@ -31,6 +41,44 @@ export default function ProfileSettingsPage() {
     switchOrg,
     isPending: orgsPending,
   } = useActiveOrg()
+
+  const handleSignOut = async () => {
+    await authClient.signOut()
+    router.push('/login')
+  }
+
+  const [passkeys, setPasskeys] = useState<PasskeyItem[]>([])
+  const [passkeysLoading, setPasskeysLoading] = useState(true)
+
+  const fetchPasskeys = useCallback(async () => {
+    setPasskeysLoading(true)
+    const { data } = await authClient.passkey.listUserPasskeys({})
+    setPasskeys(
+      (data ?? []).map((pk) => ({
+        id: pk.id,
+        name: pk.name ?? null,
+        createdAt: pk.createdAt ? String(pk.createdAt) : null,
+      })),
+    )
+    setPasskeysLoading(false)
+  }, [])
+
+  useEffect(() => {
+    void fetchPasskeys()
+  }, [fetchPasskeys])
+
+  const handleAddPasskey = useCallback(async () => {
+    await authClient.passkey.addPasskey({})
+    void fetchPasskeys()
+  }, [fetchPasskeys])
+
+  const handleDeletePasskey = useCallback(
+    async (id: string) => {
+      await authClient.passkey.deletePasskey({ id })
+      void fetchPasskeys()
+    },
+    [fetchPasskeys],
+  )
 
   const handleUpdateImage = useCallback(
     async (file: File | null): Promise<{ error?: string }> => {
@@ -106,11 +154,39 @@ export default function ProfileSettingsPage() {
           {isPending ? (
             <Skeleton className="h-8 w-8 rounded-full" />
           ) : (
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="text-xs">
-                {getInitials(session?.user.name)}
-              </AvatarFallback>
-            </Avatar>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="text-xs">
+                      {getInitials(session?.user.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-medium">{session?.user.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {session?.user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/settings/profile">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </header>
@@ -126,6 +202,10 @@ export default function ProfileSettingsPage() {
           onUpdateImage={handleUpdateImage}
           onChangePassword={handleChangePassword}
           onArchiveAccount={handleArchiveAccount}
+          passkeys={passkeys}
+          passkeysLoading={passkeysLoading}
+          onAddPasskey={handleAddPasskey}
+          onDeletePasskey={handleDeletePasskey}
         />
       </main>
     </div>

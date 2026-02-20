@@ -1,6 +1,13 @@
 'use client'
 
-import { KeyRound, Loader2, TriangleAlert, User } from 'lucide-react'
+import {
+  Fingerprint,
+  KeyRound,
+  Loader2,
+  Trash2,
+  TriangleAlert,
+  User,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { ImageUpload } from '@/components/image-upload'
@@ -38,6 +45,12 @@ function getInitials(name: string | undefined): string {
     .slice(0, 2)
 }
 
+export type PasskeyItem = {
+  id: string
+  name: string | null
+  createdAt: string | null
+}
+
 export function ProfileFormFields({
   name: initialName,
   email,
@@ -47,6 +60,10 @@ export function ProfileFormFields({
   onUpdateImage,
   onChangePassword,
   onArchiveAccount,
+  passkeys,
+  passkeysLoading,
+  onAddPasskey,
+  onDeletePasskey,
 }: {
   name: string
   email: string
@@ -59,6 +76,10 @@ export function ProfileFormFields({
     newPassword: string,
   ) => Promise<{ error?: string }>
   onArchiveAccount?: () => Promise<{ error?: string }>
+  passkeys?: PasskeyItem[]
+  passkeysLoading?: boolean
+  onAddPasskey?: () => void
+  onDeletePasskey?: (id: string) => void
 }) {
   const [name, setName] = useState(initialName)
   useEffect(() => {
@@ -351,6 +372,87 @@ export function ProfileFormFields({
                 )}
               </Button>
             </form>
+
+            <Separator className="my-8" />
+
+            <div>
+              <h2 className="text-lg font-semibold">Passkeys</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Sign in with your fingerprint, face, or device PIN
+              </p>
+              <div className="mt-4 grid gap-3">
+                {passkeysLoading ? (
+                  <div className="flex items-center gap-3 rounded-md border px-4 py-3">
+                    <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+                  </div>
+                ) : passkeys && passkeys.length > 0 ? (
+                  passkeys.map((pk) => (
+                    <div
+                      key={pk.id}
+                      className="flex items-center justify-between rounded-md border px-4 py-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Fingerprint className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm font-medium">
+                            {pk.name ?? 'Passkey'}
+                          </p>
+                          {pk.createdAt && (
+                            <p className="text-xs text-muted-foreground">
+                              Added{' '}
+                              {new Date(pk.createdAt).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {onDeletePasskey && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Trash2 className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Delete passkey?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This passkey will be permanently removed. You
+                                won&apos;t be able to use it to sign in anymore.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => onDeletePasskey(pk.id)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No passkeys registered yet.
+                  </p>
+                )}
+              </div>
+              {onAddPasskey && (
+                <Button
+                  variant="outline"
+                  onClick={onAddPasskey}
+                  className="mt-4"
+                >
+                  <Fingerprint className="h-4 w-4" />
+                  Add passkey
+                </Button>
+              )}
+            </div>
           </div>
         </TabsContent>
         {onArchiveAccount && (

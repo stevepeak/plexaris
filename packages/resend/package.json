@@ -1,0 +1,29 @@
+{
+  "name": "@app/resend",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Resend email sending integration",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . && prettier --ignore-path='../../.prettierignore' --check .",
+    "fix": "eslint --fix --quiet . && prettier --ignore-path='../../.prettierignore' --log-level=silent --write ."
+  },
+  "dependencies": {
+    "@app/config": "workspace:*",
+    "@app/email": "workspace:*",
+    "react": "^19.2.0",
+    "resend": "^4.0.0"
+  },
+  "devDependencies": {
+    "@plexaris/eslint-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "^19.2.2",
+    "tsconfig": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

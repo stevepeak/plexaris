@@ -1,8 +1,9 @@
 'use client'
 
+import { Fingerprint } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -22,10 +23,30 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect')
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(searchParams.get('email') ?? '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [passkeyLoading, setPasskeyLoading] = useState(false)
+  const [supportsPasskey, setSupportsPasskey] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.PublicKeyCredential) {
+      setSupportsPasskey(true)
+    }
+  }, [])
+
+  const handlePasskeySignIn = async () => {
+    setPasskeyLoading(true)
+    setError(null)
+    const { error: err } = await authClient.signIn.passkey()
+    if (err) {
+      setError(err.message ?? 'Passkey authentication failed')
+      setPasskeyLoading(false)
+      return
+    }
+    router.push(redirect ?? '/dashboard')
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -73,7 +94,15 @@ function LoginForm() {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <Link
+                href="/forgot-password"
+                className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <Input
               id="password"
               type="password"
@@ -91,6 +120,33 @@ function LoginForm() {
             {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
+
+        {supportsPasskey && (
+          <>
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">or</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handlePasskeySignIn}
+              disabled={passkeyLoading}
+              className="group relative flex w-full items-center justify-center gap-3 rounded-lg border border-border/60 bg-gradient-to-b from-card to-muted/30 px-4 py-3 text-sm font-medium shadow-sm transition-all duration-200 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+            >
+              <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 transition-colors duration-200 group-hover:bg-primary/15">
+                <Fingerprint className="size-4 text-primary" />
+              </span>
+              <span>
+                {passkeyLoading ? 'Verifying...' : 'Sign in with passkey'}
+              </span>
+            </button>
+          </>
+        )}
       </CardContent>
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">

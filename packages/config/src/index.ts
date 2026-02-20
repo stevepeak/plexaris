@@ -27,7 +27,7 @@ const envSchema = z.object({
 
   // Sentry
   SENTRY_DSN: z.string().startsWith('https://'),
-  SENTRY_AUTH_TOKEN: z.string().min(1).startsWith('auth_'),
+  SENTRY_AUTH_TOKEN: z.string().startsWith('sntrys_').nullable(),
 
   // Resend
   RESEND_API_KEY: z.string().startsWith('re_'),

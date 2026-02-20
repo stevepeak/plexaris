@@ -55,3 +55,63 @@ export const ReadOnly: Story = {
     />
   ),
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const voidNoop = () => {}
+
+export const WithPasskeys: Story = {
+  render: () => (
+    <ProfileFormFields
+      name="Demo User"
+      email="demo@plexaris.com"
+      isPending={false}
+      onUpdateName={noop}
+      onChangePassword={noop}
+      onArchiveAccount={noop}
+      passkeys={[
+        {
+          id: '1',
+          name: 'MacBook Pro',
+          createdAt: '2026-01-15T10:30:00Z',
+        },
+        { id: '2', name: 'iPhone', createdAt: '2026-02-01T14:00:00Z' },
+      ]}
+      passkeysLoading={false}
+      onAddPasskey={voidNoop}
+      onDeletePasskey={voidNoop}
+    />
+  ),
+}
+
+export const NoPasskeys: Story = {
+  render: () => (
+    <ProfileFormFields
+      name="Demo User"
+      email="demo@plexaris.com"
+      isPending={false}
+      onUpdateName={noop}
+      onChangePassword={noop}
+      onArchiveAccount={noop}
+      passkeys={[]}
+      passkeysLoading={false}
+      onAddPasskey={voidNoop}
+      onDeletePasskey={voidNoop}
+    />
+  ),
+}
+
+export const PasskeysLoading: Story = {
+  render: () => (
+    <ProfileFormFields
+      name="Demo User"
+      email="demo@plexaris.com"
+      isPending={false}
+      onUpdateName={noop}
+      onChangePassword={noop}
+      onArchiveAccount={noop}
+      passkeysLoading={true}
+      onAddPasskey={voidNoop}
+      onDeletePasskey={voidNoop}
+    />
+  ),
+}

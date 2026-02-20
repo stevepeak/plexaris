@@ -35,6 +35,9 @@ const config: KnipConfig = {
     'packages/cloudinary': {
       project: ['src/**/*.ts'],
     },
+    'packages/resend': {
+      project: ['src/**/*.ts'],
+    },
     'packages/email': {
       entry: ['emails/*.tsx'],
       ignoreDependencies: [

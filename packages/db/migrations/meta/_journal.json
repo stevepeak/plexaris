@@ -127,6 +127,20 @@
       "when": 1770751880783,
       "tag": "0017_charming_zombie",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1771607341328,
+      "tag": "0018_common_starhawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1771608860483,
+      "tag": "0019_soft_exodus",
+      "breakpoints": true
     }
   ]
 }
