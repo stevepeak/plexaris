@@ -10,6 +10,8 @@ import {
   Package,
   Users,
 } from 'lucide-react'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -46,6 +48,7 @@ const SUGGESTION_SOURCES = [
     description:
       'Agents analyze your data and suggest improvements to products, pricing, and strategy.',
     iconColor: 'text-violet-500',
+    tab: 'agents',
   },
   {
     icon: Users,
@@ -53,6 +56,7 @@ const SUGGESTION_SOURCES = [
     description:
       'Your team can submit suggestions for changes based on their expertise and observations.',
     iconColor: 'text-blue-500',
+    tab: null,
   },
   {
     icon: MessageSquare,
@@ -60,6 +64,7 @@ const SUGGESTION_SOURCES = [
     description:
       'Customer feedback and requests are captured as actionable suggestions.',
     iconColor: 'text-green-500',
+    tab: null,
   },
 ] as const
 
@@ -88,32 +93,51 @@ const PLACEHOLDER_SUGGESTIONS = [
 ] as const
 
 function SuggestionSourceCards({ compact }: { compact?: boolean }) {
+  const { orgId } = useParams<{ orgId: string }>()
+
   return (
     <div className={compact ? 'space-y-2' : 'grid gap-4 sm:grid-cols-3'}>
-      {SUGGESTION_SOURCES.map((source) => (
-        <div
-          key={source.title}
-          className={
-            compact
-              ? 'flex gap-3'
-              : 'rounded-lg border bg-card p-4 text-card-foreground'
-          }
-        >
-          <source.icon
-            className={`${source.iconColor} ${compact ? 'mt-0.5 h-4 w-4 shrink-0' : 'mb-2 h-5 w-5'}`}
-          />
-          <div>
-            <p className={`font-medium ${compact ? 'text-xs' : 'text-sm'}`}>
-              {source.title}
-            </p>
-            <p
-              className={`text-muted-foreground ${compact ? 'text-xs' : 'mt-1 text-xs'}`}
+      {SUGGESTION_SOURCES.map((source) => {
+        const className = compact
+          ? 'flex gap-3'
+          : 'rounded-lg border bg-card p-4 text-card-foreground'
+
+        const content = (
+          <>
+            <source.icon
+              className={`${source.iconColor} ${compact ? 'mt-0.5 h-4 w-4 shrink-0' : 'mb-2 h-5 w-5'}`}
+            />
+            <div>
+              <p className={`font-medium ${compact ? 'text-xs' : 'text-sm'}`}>
+                {source.title}
+              </p>
+              <p
+                className={`text-muted-foreground ${compact ? 'text-xs' : 'mt-1 text-xs'}`}
+              >
+                {source.description}
+              </p>
+            </div>
+          </>
+        )
+
+        if (source.tab) {
+          return (
+            <Link
+              key={source.title}
+              href={`/orgs/${orgId}?tab=${source.tab}`}
+              className={`${className} transition-colors hover:bg-muted/50`}
             >
-              {source.description}
-            </p>
+              {content}
+            </Link>
+          )
+        }
+
+        return (
+          <div key={source.title} className={className}>
+            {content}
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
