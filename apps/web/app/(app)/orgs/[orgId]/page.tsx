@@ -52,22 +52,58 @@ function getInitials(name: string | undefined): string {
 }
 
 const TAB_CONFIG = [
-  { value: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { value: 'orders', label: 'Orders', icon: ShoppingCart },
+  {
+    value: 'dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    iconColor: 'text-blue-500',
+  },
+  {
+    value: 'orders',
+    label: 'Orders',
+    icon: ShoppingCart,
+    iconColor: 'text-emerald-500',
+  },
   {
     value: 'products',
     label: 'Products',
     icon: Package,
+    iconColor: 'text-amber-500',
     orgType: 'supplier' as const,
   },
-  { value: 'sep-1' as const, label: '', icon: null },
-  { value: 'suggestions', label: 'Suggestions', icon: Lightbulb },
-  { value: 'agents', label: 'Agents', icon: Zap },
-  { value: 'sep-2' as const, label: '', icon: null },
-  { value: 'notifications', label: 'Notifications', icon: Bell },
-  { value: 'sep-3' as const, label: '', icon: null },
-  { value: 'members', label: 'Members', icon: Users },
-  { value: 'settings', label: 'Settings', icon: Settings },
+  { value: 'sep-1' as const, label: '', icon: null, iconColor: '' },
+  {
+    value: 'suggestions',
+    label: 'Suggestions',
+    icon: Lightbulb,
+    iconColor: 'text-yellow-500',
+  },
+  {
+    value: 'agents',
+    label: 'Agents',
+    icon: Zap,
+    iconColor: 'text-violet-500',
+  },
+  { value: 'sep-2' as const, label: '', icon: null, iconColor: '' },
+  {
+    value: 'notifications',
+    label: 'Notifications',
+    icon: Bell,
+    iconColor: 'text-rose-500',
+  },
+  { value: 'sep-3' as const, label: '', icon: null, iconColor: '' },
+  {
+    value: 'members',
+    label: 'Members',
+    icon: Users,
+    iconColor: 'text-cyan-500',
+  },
+  {
+    value: 'settings',
+    label: 'Settings',
+    icon: Settings,
+    iconColor: 'text-gray-500',
+  },
 ] as const
 
 export default function OrgPage() {
@@ -235,7 +271,7 @@ export default function OrgPage() {
                         'data-[state=active]:bg-muted',
                     )}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className={cn('h-4 w-4', tab.iconColor)} />
                     {tab.label}
                     {tab.value === 'suggestions' &&
                       pendingCount &&
