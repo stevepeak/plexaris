@@ -1,10 +1,9 @@
 'use client'
 
-import { Camera, Loader2, Trash2 } from 'lucide-react'
+import { Camera, Loader2, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 type ImageUploadVariant = 'circle' | 'square'
@@ -75,89 +74,71 @@ export function ImageUpload({
   const shapeClass = isCircle ? 'rounded-full' : 'rounded-lg'
 
   return (
-    <div className="flex items-center gap-4">
-      <button
-        type="button"
-        disabled={disabled || loading}
-        className={cn(
-          'group relative shrink-0 overflow-hidden border bg-muted transition-colors hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-50',
-          size,
-          shapeClass,
-        )}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <Avatar className={cn('h-full w-full', shapeClass)}>
-          {preview && (
-            <AvatarImage
-              src={preview}
-              alt={alt ?? fallback}
-              className="object-cover"
-            />
+    <div className="flex flex-col items-start gap-1.5">
+      <div className="relative">
+        <button
+          type="button"
+          disabled={disabled || loading}
+          className={cn(
+            'group relative shrink-0 overflow-hidden border bg-muted transition-colors hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-50',
+            size,
+            shapeClass,
           )}
-          <AvatarFallback
-            className={cn(
-              shapeClass,
-              isCircle ? 'text-xl' : 'text-lg font-medium',
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Avatar className={cn('h-full w-full', shapeClass)}>
+            {preview && (
+              <AvatarImage
+                src={preview}
+                alt={alt ?? fallback}
+                className="object-cover"
+              />
             )}
-          >
-            {fallback}
-          </AvatarFallback>
-        </Avatar>
-        {!disabled && (
-          <div
-            className={cn(
-              'absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100',
-              shapeClass,
-            )}
-          >
-            <Camera className="h-5 w-5 text-white" />
-          </div>
-        )}
-        {loading && (
-          <div
-            className={cn(
-              'absolute inset-0 flex items-center justify-center bg-black/40',
-              shapeClass,
-            )}
-          >
-            <Loader2 className="h-5 w-5 animate-spin text-white" />
-          </div>
-        )}
-      </button>
-      <div className="grid gap-1.5">
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={disabled || loading}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Camera className="mr-2 h-4 w-4" />
-            {preview ? 'Change photo' : 'Upload photo'}
-          </Button>
-          {preview && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={disabled || loading}
-              onClick={handleRemove}
+            <AvatarFallback
+              className={cn(
+                shapeClass,
+                isCircle ? 'text-xl' : 'text-lg font-medium',
+              )}
             >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Remove
-            </Button>
+              {fallback}
+            </AvatarFallback>
+          </Avatar>
+          {!disabled && (
+            <div
+              className={cn(
+                'absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100',
+                shapeClass,
+              )}
+            >
+              <Camera className="h-5 w-5 text-white" />
+            </div>
           )}
-        </div>
-        <p className="text-xs text-muted-foreground">
-          JPG, PNG or WebP. Max 2MB.
-        </p>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+          {loading && (
+            <div
+              className={cn(
+                'absolute inset-0 flex items-center justify-center bg-black/40',
+                shapeClass,
+              )}
+            >
+              <Loader2 className="h-5 w-5 animate-spin text-white" />
+            </div>
+          )}
+        </button>
+        {preview && !disabled && !loading && (
+          <button
+            type="button"
+            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border bg-background text-muted-foreground shadow-sm transition-colors hover:bg-destructive hover:text-destructive-foreground"
+            onClick={handleRemove}
+          >
+            <X className="h-3 w-3" />
+          </button>
+        )}
       </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/jpeg,image/png,image/webp,image/avif"
         className="hidden"
         onChange={handleFileChange}
       />

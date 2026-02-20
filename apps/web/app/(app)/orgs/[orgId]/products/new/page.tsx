@@ -35,7 +35,7 @@ export default function ProductNewPage() {
   }, [orgId, router])
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-8">
       <ProductForm onSubmit={handleCreate} onCancel={handleCancel} />
     </div>
   )

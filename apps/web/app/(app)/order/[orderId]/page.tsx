@@ -28,7 +28,7 @@ import {
 } from '@/components/order/types'
 import { useOrderHotkeys } from '@/components/order/use-order-hotkeys'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -412,6 +412,10 @@ export default function OrderPage() {
               <Button variant="ghost" size="icon" asChild>
                 <Link href="/settings/profile">
                   <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={session?.user.image ?? undefined}
+                      alt={session?.user.name ?? ''}
+                    />
                     <AvatarFallback className="text-xs">
                       {getInitials(session?.user.name)}
                     </AvatarFallback>

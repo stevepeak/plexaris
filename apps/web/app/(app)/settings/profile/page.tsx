@@ -12,7 +12,7 @@ import {
   type PasskeyItem,
   ProfileFormFields,
 } from '@/components/profile-form'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -224,7 +224,7 @@ export default function ProfileSettingsPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-lg font-semibold">
               Plexaris
@@ -244,6 +244,10 @@ export default function ProfileSettingsPage() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={session?.user.image ?? undefined}
+                      alt={session?.user.name ?? ''}
+                    />
                     <AvatarFallback className="text-xs">
                       {getInitials(session?.user.name)}
                     </AvatarFallback>
@@ -277,7 +281,7 @@ export default function ProfileSettingsPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <main className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="mb-6 text-lg font-semibold">Profile settings</h1>
         <ProfileFormFields
           name={session?.user.name ?? ''}

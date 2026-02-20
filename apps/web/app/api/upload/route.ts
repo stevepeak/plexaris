@@ -11,9 +11,9 @@ const ALLOWED_TYPES = new Set([
 ])
 
 const SIZE_LIMITS: Record<string, number> = {
-  avatars: 2 * 1024 * 1024,
-  logos: 2 * 1024 * 1024,
-  products: 4 * 1024 * 1024,
+  avatars: 10 * 1024 * 1024,
+  logos: 10 * 1024 * 1024,
+  products: 10 * 1024 * 1024,
 }
 
 export async function POST(request: Request) {

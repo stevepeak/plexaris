@@ -24,7 +24,7 @@ import { ProductsTab } from '@/components/org-page/products-tab'
 import { SettingsTab } from '@/components/org-page/settings-tab'
 import { SuggestionsTab } from '@/components/org-page/suggestions-tab'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -185,7 +185,7 @@ export default function OrgPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-lg font-semibold">
               Plexaris
@@ -205,6 +205,10 @@ export default function OrgPage() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={session?.user.image ?? undefined}
+                      alt={session?.user.name ?? ''}
+                    />
                     <AvatarFallback className="text-xs">
                       {getInitials(session?.user.name)}
                     </AvatarFallback>
@@ -238,7 +242,7 @@ export default function OrgPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8">
+      <main className="mx-auto max-w-6xl px-4 py-8">
         {orgNotFound ? (
           <p className="text-sm text-muted-foreground">
             Organization not found.
@@ -288,6 +292,7 @@ export default function OrgPage() {
             <div className="min-w-0 flex-1">
               <TabsContent value="dashboard" className="mt-0">
                 <DashboardTab
+                  key={activeOrg.id}
                   organizationId={activeOrg.id}
                   orgName={activeOrg.name}
                   orgType={activeOrg.type}

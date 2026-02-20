@@ -118,10 +118,37 @@ export function SettingsTab({
   const handleUpdateImage = async (
     file: File | null,
   ): Promise<{ error?: string }> => {
-    if (!file) return {}
-    const { urls, error } = await uploadFiles([file], 'logos')
-    if (error || !urls[0]) return { error: error ?? 'Upload failed' }
-    setOrg((prev) => (prev ? { ...prev, logoUrl: urls[0] } : prev))
+    if (!org) return { error: 'Organization not loaded' }
+
+    let newLogoUrl: string | null = null
+    if (file) {
+      const { urls, error } = await uploadFiles([file], 'logos')
+      if (error || !urls[0]) return { error: error ?? 'Upload failed' }
+      newLogoUrl = urls[0]
+    }
+
+    const res = await fetch(`/api/organizations/${organizationId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: org.name,
+        description: org.description,
+        phone: org.phone,
+        email: org.email,
+        address: org.address,
+        deliveryAddress: org.deliveryAddress,
+        deliveryAreas: org.deliveryAreas,
+        logoUrl: newLogoUrl,
+      }),
+    })
+
+    if (!res.ok) {
+      const json = await res.json()
+      return { error: json.error ?? 'Failed to save logo' }
+    }
+
+    const json = await res.json()
+    setOrg(json.organization)
     return {}
   }
 

@@ -79,7 +79,7 @@ export default function ProductEditPage() {
   }, [orgId, router])
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-8">
       {product?.status === 'draft' && (
         <Alert className="mb-6">
           <Bot className="h-4 w-4" />
