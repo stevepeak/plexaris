@@ -5,7 +5,7 @@ import { auth } from '@/lib/auth'
 
 const db = createDb()
 
-// POST /api/account/archive — Archive the current user's account
+// POST /api/account/archive — Delete and anonymize the current user's account
 export async function POST(request: Request) {
   const session = await auth.api.getSession({
     headers: request.headers,
@@ -15,31 +15,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Check if user owns any organizations — they must archive those first
-  const ownedOrgs = await db.query.membership.findMany({
+  // Check if user still has any org memberships — they must leave first
+  const memberships = await db.query.membership.findMany({
     where: eq(schema.membership.userId, session.user.id),
   })
 
-  const ownerMemberships = ownedOrgs.filter((m) => m.role === 'owner')
-  if (ownerMemberships.length > 0) {
+  if (memberships.length > 0) {
     return NextResponse.json(
       {
-        error:
-          'You must archive all organizations you own before archiving your account.',
+        error: 'Leave all organizations before deleting your account.',
       },
       { status: 400 },
     )
   }
 
-  // Remove all memberships
-  await db
-    .delete(schema.membership)
-    .where(eq(schema.membership.userId, session.user.id))
-
-  // Soft-delete the user account
+  // Anonymize user data (GDPR right-to-erasure)
   await db
     .update(schema.user)
     .set({
+      name: 'Ghost',
+      email: `deleted-${session.user.id}@deleted.local`,
+      image: null,
+      phone: null,
+      contactPreference: null,
       archivedAt: new Date(),
       updatedAt: new Date(),
     })

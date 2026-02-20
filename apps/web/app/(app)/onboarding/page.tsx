@@ -86,7 +86,7 @@ export default function OnboardingPage() {
     setPasskeyLoading(true)
     setPasskeyError(null)
     const { error: err } = await authClient.passkey.addPasskey({
-      name: 'My passkey',
+      name: session?.user.email ?? 'Passkey',
     })
     if (err) {
       setPasskeyError(err.message ?? 'Failed to set up passkey')

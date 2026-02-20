@@ -1,4 +1,4 @@
-import { and, createDb, eq, schema } from '@app/db'
+import { and, count, createDb, eq, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
@@ -35,15 +35,27 @@ export async function POST(
     )
   }
 
-  // Owners cannot leave — they must archive the org instead
+  // Sole owners cannot leave — they must transfer ownership or archive the org
   if (membership.role === 'owner') {
-    return NextResponse.json(
-      {
-        error:
-          'Organization owners cannot leave. Archive the organization instead.',
-      },
-      { status: 400 },
-    )
+    const [{ value: ownerCount }] = await db
+      .select({ value: count() })
+      .from(schema.membership)
+      .where(
+        and(
+          eq(schema.membership.organizationId, id),
+          eq(schema.membership.role, 'owner'),
+        ),
+      )
+
+    if (ownerCount <= 1) {
+      return NextResponse.json(
+        {
+          error:
+            "You're the sole owner. Transfer ownership or archive the organization first.",
+        },
+        { status: 400 },
+      )
+    }
   }
 
   // Delete the membership

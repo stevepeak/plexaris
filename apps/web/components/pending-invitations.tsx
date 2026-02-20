@@ -1,6 +1,7 @@
 'use client'
 
-import { Building2, Check, Loader2, X } from 'lucide-react'
+import { isGhostUser } from '@app/utils'
+import { Building2, Check, Ghost, Loader2, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -73,7 +74,17 @@ export function PendingInvitationsList({
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span className="capitalize">{inv.organizationType}</span>
                   <span>&middot;</span>
-                  <span>Invited by {inv.invitedByName}</span>
+                  <span>
+                    Invited by{' '}
+                    {isGhostUser(inv.invitedByName) ? (
+                      <span className="inline-flex items-center gap-1">
+                        <Ghost className="h-3 w-3" />
+                        Ghost
+                      </span>
+                    ) : (
+                      inv.invitedByName
+                    )}
+                  </span>
                 </div>
               </div>
             </div>

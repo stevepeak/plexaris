@@ -1,6 +1,7 @@
 'use client'
 
-import { Crown, Mail, User } from 'lucide-react'
+import { isGhostUser } from '@app/utils'
+import { Crown, Ghost, Mail, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { InviteMembers } from '@/components/invite-members'
@@ -56,13 +57,23 @@ export function MembersTab({
               className="flex items-center justify-between rounded-md border px-3 py-2"
             >
               <div className="flex items-center gap-3">
-                <User className="h-4 w-4 text-muted-foreground" />
+                {isGhostUser(member.userName) ? (
+                  <Ghost className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <User className="h-4 w-4 text-muted-foreground" />
+                )}
                 <div>
-                  <div className="text-sm font-medium">{member.userName}</div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Mail className="h-3 w-3" />
-                    {member.userEmail}
+                  <div
+                    className={`text-sm font-medium ${isGhostUser(member.userName) ? 'text-muted-foreground' : ''}`}
+                  >
+                    {member.userName}
                   </div>
+                  {!isGhostUser(member.userName) && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Mail className="h-3 w-3" />
+                      {member.userEmail}
+                    </div>
+                  )}
                 </div>
               </div>
               <Badge

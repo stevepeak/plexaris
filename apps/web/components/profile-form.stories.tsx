@@ -1,6 +1,6 @@
 import { type Meta, type StoryObj } from '@storybook/react'
 
-import { ProfileFormFields } from './profile-form'
+import { type OrgMembership, ProfileFormFields } from './profile-form'
 
 const meta: Meta<typeof ProfileFormFields> = {
   title: 'Profile / ProfileFormFields',
@@ -14,6 +14,11 @@ type Story = StoryObj<typeof ProfileFormFields>
 
 const noop = () => Promise.resolve({})
 
+const sampleOrgs: OrgMembership[] = [
+  { id: '1', name: 'Acme Corp', role: 'owner', soleOwner: true },
+  { id: '2', name: 'Side Project', role: 'member', soleOwner: false },
+]
+
 export const Default: Story = {
   render: () => (
     <ProfileFormFields
@@ -21,8 +26,12 @@ export const Default: Story = {
       email="demo@plexaris.com"
       isPending={false}
       onUpdateName={noop}
+      onUpdatePhone={noop}
       onChangePassword={noop}
-      onArchiveAccount={noop}
+      onDeleteAccount={noop}
+      organizations={sampleOrgs}
+      organizationsLoading={false}
+      onLeaveOrg={noop}
     />
   ),
 }
@@ -36,8 +45,31 @@ export const WithAvatar: Story = {
       isPending={false}
       onUpdateName={noop}
       onUpdateImage={async () => ({})}
+      onUpdatePhone={noop}
       onChangePassword={noop}
-      onArchiveAccount={noop}
+      onDeleteAccount={noop}
+      organizations={sampleOrgs}
+      organizationsLoading={false}
+      onLeaveOrg={noop}
+    />
+  ),
+}
+
+export const WithPhoneNumber: Story = {
+  render: () => (
+    <ProfileFormFields
+      name="Demo User"
+      email="demo@plexaris.com"
+      phone="+1 (555) 123-4567"
+      contactPreference="call"
+      isPending={false}
+      onUpdateName={noop}
+      onUpdatePhone={noop}
+      onChangePassword={noop}
+      onDeleteAccount={noop}
+      organizations={[]}
+      organizationsLoading={false}
+      onLeaveOrg={noop}
     />
   ),
 }
@@ -67,14 +99,23 @@ export const WithPasskeys: Story = {
       isPending={false}
       onUpdateName={noop}
       onChangePassword={noop}
-      onArchiveAccount={noop}
+      onDeleteAccount={noop}
+      organizations={[]}
+      organizationsLoading={false}
+      onLeaveOrg={noop}
       passkeys={[
         {
           id: '1',
-          name: 'MacBook Pro',
+          name: 'Mac',
+          aaguid: 'bada5566-a7aa-401f-bd96-45619a55120d',
           createdAt: '2026-01-15T10:30:00Z',
         },
-        { id: '2', name: 'iPhone', createdAt: '2026-02-01T14:00:00Z' },
+        {
+          id: '2',
+          name: 'iPhone',
+          aaguid: 'fbfc3007-154e-4ecc-8c0b-6e020557d7bd',
+          createdAt: '2026-02-01T14:00:00Z',
+        },
       ]}
       passkeysLoading={false}
       onAddPasskey={voidNoop}
@@ -91,7 +132,10 @@ export const NoPasskeys: Story = {
       isPending={false}
       onUpdateName={noop}
       onChangePassword={noop}
-      onArchiveAccount={noop}
+      onDeleteAccount={noop}
+      organizations={[]}
+      organizationsLoading={false}
+      onLeaveOrg={noop}
       passkeys={[]}
       passkeysLoading={false}
       onAddPasskey={voidNoop}
@@ -108,10 +152,60 @@ export const PasskeysLoading: Story = {
       isPending={false}
       onUpdateName={noop}
       onChangePassword={noop}
-      onArchiveAccount={noop}
+      onDeleteAccount={noop}
+      organizations={[]}
+      organizationsLoading={false}
+      onLeaveOrg={noop}
       passkeysLoading={true}
       onAddPasskey={voidNoop}
       onDeletePasskey={voidNoop}
+    />
+  ),
+}
+
+export const DangerZoneWithOrgs: Story = {
+  render: () => (
+    <ProfileFormFields
+      name="Demo User"
+      email="demo@plexaris.com"
+      isPending={false}
+      onUpdateName={noop}
+      onChangePassword={noop}
+      onDeleteAccount={noop}
+      organizations={sampleOrgs}
+      organizationsLoading={false}
+      onLeaveOrg={noop}
+    />
+  ),
+}
+
+export const DangerZoneNoOrgs: Story = {
+  render: () => (
+    <ProfileFormFields
+      name="Demo User"
+      email="demo@plexaris.com"
+      isPending={false}
+      onUpdateName={noop}
+      onChangePassword={noop}
+      onDeleteAccount={noop}
+      organizations={[]}
+      organizationsLoading={false}
+      onLeaveOrg={noop}
+    />
+  ),
+}
+
+export const DangerZoneOrgsLoading: Story = {
+  render: () => (
+    <ProfileFormFields
+      name="Demo User"
+      email="demo@plexaris.com"
+      isPending={false}
+      onUpdateName={noop}
+      onChangePassword={noop}
+      onDeleteAccount={noop}
+      organizationsLoading={true}
+      onLeaveOrg={noop}
     />
   ),
 }

@@ -6,7 +6,12 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
-import { type PasskeyItem, ProfileFormFields } from '@/components/profile-form'
+import {
+  type ContactPreference,
+  type OrgMembership,
+  type PasskeyItem,
+  ProfileFormFields,
+} from '@/components/profile-form'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -57,6 +62,7 @@ export default function ProfileSettingsPage() {
       (data ?? []).map((pk) => ({
         id: pk.id,
         name: pk.name ?? null,
+        aaguid: (pk as Record<string, unknown>).aaguid as string | null,
         createdAt: pk.createdAt ? String(pk.createdAt) : null,
       })),
     )
@@ -68,9 +74,11 @@ export default function ProfileSettingsPage() {
   }, [fetchPasskeys])
 
   const handleAddPasskey = useCallback(async () => {
-    await authClient.passkey.addPasskey({})
+    await authClient.passkey.addPasskey({
+      name: session?.user.email ?? 'Passkey',
+    })
     void fetchPasskeys()
-  }, [fetchPasskeys])
+  }, [fetchPasskeys, session?.user.email])
 
   const handleDeletePasskey = useCallback(
     async (id: string) => {
@@ -78,6 +86,52 @@ export default function ProfileSettingsPage() {
       void fetchPasskeys()
     },
     [fetchPasskeys],
+  )
+
+  const [userOrgs, setUserOrgs] = useState<OrgMembership[]>([])
+  const [userOrgsLoading, setUserOrgsLoading] = useState(true)
+
+  const fetchUserOrgs = useCallback(async () => {
+    setUserOrgsLoading(true)
+    const res = await fetch('/api/organizations/mine')
+    if (res.ok) {
+      const json = await res.json()
+      setUserOrgs(
+        (json.organizations ?? []).map(
+          (o: {
+            id: string
+            name: string
+            role: 'owner' | 'member'
+            soleOwner: boolean
+          }) => ({
+            id: o.id,
+            name: o.name,
+            role: o.role,
+            soleOwner: o.soleOwner,
+          }),
+        ),
+      )
+    }
+    setUserOrgsLoading(false)
+  }, [])
+
+  useEffect(() => {
+    void fetchUserOrgs()
+  }, [fetchUserOrgs])
+
+  const handleLeaveOrg = useCallback(
+    async (orgId: string): Promise<{ error?: string }> => {
+      const res = await fetch(`/api/organizations/${orgId}/leave`, {
+        method: 'POST',
+      })
+      if (!res.ok) {
+        const json = await res.json()
+        return { error: json.error ?? 'Failed to leave organization' }
+      }
+      void fetchUserOrgs()
+      return {}
+    },
+    [fetchUserOrgs],
   )
 
   const handleUpdateImage = useCallback(
@@ -105,6 +159,23 @@ export default function ProfileSettingsPage() {
     [],
   )
 
+  const handleUpdatePhone = useCallback(
+    async (
+      phone: string,
+      contactPreference: ContactPreference,
+    ): Promise<{ error?: string }> => {
+      const { error } = await authClient.updateUser({
+        phone,
+        contactPreference,
+      })
+      if (error) {
+        return { error: error.message ?? 'Failed to update contact info' }
+      }
+      return {}
+    },
+    [],
+  )
+
   const handleChangePassword = useCallback(
     async (
       currentPassword: string,
@@ -123,13 +194,13 @@ export default function ProfileSettingsPage() {
     [],
   )
 
-  const handleArchiveAccount = useCallback(async (): Promise<{
+  const handleDeleteAccount = useCallback(async (): Promise<{
     error?: string
   }> => {
     const res = await fetch('/api/account/archive', { method: 'POST' })
     if (!res.ok) {
       const json = await res.json()
-      return { error: json.error ?? 'Failed to archive account' }
+      return { error: json.error ?? 'Failed to delete account' }
     }
     router.push('/login')
     return {}
@@ -197,11 +268,19 @@ export default function ProfileSettingsPage() {
           name={session?.user.name ?? ''}
           email={session?.user.email ?? ''}
           image={session?.user.image}
+          phone={session?.user.phone}
+          contactPreference={
+            session?.user.contactPreference as ContactPreference | null
+          }
           isPending={isPending}
           onUpdateName={handleUpdateName}
           onUpdateImage={handleUpdateImage}
+          onUpdatePhone={handleUpdatePhone}
           onChangePassword={handleChangePassword}
-          onArchiveAccount={handleArchiveAccount}
+          onDeleteAccount={handleDeleteAccount}
+          organizations={userOrgs}
+          organizationsLoading={userOrgsLoading}
+          onLeaveOrg={handleLeaveOrg}
           passkeys={passkeys}
           passkeysLoading={passkeysLoading}
           onAddPasskey={handleAddPasskey}

@@ -141,6 +141,13 @@
       "when": 1771608860483,
       "tag": "0019_soft_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1771610329518,
+      "tag": "0020_careful_wild_pack",
+      "breakpoints": true
     }
   ]
 }

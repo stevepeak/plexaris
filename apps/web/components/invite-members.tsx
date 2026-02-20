@@ -1,6 +1,7 @@
 'use client'
 
-import { Clock, Loader2, Mail, Send, UserPlus, X } from 'lucide-react'
+import { isGhostUser } from '@app/utils'
+import { Clock, Ghost, Loader2, Mail, Send, UserPlus, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -185,7 +186,15 @@ export function InviteMembersList({
                     <div className="text-sm font-medium">{inv.email}</div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" />
-                      Invited by {inv.invitedByName}
+                      Invited by{' '}
+                      {isGhostUser(inv.invitedByName) ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Ghost className="h-3 w-3" />
+                          Ghost
+                        </span>
+                      ) : (
+                        inv.invitedByName
+                      )}
                     </div>
                   </div>
                 </div>

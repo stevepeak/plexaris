@@ -18,6 +18,19 @@ export const auth = betterAuth({
     provider: 'pg',
     schema,
   }),
+  user: {
+    additionalFields: {
+      phone: {
+        type: 'string',
+        required: false,
+      },
+      contactPreference: {
+        type: 'string',
+        required: false,
+        fieldName: 'contact_preference',
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url }) => {
