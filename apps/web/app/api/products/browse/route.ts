@@ -26,7 +26,18 @@ export async function GET(request: Request) {
   ]
 
   if (category && category !== 'All products' && category !== 'Supplier') {
-    conditions.push(eq(schema.product.category, category))
+    if (category.includes(' > ')) {
+      // Sub-category: exact match
+      conditions.push(eq(schema.product.category, category))
+    } else {
+      // Primary category: match exact or any sub-category
+      conditions.push(
+        or(
+          eq(schema.product.category, category),
+          ilike(schema.product.category, `${category} > %`),
+        )!,
+      )
+    }
   }
 
   if (organizationId) {

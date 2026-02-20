@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
+import { CategoryPicker } from '@/components/category-picker'
 import { ProductSections } from '@/components/order/product-detail'
 import { ProductChangesPopover } from '@/components/product-changes-popover'
 import { ProductImageManager } from '@/components/product-image-manager'
@@ -64,7 +65,7 @@ import {
   useProductChanges,
 } from '@/hooks/use-product-changes'
 import { getNestedValue, setNestedValue } from '@/lib/nested-value'
-import { getCategoryIcon, PRODUCT_CATEGORIES } from '@/lib/product-categories'
+import { getCategoryIcon } from '@/lib/product-categories'
 import { uploadFiles } from '@/lib/upload'
 import { cn } from '@/lib/utils'
 
@@ -378,33 +379,7 @@ export function ProductForm({
               >
                 Category
               </FieldLabel>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger id="product-category">
-                  {category ? (
-                    <span className="!flex items-center gap-2">
-                      {(() => {
-                        const Icon = getCategoryIcon(category)
-                        return Icon ? (
-                          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        ) : null
-                      })()}
-                      {category}
-                    </span>
-                  ) : (
-                    <SelectValue placeholder="Select category" />
-                  )}
-                </SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_CATEGORIES.map((c) => (
-                    <SelectItem key={c.label} value={c.label}>
-                      <span className="flex items-center gap-2">
-                        <c.icon className="h-4 w-4 text-muted-foreground" />
-                        {c.label}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CategoryPicker value={category} onValueChange={setCategory} />
             </div>
           </div>
 

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { parseCategoryValue } from '@/lib/product-categories'
 
 interface SupplierProfile {
   id: string
@@ -80,13 +81,17 @@ function ProductsSection({ products }: { products: SupplierProduct[] }) {
   const categories = useMemo(() => {
     const cats = new Set<string>()
     for (const p of products) {
-      if (p.category) cats.add(p.category)
+      if (p.category) cats.add(parseCategoryValue(p.category).primary)
     }
     return Array.from(cats).sort()
   }, [products])
 
   const filtered = activeCategory
-    ? products.filter((p) => p.category === activeCategory)
+    ? products.filter(
+        (p) =>
+          p.category !== null &&
+          parseCategoryValue(p.category).primary === activeCategory,
+      )
     : products
 
   return (

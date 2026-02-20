@@ -39,6 +39,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { parseCategoryValue } from '@/lib/product-categories'
 import { cn } from '@/lib/utils'
 
 export type Product = {
@@ -111,12 +112,13 @@ function ProductCardGrid({
 
   const grouped = new Map<string, Product[]>()
   for (const product of products) {
-    const category = product.category ?? 'Uncategorized'
-    const group = grouped.get(category)
+    const raw = product.category ?? 'Uncategorized'
+    const { primary } = parseCategoryValue(raw)
+    const group = grouped.get(primary)
     if (group) {
       group.push(product)
     } else {
-      grouped.set(category, [product])
+      grouped.set(primary, [product])
     }
   }
 

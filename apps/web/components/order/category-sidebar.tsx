@@ -9,6 +9,7 @@ import {
   Home,
   LayoutGrid,
   type LucideIcon,
+  Package,
   Search,
   ShoppingBag,
   Star,
@@ -16,6 +17,7 @@ import {
   TrendingUp,
   Truck,
 } from 'lucide-react'
+import { useState } from 'react'
 
 import { Kbd } from '@/components/kbd'
 import { BrowseHome, type BrowseSection } from '@/components/order/browse-home'
@@ -24,7 +26,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
-import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
+import {
+  buildCategoryValue,
+  parseCategoryValue,
+  PRODUCT_CATEGORIES,
+} from '@/lib/product-categories'
 
 interface CategoryDef {
   label: string
@@ -61,6 +67,13 @@ const SECTION_LABELS: Record<BrowseSection, string> = {
   products: 'Products',
   suppliers: 'Suppliers',
   recipes: 'Recipes',
+}
+
+const SECTION_ICONS: Record<BrowseSection, LucideIcon> = {
+  favorites: Star,
+  products: Package,
+  suppliers: Store,
+  recipes: ChefHat,
 }
 
 export interface BrowseProduct {
@@ -180,31 +193,12 @@ export function CategorySidebar({
         )}
       </div>
 
-      <div className="flex items-center gap-1 border-b px-3 py-2 text-sm">
-        <button
-          type="button"
-          className="text-muted-foreground hover:text-foreground"
-          onClick={() => onSectionChange(null)}
-        >
-          <Home className="h-3.5 w-3.5" />
-        </button>
-        <ChevronRight className="h-3 w-3 text-muted-foreground" />
-        {activeCategory ? (
-          <>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-foreground"
-              onClick={() => onNavigate(null)}
-            >
-              {SECTION_LABELS[activeSection]}
-            </button>
-            <ChevronRight className="h-3 w-3 text-muted-foreground" />
-            <span className="font-medium">{activeCategory}</span>
-          </>
-        ) : (
-          <span className="font-medium">{SECTION_LABELS[activeSection]}</span>
-        )}
-      </div>
+      <Breadcrumbs
+        activeSection={activeSection}
+        activeCategory={activeCategory}
+        onSectionChange={onSectionChange}
+        onNavigate={onNavigate}
+      />
 
       {activeSection === 'suppliers' ? (
         <ScrollArea className="flex-1">
@@ -255,17 +249,32 @@ export function CategorySidebar({
       ) : (
         <ScrollArea className="flex-1">
           <div className="flex flex-col gap-1 p-2">
-            {filtered.map((category) => (
-              <Button
-                key={category.label}
-                variant="ghost"
-                className="justify-start gap-2"
-                onClick={() => onNavigate(category.label)}
-              >
-                <category.icon className="h-4 w-4" />
-                {category.label}
-              </Button>
-            ))}
+            {filtered.map((cat) => {
+              const catDef =
+                activeSection === 'products'
+                  ? PRODUCT_CATEGORIES.find((c) => c.label === cat.label)
+                  : undefined
+              const hasSubs =
+                catDef?.subcategories && catDef.subcategories.length > 0
+              return hasSubs ? (
+                <SubCategoryGroup
+                  key={cat.label}
+                  category={catDef!}
+                  icon={cat.icon}
+                  onNavigate={onNavigate}
+                />
+              ) : (
+                <Button
+                  key={cat.label}
+                  variant="ghost"
+                  className="justify-start gap-2"
+                  onClick={() => onNavigate(cat.label)}
+                >
+                  <cat.icon className="h-4 w-4" />
+                  {cat.label}
+                </Button>
+              )
+            })}
           </div>
         </ScrollArea>
       )}
@@ -308,6 +317,124 @@ function ProductList({
           )}
         </button>
       ))}
+    </div>
+  )
+}
+
+function Breadcrumbs({
+  activeSection,
+  activeCategory,
+  onSectionChange,
+  onNavigate,
+}: {
+  activeSection: BrowseSection
+  activeCategory: string | null
+  onSectionChange: (section: BrowseSection | null) => void
+  onNavigate: (category: string | null) => void
+}) {
+  const parsed = activeCategory ? parseCategoryValue(activeCategory) : null
+  const SectionIcon = SECTION_ICONS[activeSection]
+
+  return (
+    <div className="flex min-w-0 items-center gap-1 overflow-hidden border-b px-3 py-2 text-sm">
+      <button
+        type="button"
+        className="text-muted-foreground hover:text-foreground"
+        onClick={() => onSectionChange(null)}
+      >
+        <Home className="h-3.5 w-3.5" />
+      </button>
+      <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+      {activeCategory ? (
+        <>
+          <button
+            type="button"
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+            onClick={() => onNavigate(null)}
+          >
+            <SectionIcon className="h-3.5 w-3.5" />
+          </button>
+          {parsed?.sub ? (
+            <>
+              <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+              <button
+                type="button"
+                className="min-w-0 truncate text-muted-foreground hover:text-foreground"
+                onClick={() => onNavigate(parsed.primary)}
+              >
+                {parsed.primary}
+              </button>
+              <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 truncate font-medium">{parsed.sub}</span>
+            </>
+          ) : (
+            <>
+              <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 truncate font-medium">
+                {activeCategory}
+              </span>
+            </>
+          )}
+        </>
+      ) : (
+        <span className="min-w-0 truncate font-medium">
+          {SECTION_LABELS[activeSection]}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function SubCategoryGroup({
+  category,
+  icon,
+  onNavigate,
+}: {
+  category: { label: string; subcategories?: string[] }
+  icon: React.ComponentType<{ className?: string }>
+  onNavigate: (category: string) => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const IconComp = icon
+
+  return (
+    <div>
+      <Button
+        variant="ghost"
+        className="w-full justify-start gap-2"
+        onClick={() => setExpanded((e) => !e)}
+      >
+        <IconComp className="h-4 w-4" />
+        {category.label}
+        <ChevronRight
+          className={`ml-auto h-3.5 w-3.5 text-muted-foreground transition-transform ${expanded ? 'rotate-90' : ''}`}
+        />
+      </Button>
+      {expanded && (
+        <div className="ml-6 flex flex-col gap-0.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="justify-start text-xs"
+            onClick={() => onNavigate(category.label)}
+          >
+            All {category.label}
+          </Button>
+          {category.subcategories?.map((sub) => (
+            <Button
+              key={sub}
+              variant="ghost"
+              size="sm"
+              className="justify-start text-xs"
+              onClick={() =>
+                onNavigate(buildCategoryValue(category.label, sub))
+              }
+            >
+              {sub}
+            </Button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
