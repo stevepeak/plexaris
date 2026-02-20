@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react'
 import { MembersTab } from './members-tab'
 
 const meta: Meta<typeof MembersTab> = {
-  title: 'Organization / Tabs / MembersTab',
+  title: 'Organization / Tabs / TeamTab',
   component: MembersTab,
   parameters: {
     nextjs: { appDirectory: true },

@@ -213,7 +213,7 @@ export function InviteMembersList({
   )
 }
 
-export function InviteMembers({
+function InviteMembers({
   organizationId,
   isOwner,
 }: {
