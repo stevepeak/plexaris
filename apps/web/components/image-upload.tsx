@@ -1,9 +1,15 @@
 'use client'
 
-import { Camera, Loader2, X } from 'lucide-react'
+import { Camera, ImageUp, Loader2, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
 type ImageUploadVariant = 'circle' | 'square'
@@ -75,65 +81,69 @@ export function ImageUpload({
 
   return (
     <div className="flex flex-col items-start gap-1.5">
-      <div className="relative">
-        <button
-          type="button"
-          disabled={disabled || loading}
-          className={cn(
-            'group relative shrink-0 overflow-hidden border bg-muted transition-colors hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-50',
-            size,
-            shapeClass,
-          )}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <Avatar className={cn('h-full w-full', shapeClass)}>
-            {preview && (
-              <AvatarImage
-                src={preview}
-                alt={alt ?? fallback}
-                className="object-cover"
-              />
-            )}
-            <AvatarFallback
-              className={cn(
-                shapeClass,
-                isCircle ? 'text-xl' : 'text-lg font-medium',
-              )}
-            >
-              {fallback}
-            </AvatarFallback>
-          </Avatar>
-          {!disabled && (
-            <div
-              className={cn(
-                'absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100',
-                shapeClass,
-              )}
-            >
-              <Camera className="h-5 w-5 text-white" />
-            </div>
-          )}
-          {loading && (
-            <div
-              className={cn(
-                'absolute inset-0 flex items-center justify-center bg-black/40',
-                shapeClass,
-              )}
-            >
-              <Loader2 className="h-5 w-5 animate-spin text-white" />
-            </div>
-          )}
-        </button>
-        {preview && !disabled && !loading && (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild disabled={disabled || loading}>
           <button
             type="button"
-            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border bg-background text-muted-foreground shadow-sm transition-colors hover:bg-destructive hover:text-destructive-foreground"
-            onClick={handleRemove}
+            disabled={disabled || loading}
+            className={cn(
+              'group relative shrink-0 overflow-hidden border bg-muted transition-colors hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-50',
+              size,
+              shapeClass,
+            )}
           >
-            <X className="h-3 w-3" />
+            <Avatar className={cn('h-full w-full', shapeClass)}>
+              {preview && (
+                <AvatarImage
+                  src={preview}
+                  alt={alt ?? fallback}
+                  className="object-cover"
+                />
+              )}
+              <AvatarFallback
+                className={cn(
+                  shapeClass,
+                  isCircle ? 'text-xl' : 'text-lg font-medium',
+                )}
+              >
+                {fallback}
+              </AvatarFallback>
+            </Avatar>
+            {!disabled && (
+              <div
+                className={cn(
+                  'absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100',
+                  shapeClass,
+                )}
+              >
+                <Camera className="h-5 w-5 text-white" />
+              </div>
+            )}
+            {loading && (
+              <div
+                className={cn(
+                  'absolute inset-0 flex items-center justify-center bg-black/40',
+                  shapeClass,
+                )}
+              >
+                <Loader2 className="h-5 w-5 animate-spin text-white" />
+              </div>
+            )}
           </button>
-        )}
-      </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
+            <ImageUp />
+            Upload a photo...
+          </DropdownMenuItem>
+          {preview && (
+            <DropdownMenuItem onSelect={handleRemove}>
+              <Trash2 />
+              Remove photo
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <input
         ref={fileInputRef}
