@@ -115,6 +115,13 @@ const NAV_CONFIG: NavItem[] = [
   },
   {
     kind: 'link',
+    path: '/mcp',
+    label: 'MCP',
+    icon: Cable,
+    iconColor: 'text-teal-500',
+  },
+  {
+    kind: 'link',
     path: '/members',
     label: 'Team',
     icon: Users,
@@ -161,8 +168,9 @@ export function OrgSidebar() {
       item.permission &&
       !isAdmin &&
       !hasPermission(permissions, item.permission)
-    )
+    ) {
       return false
+    }
     return true
   })
 
