@@ -153,93 +153,100 @@ export function McpTab(_props: McpTabProps) {
         </svg>
       </div>
 
-      {/* Main card */}
-      <Card className="relative z-10 w-full max-w-lg border-border/50 bg-card/80 shadow-2xl backdrop-blur-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold tracking-tight">
-            Connect to Plexaris MCP
-          </CardTitle>
-          <CardDescription className="text-base">
-            Add the following configuration to your AI client to get started
-            with MCP integration.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* JSON config block */}
-          <div className="group relative">
-            <div className="overflow-hidden rounded-lg border border-border/50 bg-zinc-950 font-mono text-sm dark:bg-zinc-900">
-              <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
-                <span className="text-xs text-zinc-400">mcp.json</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCopy}
-                  className="h-7 gap-1.5 px-2 text-xs text-zinc-400 hover:text-zinc-100"
-                >
-                  {copied ? (
-                    <Check className="h-3.5 w-3.5 text-emerald-400" />
-                  ) : (
-                    <Copy className="h-3.5 w-3.5" />
-                  )}
-                  {copied ? 'Copied' : 'Copy'}
-                </Button>
+      {/* Coming soon pill + blurred card */}
+      <div className="relative z-10 flex w-full max-w-lg flex-col items-center">
+        <span className="mb-4 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-sm font-medium text-violet-400">
+          Coming soon
+        </span>
+        <div className="pointer-events-none w-full select-none blur-[6px]">
+          <Card className="w-full border-border/50 bg-card/80 shadow-2xl backdrop-blur-sm">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl font-bold tracking-tight">
+                Connect to Plexaris MCP
+              </CardTitle>
+              <CardDescription className="text-base">
+                Add the following configuration to your AI client to get started
+                with MCP integration.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* JSON config block */}
+              <div className="group relative">
+                <div className="overflow-hidden rounded-lg border border-border/50 bg-zinc-950 font-mono text-sm dark:bg-zinc-900">
+                  <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
+                    <span className="text-xs text-zinc-400">mcp.json</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCopy}
+                      className="h-7 gap-1.5 px-2 text-xs text-zinc-400 hover:text-zinc-100"
+                    >
+                      {copied ? (
+                        <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                      {copied ? 'Copied' : 'Copy'}
+                    </Button>
+                  </div>
+                  <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed">
+                    <code>
+                      <span className="text-zinc-100">{'{'}</span>
+                      {'\n'}
+                      <span className="text-zinc-100">{'  '}</span>
+                      <span className="text-violet-400">{'"mcpServers"'}</span>
+                      <span className="text-zinc-100">{': {'}</span>
+                      {'\n'}
+                      <span className="text-zinc-100">{'    '}</span>
+                      <span className="text-cyan-400">{'"plexaris"'}</span>
+                      <span className="text-zinc-100">{': {'}</span>
+                      {'\n'}
+                      <span className="text-zinc-100">{'      '}</span>
+                      <span className="text-emerald-400">{'"url"'}</span>
+                      <span className="text-zinc-100">{': '}</span>
+                      <span className="text-amber-300">
+                        {'"https://mcp.plexaris.com"'}
+                      </span>
+                      {'\n'}
+                      <span className="text-zinc-100">{'    }'}</span>
+                      {'\n'}
+                      <span className="text-zinc-100">{'  }'}</span>
+                      {'\n'}
+                      <span className="text-zinc-100">{'}'}</span>
+                    </code>
+                  </pre>
+                </div>
               </div>
-              <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed">
-                <code>
-                  <span className="text-zinc-100">{'{'}</span>
-                  {'\n'}
-                  <span className="text-zinc-100">{'  '}</span>
-                  <span className="text-violet-400">{'"mcpServers"'}</span>
-                  <span className="text-zinc-100">{': {'}</span>
-                  {'\n'}
-                  <span className="text-zinc-100">{'    '}</span>
-                  <span className="text-cyan-400">{'"plexaris"'}</span>
-                  <span className="text-zinc-100">{': {'}</span>
-                  {'\n'}
-                  <span className="text-zinc-100">{'      '}</span>
-                  <span className="text-emerald-400">{'"url"'}</span>
-                  <span className="text-zinc-100">{': '}</span>
-                  <span className="text-amber-300">
-                    {'"https://mcp.plexaris.com"'}
-                  </span>
-                  {'\n'}
-                  <span className="text-zinc-100">{'    }'}</span>
-                  {'\n'}
-                  <span className="text-zinc-100">{'  }'}</span>
-                  {'\n'}
-                  <span className="text-zinc-100">{'}'}</span>
-                </code>
-              </pre>
-            </div>
-          </div>
 
-          {/* Connect buttons */}
-          <div className="space-y-3">
-            <p className="text-center text-sm font-medium text-muted-foreground">
-              Connect to
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              {INTEGRATIONS.map((integration) => (
-                <Button
-                  key={integration.name}
-                  variant="outline"
-                  className="h-12 gap-2.5 text-sm font-medium"
-                  asChild
-                >
-                  <a
-                    href={integration.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {integration.icon}
-                    {integration.name}
-                  </a>
-                </Button>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              {/* Connect buttons */}
+              <div className="space-y-3">
+                <p className="text-center text-sm font-medium text-muted-foreground">
+                  Connect to
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {INTEGRATIONS.map((integration) => (
+                    <Button
+                      key={integration.name}
+                      variant="outline"
+                      className="h-12 gap-2.5 text-sm font-medium"
+                      asChild
+                    >
+                      <a
+                        href={integration.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {integration.icon}
+                        {integration.name}
+                      </a>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   )
 }

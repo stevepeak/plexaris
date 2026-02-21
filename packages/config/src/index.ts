@@ -29,6 +29,9 @@ const envSchema = z.object({
   SENTRY_DSN: z.string().startsWith('https://'),
   SENTRY_AUTH_TOKEN: z.string().startsWith('sntrys_').nullable(),
 
+  // UploadThing
+  UPLOADTHING_TOKEN: z.string(),
+
   // Resend
   RESEND_API_KEY: z.string().startsWith('re_'),
 
