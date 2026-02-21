@@ -5,8 +5,10 @@ import {
   Bot,
   Lightbulb,
   type LucideIcon,
+  Mail,
   RotateCcw,
   ShoppingCart,
+  Smartphone,
   UserCheck,
   UserPlus,
   XCircle,
@@ -15,20 +17,13 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { trpc } from '@/lib/trpc'
+import { cn } from '@/lib/utils'
 
 type NotificationType =
   | 'order_placed'
@@ -40,13 +35,12 @@ type NotificationType =
   | 'agent_suggestion_found'
   | 'agent_completed'
 
-type Channel = 'email' | 'sms' | 'inApp'
+type Channel = 'email' | 'sms'
 
 type Preference = {
   notificationType: NotificationType
   email: boolean
   sms: boolean
-  inApp: boolean
 }
 
 type NotificationItem = {
@@ -58,10 +52,12 @@ type NotificationItem = {
 
 const NOTIFICATION_GROUPS: {
   label: string
+  description: string
   items: NotificationItem[]
 }[] = [
   {
     label: 'Orders',
+    description: 'Activity on orders you manage',
     items: [
       {
         type: 'order_placed',
@@ -91,6 +87,7 @@ const NOTIFICATION_GROUPS: {
   },
   {
     label: 'Team',
+    description: 'Members joining your organization',
     items: [
       {
         type: 'user_invited',
@@ -108,6 +105,7 @@ const NOTIFICATION_GROUPS: {
   },
   {
     label: 'Agents',
+    description: 'Updates from your AI agents',
     items: [
       {
         type: 'agent_suggestion_found',
@@ -124,6 +122,60 @@ const NOTIFICATION_GROUPS: {
     ],
   },
 ]
+
+function ChannelToggle({
+  icon,
+  label,
+  checked,
+  disabled,
+  tooltip,
+  onCheckedChange,
+  ariaLabel,
+}: {
+  icon: LucideIcon
+  label: string
+  checked: boolean
+  disabled?: boolean
+  tooltip?: string
+  onCheckedChange?: (checked: boolean) => void
+  ariaLabel: string
+}) {
+  const IconComponent = icon
+  const content = (
+    <label
+      className={cn(
+        'flex cursor-pointer items-center gap-2 rounded-md border px-2.5 py-1.5 transition-colors',
+        disabled && 'cursor-not-allowed opacity-50',
+        checked
+          ? 'border-primary/20 bg-primary/5'
+          : 'border-transparent bg-muted/50',
+      )}
+    >
+      <IconComponent className="h-3.5 w-3.5 text-muted-foreground" />
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <Switch
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={onCheckedChange}
+        aria-label={ariaLabel}
+        className="scale-[0.85]"
+      />
+    </label>
+  )
+
+  if (tooltip) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{content}</TooltipTrigger>
+          <TooltipContent>{tooltip}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
+  }
+
+  return content
+}
 
 export function NotificationSettingsFormFields({
   preferences,
@@ -142,17 +194,21 @@ export function NotificationSettingsFormFields({
         <div className="h-5 w-40 animate-pulse rounded bg-muted" />
         <div className="h-4 w-72 animate-pulse rounded bg-muted" />
         <div className="h-px bg-border" />
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 py-2">
-            <div className="flex-1 space-y-2">
-              <div className="h-4 w-32 animate-pulse rounded bg-muted" />
-              <div className="h-3 w-48 animate-pulse rounded bg-muted" />
-            </div>
-            <div className="flex gap-6">
-              <div className="h-5 w-9 animate-pulse rounded-full bg-muted" />
-              <div className="h-5 w-9 animate-pulse rounded-full bg-muted" />
-              <div className="h-5 w-9 animate-pulse rounded-full bg-muted" />
-            </div>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="space-y-3 rounded-xl border p-5">
+            <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+            {Array.from({ length: 2 }).map((_, j) => (
+              <div key={j} className="flex items-center gap-4 py-2">
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-48 animate-pulse rounded bg-muted" />
+                </div>
+                <div className="flex gap-2">
+                  <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
+                  <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
+                </div>
+              </div>
+            ))}
           </div>
         ))}
       </div>
@@ -163,85 +219,65 @@ export function NotificationSettingsFormFields({
     <div>
       <h2 className="text-lg font-semibold">Notifications</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        These are your personal notification preferences. They do not affect
-        other members of this organization.
+        Choose how you want to be notified. These preferences are personal and
+        do not affect other members.
       </p>
       <Separator className="my-6" />
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {NOTIFICATION_GROUPS.map((group) => (
-          <div key={group.label}>
-            <h3 className="mb-2 text-sm font-semibold">{group.label}</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead />
-                  <TableHead className="w-16 text-center">Email</TableHead>
-                  <TableHead className="w-16 text-center">SMS</TableHead>
-                  <TableHead className="w-16 text-center">In-app</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {group.items.map((item) => {
-                  const pref = prefMap.get(item.type) ?? {
-                    email: true,
-                    sms: true,
-                    inApp: true,
-                  }
-                  const Icon = item.icon
+          <div key={group.label} className="rounded-xl border">
+            <div className="flex items-center gap-3 border-b px-5 py-3.5">
+              <h3 className="text-sm font-semibold">{group.label}</h3>
+              <span className="text-xs text-muted-foreground">
+                {group.description}
+              </span>
+            </div>
+            <div className="divide-y">
+              {group.items.map((item) => {
+                const pref = prefMap.get(item.type) ?? {
+                  email: true,
+                  sms: true,
+                }
+                const Icon = item.icon
 
-                  return (
-                    <TableRow key={item.type}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm font-medium">{item.label}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {item.description}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Switch
-                          checked={pref.email}
-                          onCheckedChange={(checked) =>
-                            onToggle(item.type, 'email', checked)
-                          }
-                          aria-label={`${item.label} email`}
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="inline-flex">
-                                <Switch
-                                  checked={false}
-                                  disabled
-                                  aria-label={`${item.label} SMS`}
-                                />
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>Coming soon</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Switch
-                          checked={pref.inApp}
-                          onCheckedChange={(checked) =>
-                            onToggle(item.type, 'inApp', checked)
-                          }
-                          aria-label={`${item.label} in-app`}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
+                return (
+                  <div
+                    key={item.type}
+                    className="flex items-center gap-4 px-5 py-3.5"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/60">
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium">{item.label}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <ChannelToggle
+                        icon={Mail}
+                        label="Email"
+                        checked={pref.email}
+                        onCheckedChange={(checked) =>
+                          onToggle(item.type, 'email', checked)
+                        }
+                        ariaLabel={`${item.label} email`}
+                      />
+                      <ChannelToggle
+                        icon={Smartphone}
+                        label="SMS"
+                        checked={false}
+                        disabled
+                        tooltip="Coming soon"
+                        ariaLabel={`${item.label} SMS`}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         ))}
       </div>

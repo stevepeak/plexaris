@@ -58,7 +58,6 @@ export const notificationRouter = router({
           notificationType: type,
           email: row?.email ?? true,
           sms: row?.sms ?? true,
-          inApp: row?.inApp ?? true,
         }
       })
     }),
@@ -68,7 +67,7 @@ export const notificationRouter = router({
       z.object({
         organizationId: z.string().uuid(),
         notificationType: z.enum(NOTIFICATION_TYPES),
-        channel: z.enum(['email', 'sms', 'inApp']),
+        channel: z.enum(['email', 'sms']),
         enabled: z.boolean(),
       }),
     )
@@ -79,7 +78,6 @@ export const notificationRouter = router({
       const columnMap = {
         email: schema.notificationPreference.email,
         sms: schema.notificationPreference.sms,
-        inApp: schema.notificationPreference.inApp,
       } as const
 
       await ctx.db
@@ -90,7 +88,6 @@ export const notificationRouter = router({
           notificationType: input.notificationType,
           email: input.channel === 'email' ? input.enabled : true,
           sms: input.channel === 'sms' ? input.enabled : true,
-          inApp: input.channel === 'inApp' ? input.enabled : true,
           createdAt: now,
           updatedAt: now,
         })

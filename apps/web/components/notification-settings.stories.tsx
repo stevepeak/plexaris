@@ -17,49 +17,41 @@ const allEnabled = [
     notificationType: 'order_placed' as const,
     email: true,
     sms: true,
-    inApp: true,
   },
   {
     notificationType: 'order_cancelled' as const,
     email: true,
     sms: true,
-    inApp: true,
   },
   {
     notificationType: 'order_returned' as const,
     email: true,
     sms: true,
-    inApp: true,
   },
   {
     notificationType: 'user_invited' as const,
     email: true,
     sms: true,
-    inApp: true,
   },
   {
     notificationType: 'user_accepted_invite' as const,
     email: true,
     sms: true,
-    inApp: true,
   },
   {
     notificationType: 'order_issues' as const,
     email: true,
     sms: true,
-    inApp: true,
   },
   {
     notificationType: 'agent_suggestion_found' as const,
     email: true,
     sms: true,
-    inApp: true,
   },
   {
     notificationType: 'agent_completed' as const,
     email: true,
     sms: true,
-    inApp: true,
   },
 ]
 
@@ -68,49 +60,41 @@ const mixedPreferences = [
     notificationType: 'order_placed' as const,
     email: true,
     sms: false,
-    inApp: true,
   },
   {
     notificationType: 'order_cancelled' as const,
     email: true,
     sms: true,
-    inApp: false,
   },
   {
     notificationType: 'order_returned' as const,
     email: false,
     sms: false,
-    inApp: true,
   },
   {
     notificationType: 'user_invited' as const,
     email: true,
     sms: true,
-    inApp: true,
   },
   {
     notificationType: 'user_accepted_invite' as const,
     email: false,
     sms: true,
-    inApp: false,
   },
   {
     notificationType: 'order_issues' as const,
     email: true,
     sms: false,
-    inApp: true,
   },
   {
     notificationType: 'agent_suggestion_found' as const,
     email: true,
     sms: true,
-    inApp: true,
   },
   {
     notificationType: 'agent_completed' as const,
     email: false,
     sms: false,
-    inApp: true,
   },
 ]
 

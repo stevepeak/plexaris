@@ -35,7 +35,6 @@ export const notificationPreference = pgTable(
     notificationType: notificationTypeEnum('notification_type').notNull(),
     email: boolean('email').notNull().default(true),
     sms: boolean('sms').notNull().default(true),
-    inApp: boolean('in_app').notNull().default(true),
     createdAt: timestamp('created_at').notNull(),
     updatedAt: timestamp('updated_at').notNull(),
   },
