@@ -218,7 +218,7 @@ export default function OrgPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+        <div className="flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="text-lg font-semibold">
               Plexaris
@@ -275,7 +275,7 @@ export default function OrgPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="px-4 py-8">
         {orgNotFound ? (
           <p className="text-sm text-muted-foreground">
             Organization not found.
@@ -303,9 +303,7 @@ export default function OrgPage() {
                     key={tab.value}
                     value={tab.value}
                     className={cn(
-                      'justify-start gap-2 data-[state=active]:bg-muted data-[state=active]:shadow-none',
-                      tab.value === 'settings' &&
-                        'data-[state=active]:bg-muted',
+                      'justify-start gap-2 rounded-md transition-colors hover:bg-muted/50 data-[state=active]:bg-muted data-[state=active]:shadow-none',
                     )}
                   >
                     <Icon className={cn('h-4 w-4', tab.iconColor)} />
