@@ -2,6 +2,7 @@ import { and, count, createDb, eq, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
+import { checkMembership } from '@/lib/permissions'
 
 const db = createDb()
 
@@ -20,38 +21,33 @@ export async function POST(
 
   const { id } = await params
 
-  // Verify user is a member
-  const membership = await db.query.membership.findFirst({
-    where: and(
-      eq(schema.membership.userId, session.user.id),
-      eq(schema.membership.organizationId, id),
-    ),
-  })
+  const member = await checkMembership(session.user.id, id)
 
-  if (!membership) {
+  if (!member) {
     return NextResponse.json(
       { error: 'You are not a member of this organization' },
       { status: 403 },
     )
   }
 
-  // Sole owners cannot leave — they must transfer ownership or archive the org
-  if (membership.role === 'owner') {
-    const [{ value: ownerCount }] = await db
+  // Sole admins cannot leave — they must assign another admin or archive the org
+  if (member.isSystem) {
+    const [{ value: adminCount }] = await db
       .select({ value: count() })
       .from(schema.membership)
+      .innerJoin(schema.role, eq(schema.membership.roleId, schema.role.id))
       .where(
         and(
           eq(schema.membership.organizationId, id),
-          eq(schema.membership.role, 'owner'),
+          eq(schema.role.isSystem, true),
         ),
       )
 
-    if (ownerCount <= 1) {
+    if (adminCount <= 1) {
       return NextResponse.json(
         {
           error:
-            "You're the sole owner. Transfer ownership or archive the organization first.",
+            "You're the sole admin. Assign another admin or archive the organization first.",
         },
         { status: 400 },
       )
@@ -61,7 +57,7 @@ export async function POST(
   // Delete the membership
   await db
     .delete(schema.membership)
-    .where(eq(schema.membership.id, membership.id))
+    .where(eq(schema.membership.id, member.membershipId))
 
   return NextResponse.json({ success: true })
 }

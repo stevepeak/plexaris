@@ -53,8 +53,9 @@ export type PasskeyItem = {
 export type OrgMembership = {
   id: string
   name: string
-  role: 'owner' | 'member'
-  soleOwner: boolean
+  roleName: string
+  isAdmin: boolean
+  soleAdmin: boolean
 }
 
 export type ContactPreference = 'message' | 'call'
@@ -619,17 +620,17 @@ export function ProfileFormFields({
                                   variant="secondary"
                                   className="capitalize"
                                 >
-                                  {org.soleOwner ? 'sole owner' : org.role}
+                                  {org.soleAdmin ? 'sole admin' : org.roleName}
                                 </Badge>
                               </div>
-                              {org.soleOwner && (
+                              {org.soleAdmin && (
                                 <p className="mt-1 text-xs text-muted-foreground">
-                                  You are the only owner. Archive this
+                                  You are the only admin. Archive this
                                   organization to proceed.
                                 </p>
                               )}
                             </div>
-                            {org.soleOwner ? (
+                            {org.soleAdmin ? (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button

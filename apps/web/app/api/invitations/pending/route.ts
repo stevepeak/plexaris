@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     .select({
       id: schema.invitation.id,
       email: schema.invitation.email,
-      role: schema.invitation.role,
+      roleName: schema.role.name,
       token: schema.invitation.token,
       createdAt: schema.invitation.createdAt,
       expiresAt: schema.invitation.expiresAt,
@@ -33,6 +33,7 @@ export async function GET(request: Request) {
       eq(schema.invitation.organizationId, schema.organization.id),
     )
     .innerJoin(schema.user, eq(schema.invitation.invitedBy, schema.user.id))
+    .innerJoin(schema.role, eq(schema.invitation.roleId, schema.role.id))
     .where(
       and(
         eq(schema.invitation.email, session.user.email),

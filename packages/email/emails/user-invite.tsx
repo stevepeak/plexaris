@@ -6,14 +6,14 @@ export type UserInviteEmailProps = {
   invitedByName: string
   organizationName: string
   inviteLink: string
-  role: 'owner' | 'member'
+  roleName: string
 }
 
 export default function UserInviteEmail({
   invitedByName,
   organizationName,
   inviteLink,
-  role,
+  roleName,
 }: UserInviteEmailProps) {
   return (
     <Layout
@@ -22,8 +22,7 @@ export default function UserInviteEmail({
       <Heading style={heading}>You&apos;ve been invited</Heading>
       <Text style={text}>
         <strong>{invitedByName}</strong> has invited you to join{' '}
-        <strong>{organizationName}</strong> as a
-        {role === 'owner' ? 'n owner' : ' member'}.
+        <strong>{organizationName}</strong> as a {roleName}.
       </Text>
       <Text style={text}>
         Click the button below to accept the invitation and get started.
@@ -43,7 +42,7 @@ const PreviewProps: UserInviteEmailProps = {
   invitedByName: 'Steve',
   organizationName: 'Acme Corp',
   inviteLink: 'https://app.plexaris.com/invite/abc123',
-  role: 'member',
+  roleName: 'Member',
 }
 
 UserInviteEmail.PreviewProps = PreviewProps

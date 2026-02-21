@@ -3,11 +3,13 @@
 import {
   BarChart3,
   Bell,
+  FlaskConical,
   LayoutDashboard,
   Lightbulb,
   LogOut,
   Package,
   Settings,
+  Shield,
   ShoppingCart,
   Users,
   Zap,
@@ -17,12 +19,14 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 import { AgentsTab } from '@/components/org-page/agents-tab'
+import { AlignTab } from '@/components/org-page/align-tab'
 import { DashboardTab } from '@/components/org-page/dashboard-tab'
 import { InsightsTab } from '@/components/org-page/insights-tab'
 import { MembersTab } from '@/components/org-page/members-tab'
 import { NotificationsTab } from '@/components/org-page/notifications-tab'
 import { OrdersTab } from '@/components/org-page/orders-tab'
 import { ProductsTab } from '@/components/org-page/products-tab'
+import { RolesTab } from '@/components/org-page/roles-tab'
 import { SettingsTab } from '@/components/org-page/settings-tab'
 import { SuggestionsTab } from '@/components/org-page/suggestions-tab'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
@@ -40,6 +44,7 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { authClient } from '@/lib/auth-client'
+import { hasPermission } from '@/lib/permissions-client'
 import { trpc } from '@/lib/trpc'
 import { cn } from '@/lib/utils'
 
@@ -87,12 +92,24 @@ const TAB_CONFIG = [
     icon: Lightbulb,
     iconColor: 'text-yellow-500',
   },
+  {
+    value: 'align',
+    label: 'Align',
+    icon: FlaskConical,
+    iconColor: 'text-orange-500',
+  },
   { value: 'sep-3' as const, label: '', icon: null, iconColor: '' },
   {
     value: 'agents',
     label: 'Agents',
     icon: Zap,
     iconColor: 'text-violet-500',
+  },
+  {
+    value: 'roles',
+    label: 'Roles',
+    icon: Shield,
+    iconColor: 'text-orange-500',
   },
   {
     value: 'members',
@@ -185,9 +202,17 @@ export default function OrgPage() {
     !organizations.find((o) => o.id === orgId)
 
   const visibleTabs = activeOrg
-    ? TAB_CONFIG.filter(
-        (tab) => !('orgType' in tab) || tab.orgType === activeOrg.type,
-      )
+    ? TAB_CONFIG.filter((tab) => {
+        if ('orgType' in tab && tab.orgType !== activeOrg.type) return false
+        if (
+          tab.value === 'roles' &&
+          !activeOrg.isAdmin &&
+          !hasPermission(activeOrg.permissions, 'manage_roles')
+        ) {
+          return false
+        }
+        return true
+      })
     : []
 
   return (
@@ -327,16 +352,25 @@ export default function OrgPage() {
                 <TabsContent value="products" className="mt-0">
                   <ProductsTab
                     organizationId={activeOrg.id}
-                    isOwner={activeOrg.role === 'owner'}
+                    permissions={activeOrg.permissions}
                     initialProductId={initialProductId}
                   />
                 </TabsContent>
               )}
 
+              <TabsContent value="roles" className="mt-0">
+                <RolesTab
+                  organizationId={activeOrg.id}
+                  permissions={activeOrg.permissions}
+                  isAdmin={activeOrg.isAdmin}
+                />
+              </TabsContent>
+
               <TabsContent value="members" className="mt-0">
                 <MembersTab
                   organizationId={activeOrg.id}
-                  isOwner={activeOrg.role === 'owner'}
+                  permissions={activeOrg.permissions}
+                  isAdmin={activeOrg.isAdmin}
                 />
               </TabsContent>
 
@@ -350,6 +384,10 @@ export default function OrgPage() {
 
               <TabsContent value="insights" className="mt-0">
                 <InsightsTab organizationId={activeOrg.id} />
+              </TabsContent>
+
+              <TabsContent value="align" className="mt-0">
+                <AlignTab organizationId={activeOrg.id} />
               </TabsContent>
 
               <TabsContent value="notifications" className="mt-0">

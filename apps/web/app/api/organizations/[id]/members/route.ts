@@ -2,6 +2,7 @@ import { and, createDb, eq, isNull, schema, sql } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
+import { checkMembership } from '@/lib/permissions'
 
 const db = createDb()
 
@@ -20,15 +21,9 @@ export async function GET(
 
   const { id } = await params
 
-  // Verify user is a member of the org
-  const userMembership = await db.query.membership.findFirst({
-    where: and(
-      eq(schema.membership.userId, session.user.id),
-      eq(schema.membership.organizationId, id),
-    ),
-  })
+  const member = await checkMembership(session.user.id, id)
 
-  if (!userMembership) {
+  if (!member) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -36,7 +31,9 @@ export async function GET(
     .select({
       id: schema.membership.id,
       userId: schema.membership.userId,
-      role: schema.membership.role,
+      roleId: schema.role.id,
+      roleName: schema.role.name,
+      isSystemRole: schema.role.isSystem,
       createdAt: schema.membership.createdAt,
       userName: schema.user.name,
       userEmail: schema.user.email,
@@ -49,6 +46,7 @@ export async function GET(
     })
     .from(schema.membership)
     .innerJoin(schema.user, eq(schema.membership.userId, schema.user.id))
+    .innerJoin(schema.role, eq(schema.membership.roleId, schema.role.id))
     .where(eq(schema.membership.organizationId, id))
 
   // Pending invitations (not accepted, not rejected, not expired)
@@ -56,12 +54,13 @@ export async function GET(
     .select({
       id: schema.invitation.id,
       email: schema.invitation.email,
-      role: schema.invitation.role,
+      roleName: schema.role.name,
       createdAt: schema.invitation.createdAt,
       invitedByName: schema.user.name,
     })
     .from(schema.invitation)
     .innerJoin(schema.user, eq(schema.invitation.invitedBy, schema.user.id))
+    .innerJoin(schema.role, eq(schema.invitation.roleId, schema.role.id))
     .where(
       and(
         eq(schema.invitation.organizationId, id),

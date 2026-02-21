@@ -21,7 +21,10 @@ type Organization = {
   type: 'supplier' | 'horeca'
   claimed: boolean
   logoUrl: string | null
-  role: 'owner' | 'member'
+  roleId: string
+  roleName: string
+  isAdmin: boolean
+  permissions: string[]
 }
 
 function getOrgInitials(name: string): string {

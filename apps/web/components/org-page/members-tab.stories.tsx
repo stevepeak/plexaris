@@ -15,13 +15,24 @@ type Story = StoryObj<typeof MembersTab>
 export const Owner: Story = {
   args: {
     organizationId: 'org-1',
-    isOwner: true,
+    permissions: [
+      'create_order',
+      'edit_order',
+      'place_order',
+      'invite_members',
+      'manage_roles',
+      'manage_agents',
+      'manage_products',
+      'edit_org_details',
+    ],
+    isAdmin: true,
   },
 }
 
 export const Member: Story = {
   args: {
     organizationId: 'org-1',
-    isOwner: false,
+    permissions: ['create_order', 'edit_order', 'place_order'],
+    isAdmin: false,
   },
 }

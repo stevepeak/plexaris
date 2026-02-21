@@ -11,12 +11,37 @@ import {
 
 import { user } from './auth-schema'
 
+// --- Permissions ---
+
+export const PERMISSIONS = {
+  create_order: 'create_order',
+  edit_order: 'edit_order',
+  place_order: 'place_order',
+  invite_members: 'invite_members',
+  manage_roles: 'manage_roles',
+  manage_agents: 'manage_agents',
+  manage_products: 'manage_products',
+  edit_org_details: 'edit_org_details',
+} as const
+
+export const ALL_PERMISSIONS = Object.values(PERMISSIONS)
+
+export const ADMIN_ROLE_NAME = 'Admin'
+
+export const DEFAULT_MEMBER_PERMISSIONS = [
+  PERMISSIONS.create_order,
+  PERMISSIONS.edit_order,
+  PERMISSIONS.place_order,
+]
+
+// --- Enums ---
+
 export const organizationTypeEnum = pgEnum('organization_type', [
   'supplier',
   'horeca',
 ])
 
-export const membershipRoleEnum = pgEnum('membership_role', ['owner', 'member'])
+// --- Tables ---
 
 export const organization = pgTable('organization', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -36,6 +61,22 @@ export const organization = pgTable('organization', {
   archivedAt: timestamp('archived_at'),
 })
 
+export const role = pgTable(
+  'role',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organization.id),
+    name: text('name').notNull(),
+    isSystem: boolean('is_system').notNull().default(false),
+    permissions: text('permissions').array().notNull().default([]),
+    createdAt: timestamp('created_at').notNull(),
+    updatedAt: timestamp('updated_at').notNull(),
+  },
+  (table) => [unique().on(table.organizationId, table.name)],
+)
+
 export const membership = pgTable(
   'membership',
   {
@@ -46,7 +87,9 @@ export const membership = pgTable(
     organizationId: uuid('organization_id')
       .notNull()
       .references(() => organization.id),
-    role: membershipRoleEnum('role').notNull().default('member'),
+    roleId: uuid('role_id')
+      .notNull()
+      .references(() => role.id),
     createdAt: timestamp('created_at').notNull(),
     updatedAt: timestamp('updated_at').notNull(),
   },
@@ -74,7 +117,9 @@ export const invitation = pgTable('invitation', {
     .notNull()
     .references(() => user.id),
   email: text('email').notNull(),
-  role: membershipRoleEnum('role').notNull().default('member'),
+  roleId: uuid('role_id')
+    .notNull()
+    .references(() => role.id),
   token: text('token').notNull().unique(),
   expiresAt: timestamp('expires_at').notNull(),
   acceptedAt: timestamp('accepted_at'),

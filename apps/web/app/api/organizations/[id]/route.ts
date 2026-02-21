@@ -2,6 +2,7 @@ import { and, createDb, eq, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
+import { checkMembership, checkPermission } from '@/lib/permissions'
 
 const db = createDb()
 
@@ -20,15 +21,9 @@ export async function GET(
 
   const { id } = await params
 
-  // Verify user is a member
-  const membership = await db.query.membership.findFirst({
-    where: and(
-      eq(schema.membership.userId, session.user.id),
-      eq(schema.membership.organizationId, id),
-    ),
-  })
+  const member = await checkMembership(session.user.id, id)
 
-  if (!membership) {
+  if (!member) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -43,10 +38,18 @@ export async function GET(
     )
   }
 
-  return NextResponse.json({ organization: org, role: membership.role })
+  return NextResponse.json({
+    organization: org,
+    role: {
+      id: member.roleId,
+      name: member.roleName,
+      isSystem: member.isSystem,
+      permissions: member.permissions,
+    },
+  })
 }
 
-// PATCH /api/organizations/[id] — Update org details (owners only)
+// PATCH /api/organizations/[id] — Update org details
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -61,18 +64,11 @@ export async function PATCH(
 
   const { id } = await params
 
-  // Verify user is an owner
-  const membership = await db.query.membership.findFirst({
-    where: and(
-      eq(schema.membership.userId, session.user.id),
-      eq(schema.membership.organizationId, id),
-      eq(schema.membership.role, 'owner'),
-    ),
-  })
+  const perm = await checkPermission(session.user.id, id, 'edit_org_details')
 
-  if (!membership) {
+  if (!perm) {
     return NextResponse.json(
-      { error: 'Only organization owners can update details' },
+      { error: 'You do not have permission to update organization details' },
       { status: 403 },
     )
   }

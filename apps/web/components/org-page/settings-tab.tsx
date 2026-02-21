@@ -46,7 +46,8 @@ export function SettingsTab({
   onOrgArchived?: () => void
 }) {
   const [org, setOrg] = useState<OrgDetails | null>(null)
-  const [isOwner, setIsOwner] = useState(false)
+  const [canEdit, setCanEdit] = useState(false)
+  const [isOrgAdmin, setIsOrgAdmin] = useState(false)
   const [isPending, setIsPending] = useState(true)
 
   const [name, setName] = useState('')
@@ -70,7 +71,14 @@ export function SettingsTab({
         if (data?.organization) {
           const o = data.organization as OrgDetails
           setOrg(o)
-          setIsOwner(data.role === 'owner')
+          const role = data.role as {
+            isSystem: boolean
+            permissions: string[]
+          }
+          setCanEdit(
+            role.isSystem || role.permissions.includes('edit_org_details'),
+          )
+          setIsOrgAdmin(role.isSystem)
           setName(o.name)
           setDescription(o.description ?? '')
           setPhone(o.phone ?? '')
@@ -205,7 +213,7 @@ export function SettingsTab({
         </Badge>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        {isOwner
+        {canEdit
           ? 'Update your organization information'
           : 'View your organization information'}
       </p>
@@ -224,7 +232,7 @@ export function SettingsTab({
               .slice(0, 2)}
             variant="square"
             alt={`${org.name} logo`}
-            disabled={!isOwner}
+            disabled={!canEdit}
             onUpload={handleUpdateImage}
           />
         </div>
@@ -238,7 +246,7 @@ export function SettingsTab({
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            disabled={!isOwner}
+            disabled={!canEdit}
           />
         </div>
 
@@ -250,7 +258,7 @@ export function SettingsTab({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            disabled={!isOwner}
+            disabled={!canEdit}
           />
         </div>
 
@@ -263,7 +271,7 @@ export function SettingsTab({
               autoComplete="off"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              disabled={!isOwner}
+              disabled={!canEdit}
             />
           </div>
           <div className="grid gap-2">
@@ -274,7 +282,7 @@ export function SettingsTab({
               autoComplete="off"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={!isOwner}
+              disabled={!canEdit}
             />
           </div>
         </div>
@@ -287,7 +295,7 @@ export function SettingsTab({
             autoComplete="off"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            disabled={!isOwner}
+            disabled={!canEdit}
           />
         </div>
 
@@ -301,7 +309,7 @@ export function SettingsTab({
               value={deliveryAreas}
               onChange={(e) => setDeliveryAreas(e.target.value)}
               rows={2}
-              disabled={!isOwner}
+              disabled={!canEdit}
             />
           </div>
         )}
@@ -315,7 +323,7 @@ export function SettingsTab({
               autoComplete="off"
               value={deliveryAddress}
               onChange={(e) => setDeliveryAddress(e.target.value)}
-              disabled={!isOwner}
+              disabled={!canEdit}
             />
           </div>
         )}
@@ -327,7 +335,7 @@ export function SettingsTab({
           </p>
         )}
 
-        {isOwner && (
+        {canEdit && (
           <Button type="submit" disabled={isLoading} className="w-fit">
             {isLoading ? (
               <>
@@ -357,7 +365,7 @@ export function SettingsTab({
             <p className="text-sm text-destructive">{dangerError}</p>
           )}
 
-          {!isOwner && (
+          {!isOrgAdmin && (
             <div className="flex items-center justify-between rounded-md border px-4 py-3">
               <div>
                 <p className="text-sm font-medium">Leave organization</p>
@@ -398,7 +406,7 @@ export function SettingsTab({
             </div>
           )}
 
-          {isOwner && (
+          {isOrgAdmin && (
             <div className="flex items-center justify-between rounded-md border px-4 py-3">
               <div>
                 <p className="text-sm font-medium">Archive organization</p>

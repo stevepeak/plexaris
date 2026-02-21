@@ -16,7 +16,7 @@ const sampleInvitations = [
   {
     id: '1',
     email: 'alice@company.com',
-    role: 'member',
+    roleName: 'Member',
     createdAt: new Date().toISOString(),
     expiresAt: new Date(Date.now() + 7 * 86400000).toISOString(),
     acceptedAt: null,
@@ -26,7 +26,7 @@ const sampleInvitations = [
   {
     id: '2',
     email: 'bob@company.com',
-    role: 'member',
+    roleName: 'Member',
     createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
     expiresAt: new Date(Date.now() + 4 * 86400000).toISOString(),
     acceptedAt: new Date().toISOString(),
@@ -36,7 +36,7 @@ const sampleInvitations = [
   {
     id: '3',
     email: 'carol@company.com',
-    role: 'owner',
+    roleName: 'Admin',
     createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
     expiresAt: new Date(Date.now() + 2 * 86400000).toISOString(),
     acceptedAt: null,
@@ -46,7 +46,7 @@ const sampleInvitations = [
   {
     id: '4',
     email: 'dave@company.com',
-    role: 'member',
+    roleName: 'Member',
     createdAt: new Date(Date.now() - 10 * 86400000).toISOString(),
     expiresAt: new Date(Date.now() - 3 * 86400000).toISOString(),
     acceptedAt: null,
@@ -61,7 +61,7 @@ export const WithInvitations: Story = {
   render: () => (
     <InviteMembersList
       invitations={sampleInvitations}
-      isOwner={true}
+      canInvite={true}
       isPending={false}
       onInvite={noop}
     />
@@ -72,7 +72,7 @@ export const Empty: Story = {
   render: () => (
     <InviteMembersList
       invitations={[]}
-      isOwner={true}
+      canInvite={true}
       isPending={false}
       onInvite={noop}
     />
@@ -83,7 +83,7 @@ export const MemberView: Story = {
   render: () => (
     <InviteMembersList
       invitations={sampleInvitations}
-      isOwner={false}
+      canInvite={false}
       isPending={false}
     />
   ),
@@ -93,7 +93,7 @@ export const Loading: Story = {
   render: () => (
     <InviteMembersList
       invitations={[]}
-      isOwner={true}
+      canInvite={true}
       isPending={true}
       onInvite={noop}
     />

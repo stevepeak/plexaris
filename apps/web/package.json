@@ -17,6 +17,7 @@
   "dependencies": {
     "@app/api": "workspace:*",
     "@app/cloudinary": "workspace:*",
+    "@app/config": "workspace:*",
     "@app/email": "workspace:*",
     "@app/resend": "workspace:*",
     "@app/db": "workspace:*",

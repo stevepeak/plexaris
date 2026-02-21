@@ -15,8 +15,20 @@ type Story = StoryObj<typeof ProfileFormFields>
 const noop = () => Promise.resolve({})
 
 const sampleOrgs: OrgMembership[] = [
-  { id: '1', name: 'Acme Corp', role: 'owner', soleOwner: true },
-  { id: '2', name: 'Side Project', role: 'member', soleOwner: false },
+  {
+    id: '1',
+    name: 'Acme Corp',
+    roleName: 'Admin',
+    isAdmin: true,
+    soleAdmin: true,
+  },
+  {
+    id: '2',
+    name: 'Side Project',
+    roleName: 'Member',
+    isAdmin: false,
+    soleAdmin: false,
+  },
 ]
 
 export const Default: Story = {
@@ -196,8 +208,20 @@ export const DangerZoneSoleOwnerOnly: Story = {
       onChangePassword={noop}
       onDeleteAccount={noop}
       organizations={[
-        { id: '1', name: 'Acme Corp', role: 'owner', soleOwner: true },
-        { id: '3', name: 'Personal Workspace', role: 'owner', soleOwner: true },
+        {
+          id: '1',
+          name: 'Acme Corp',
+          roleName: 'Admin',
+          isAdmin: true,
+          soleAdmin: true,
+        },
+        {
+          id: '3',
+          name: 'Personal Workspace',
+          roleName: 'Admin',
+          isAdmin: true,
+          soleAdmin: true,
+        },
       ]}
       organizationsLoading={false}
       onLeaveOrg={noop}

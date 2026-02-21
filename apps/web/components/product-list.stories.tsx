@@ -97,7 +97,16 @@ export const Loading: Story = {
   args: {
     products: [],
     isPending: true,
-    isOwner: true,
+    permissions: [
+      'create_order',
+      'edit_order',
+      'place_order',
+      'invite_members',
+      'manage_roles',
+      'manage_agents',
+      'manage_products',
+      'edit_org_details',
+    ],
   },
 }
 
@@ -105,7 +114,16 @@ export const GridView: Story = {
   args: {
     products: sampleProducts,
     isPending: false,
-    isOwner: true,
+    permissions: [
+      'create_order',
+      'edit_order',
+      'place_order',
+      'invite_members',
+      'manage_roles',
+      'manage_agents',
+      'manage_products',
+      'edit_org_details',
+    ],
     onAddProduct: () => undefined,
   },
 }
@@ -114,7 +132,16 @@ export const EmptyOwner: Story = {
   args: {
     products: [],
     isPending: false,
-    isOwner: true,
+    permissions: [
+      'create_order',
+      'edit_order',
+      'place_order',
+      'invite_members',
+      'manage_roles',
+      'manage_agents',
+      'manage_products',
+      'edit_org_details',
+    ],
     onAddProduct: () => undefined,
   },
 }
@@ -123,7 +150,7 @@ export const EmptyMember: Story = {
   args: {
     products: [],
     isPending: false,
-    isOwner: false,
+    permissions: ['create_order', 'edit_order', 'place_order'],
   },
 }
 
@@ -131,7 +158,7 @@ export const MemberView: Story = {
   args: {
     products: sampleProducts,
     isPending: false,
-    isOwner: false,
+    permissions: ['create_order', 'edit_order', 'place_order'],
   },
 }
 
@@ -166,7 +193,16 @@ export const NoPrices: Story = {
       },
     ],
     isPending: false,
-    isOwner: true,
+    permissions: [
+      'create_order',
+      'edit_order',
+      'place_order',
+      'invite_members',
+      'manage_roles',
+      'manage_agents',
+      'manage_products',
+      'edit_org_details',
+    ],
     onAddProduct: () => undefined,
   },
 }

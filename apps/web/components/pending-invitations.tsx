@@ -17,7 +17,7 @@ import {
 type PendingInvitation = {
   id: string
   email: string
-  role: string
+  roleName: string
   token: string
   createdAt: string
   expiresAt: string
@@ -90,7 +90,7 @@ export function PendingInvitationsList({
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="capitalize">
-                {inv.role}
+                {inv.roleName}
               </Badge>
               <Button
                 size="sm"

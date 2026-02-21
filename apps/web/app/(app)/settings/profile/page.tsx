@@ -101,13 +101,15 @@ export default function ProfileSettingsPage() {
           (o: {
             id: string
             name: string
-            role: 'owner' | 'member'
-            soleOwner: boolean
+            roleName: string
+            isAdmin: boolean
+            soleAdmin: boolean
           }) => ({
             id: o.id,
             name: o.name,
-            role: o.role,
-            soleOwner: o.soleOwner,
+            roleName: o.roleName,
+            isAdmin: o.isAdmin,
+            soleAdmin: o.soleAdmin,
           }),
         ),
       )

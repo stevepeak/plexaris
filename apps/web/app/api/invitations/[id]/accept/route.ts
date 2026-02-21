@@ -43,12 +43,12 @@ export async function POST(
     )
   }
 
-  // Create membership
+  // Create membership with the invitation's roleId
   const now = new Date()
   await db.insert(schema.membership).values({
     userId: session.user.id,
     organizationId: invitation.organizationId,
-    role: invitation.role,
+    roleId: invitation.roleId,
     createdAt: now,
     updatedAt: now,
   })

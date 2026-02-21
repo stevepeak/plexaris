@@ -39,6 +39,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { hasPermission } from '@/lib/permissions-client'
 import { parseCategoryValue } from '@/lib/product-categories'
 import { cn } from '@/lib/utils'
 
@@ -90,11 +91,11 @@ function formatPrice(price: string | null, unit: string | null) {
 
 function ProductCardGrid({
   products,
-  isOwner,
+  canManage,
   onEditProduct,
 }: {
   products: Product[]
-  isOwner: boolean
+  canManage: boolean
   onEditProduct?: (product: Product) => void
 }) {
   if (products.length === 0) {
@@ -102,7 +103,7 @@ function ProductCardGrid({
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Package className="h-12 w-12 text-muted-foreground/50" />
         <p className="mt-4 text-sm text-muted-foreground">
-          {isOwner
+          {canManage
             ? 'Add your first product to get started.'
             : 'This supplier has no products yet.'}
         </p>
@@ -135,12 +136,12 @@ function ProductCardGrid({
                 key={product.id}
                 className={cn(
                   'overflow-hidden',
-                  isOwner &&
+                  canManage &&
                     onEditProduct &&
                     'cursor-pointer hover:border-foreground/20',
                 )}
                 onClick={
-                  isOwner && onEditProduct
+                  canManage && onEditProduct
                     ? () => onEditProduct(product)
                     : undefined
                 }
@@ -190,14 +191,14 @@ function ProductCardGrid({
 
 function ProductTableView({
   products,
-  isOwner,
+  canManage,
   onEditProduct,
   sortField,
   sortDirection,
   onSort,
 }: {
   products: Product[]
-  isOwner: boolean
+  canManage: boolean
   onEditProduct?: (product: Product) => void
   sortField: SortField | null
   sortDirection: SortDirection
@@ -230,7 +231,7 @@ function ProductTableView({
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Package className="h-12 w-12 text-muted-foreground/50" />
         <p className="mt-4 text-sm text-muted-foreground">
-          {isOwner
+          {canManage
             ? 'Add your first product to get started.'
             : 'This supplier has no products yet.'}
         </p>
@@ -252,9 +253,11 @@ function ProductTableView({
         {products.map((product) => (
           <TableRow
             key={product.id}
-            className={isOwner && onEditProduct ? 'cursor-pointer' : undefined}
+            className={
+              canManage && onEditProduct ? 'cursor-pointer' : undefined
+            }
             onClick={
-              isOwner && onEditProduct
+              canManage && onEditProduct
                 ? () => onEditProduct(product)
                 : undefined
             }
@@ -281,16 +284,17 @@ function ProductTableView({
 export function ProductList({
   products,
   isPending,
-  isOwner,
+  permissions,
   onAddProduct,
   onEditProduct,
 }: {
   products: Product[]
   isPending: boolean
-  isOwner: boolean
+  permissions: string[]
   onAddProduct?: () => void
   onEditProduct?: (product: Product) => void
 }) {
+  const canManage = hasPermission(permissions, 'manage_products')
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table')
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<ProductFilters>({
@@ -454,7 +458,7 @@ export function ProductList({
               <TooltipContent>Coming soon</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          {isOwner && (
+          {canManage && (
             <Button size="sm" onClick={onAddProduct}>
               <Plus className="h-4 w-4" />
               Add Product
@@ -574,13 +578,13 @@ export function ProductList({
       {viewMode === 'grid' ? (
         <ProductCardGrid
           products={filteredProducts}
-          isOwner={isOwner}
+          canManage={canManage}
           onEditProduct={onEditProduct}
         />
       ) : (
         <ProductTableView
           products={filteredProducts}
-          isOwner={isOwner}
+          canManage={canManage}
           onEditProduct={onEditProduct}
           sortField={sortField}
           sortDirection={sortDirection}

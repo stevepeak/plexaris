@@ -17,12 +17,22 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import { hasPermission } from '@/lib/permissions-client'
 
 type Member = {
   id: string
   userId: string
-  role: string
+  roleId: string
+  roleName: string
+  isSystemRole: boolean
   createdAt: string
   userName: string
   userEmail: string
@@ -33,9 +43,16 @@ type Member = {
 type Invitation = {
   id: string
   email: string
-  role: string
+  roleName: string
   createdAt: string
   invitedByName: string
+}
+
+type Role = {
+  id: string
+  name: string
+  isSystem: boolean
+  permissions: string[]
 }
 
 function timeAgo(date: string): string {
@@ -53,30 +70,53 @@ function timeAgo(date: string): string {
 
 export function MembersTab({
   organizationId,
-  isOwner,
+  permissions,
+  isAdmin,
 }: {
   organizationId: string
-  isOwner: boolean
+  permissions: string[]
+  isAdmin: boolean
 }) {
   const [members, setMembers] = useState<Member[]>([])
   const [invitations, setInvitations] = useState<Invitation[]>([])
+  const [roles, setRoles] = useState<Role[]>([])
   const [isPending, setIsPending] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [email, setEmail] = useState('')
+  const [selectedRoleId, setSelectedRoleId] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [roleChangeError, setRoleChangeError] = useState<string | null>(null)
+
+  const canInvite = isAdmin || hasPermission(permissions, 'invite_members')
+  const canManageRoles = isAdmin || hasPermission(permissions, 'manage_roles')
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch(`/api/organizations/${organizationId}/members`)
-      if (!res.ok) return
-      const data = await res.json()
-      setMembers(data.members ?? [])
-      setInvitations(data.invitations ?? [])
+      const [membersRes, rolesRes] = await Promise.all([
+        fetch(`/api/organizations/${organizationId}/members`),
+        fetch(`/api/organizations/${organizationId}/roles`),
+      ])
+      if (membersRes.ok) {
+        const data = await membersRes.json()
+        setMembers(data.members ?? [])
+        setInvitations(data.invitations ?? [])
+      }
+      if (rolesRes.ok) {
+        const data = await rolesRes.json()
+        setRoles(data.roles ?? [])
+        // Default invite role to Member role
+        const memberRole = (data.roles ?? []).find(
+          (r: Role) => r.name === 'Member',
+        )
+        if (memberRole && !selectedRoleId) {
+          setSelectedRoleId(memberRole.id)
+        }
+      }
     } finally {
       setIsPending(false)
     }
-  }, [organizationId])
+  }, [organizationId, selectedRoleId])
 
   useEffect(() => {
     void fetchData()
@@ -90,12 +130,21 @@ export function MembersTab({
     const res = await fetch('/api/invitations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, organizationId, role: 'member' }),
+      body: JSON.stringify({
+        email,
+        organizationId,
+        roleId: selectedRoleId,
+      }),
     })
 
     if (!res.ok) {
-      const data = await res.json()
-      setError(data.error ?? 'Failed to send invitation')
+      const text = await res.text()
+      try {
+        const data = JSON.parse(text)
+        setError(data.error ?? 'Failed to send invitation')
+      } catch {
+        setError('Failed to send invitation')
+      }
       setIsSending(false)
       return
     }
@@ -106,11 +155,31 @@ export function MembersTab({
     void fetchData()
   }
 
+  const handleRoleChange = async (membershipId: string, roleId: string) => {
+    setRoleChangeError(null)
+    const res = await fetch(
+      `/api/organizations/${organizationId}/members/${membershipId}/role`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roleId }),
+      },
+    )
+
+    if (!res.ok) {
+      const data = await res.json()
+      setRoleChangeError(data.error ?? 'Failed to change role')
+      return
+    }
+
+    void fetchData()
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Team</h2>
-        {isOwner && (
+        {canInvite && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
@@ -139,8 +208,26 @@ export function MembersTab({
                     required
                   />
                 </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="invite-role">Role</Label>
+                  <Select
+                    value={selectedRoleId}
+                    onValueChange={setSelectedRoleId}
+                  >
+                    <SelectTrigger id="invite-role">
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roles.map((role) => (
+                        <SelectItem key={role.id} value={role.id}>
+                          {role.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" disabled={isSending}>
+                <Button type="submit" disabled={isSending || !selectedRoleId}>
                   {isSending ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -160,6 +247,10 @@ export function MembersTab({
       </div>
 
       <Separator className="my-6" />
+
+      {roleChangeError && (
+        <p className="mb-4 text-sm text-destructive">{roleChangeError}</p>
+      )}
 
       <div>
         {isPending ? (
@@ -225,15 +316,36 @@ export function MembersTab({
                     </div>
                   </div>
                 </div>
-                <Badge
-                  variant={member.role === 'owner' ? 'default' : 'secondary'}
-                  className="capitalize"
-                >
-                  {member.role === 'owner' && (
-                    <Crown className="mr-1 h-3 w-3" />
+                <div className="flex items-center gap-2">
+                  {canManageRoles ? (
+                    <Select
+                      value={member.roleId}
+                      onValueChange={(value) =>
+                        handleRoleChange(member.id, value)
+                      }
+                    >
+                      <SelectTrigger className="h-7 w-auto gap-1.5 border-none px-2 text-xs shadow-none">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {roles.map((role) => (
+                          <SelectItem key={role.id} value={role.id}>
+                            {role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge
+                      variant={member.isSystemRole ? 'default' : 'secondary'}
+                    >
+                      {member.isSystemRole && (
+                        <Crown className="mr-1 h-3 w-3" />
+                      )}
+                      {member.roleName}
+                    </Badge>
                   )}
-                  {member.role}
-                </Badge>
+                </div>
               </div>
             ))}
             {invitations.map((inv) => (
@@ -254,7 +366,10 @@ export function MembersTab({
                     </div>
                   </div>
                 </div>
-                <Badge variant="outline">Invited</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">{inv.roleName}</Badge>
+                  <Badge variant="outline">Invited</Badge>
+                </div>
               </div>
             ))}
           </div>

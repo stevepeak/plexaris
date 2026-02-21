@@ -2,6 +2,7 @@ import { and, createDb, eq, isNotNull, isNull, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
+import { checkPermission } from '@/lib/permissions'
 
 const db = createDb()
 
@@ -34,18 +35,15 @@ export async function POST(request: Request) {
     )
   }
 
-  // Verify user is an owner of the organization
-  const membership = await db.query.membership.findFirst({
-    where: and(
-      eq(schema.membership.userId, session.user.id),
-      eq(schema.membership.organizationId, organizationId),
-      eq(schema.membership.role, 'owner'),
-    ),
-  })
+  const perm = await checkPermission(
+    session.user.id,
+    organizationId,
+    'manage_products',
+  )
 
-  if (!membership) {
+  if (!perm) {
     return NextResponse.json(
-      { error: 'Only organization owners can create products' },
+      { error: 'You do not have permission to manage products' },
       { status: 403 },
     )
   }

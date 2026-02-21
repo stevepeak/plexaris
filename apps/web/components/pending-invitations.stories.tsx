@@ -16,7 +16,7 @@ const sampleInvitations = [
   {
     id: '1',
     email: 'demo@plexaris.com',
-    role: 'member',
+    roleName: 'Member',
     token: 'token-1',
     createdAt: new Date().toISOString(),
     expiresAt: new Date(Date.now() + 7 * 86400000).toISOString(),
@@ -27,7 +27,7 @@ const sampleInvitations = [
   {
     id: '2',
     email: 'demo@plexaris.com',
-    role: 'owner',
+    roleName: 'Member',
     token: 'token-2',
     createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
     expiresAt: new Date(Date.now() + 5 * 86400000).toISOString(),

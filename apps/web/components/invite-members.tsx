@@ -21,7 +21,7 @@ import { Separator } from '@/components/ui/separator'
 type Invitation = {
   id: string
   email: string
-  role: string
+  roleName: string
   createdAt: string
   expiresAt: string
   acceptedAt: string | null
@@ -57,12 +57,12 @@ function StatusBadge({ status }: { status: ReturnType<typeof getStatus> }) {
 
 export function InviteMembersList({
   invitations,
-  isOwner,
+  canInvite,
   isPending,
   onInvite,
 }: {
   invitations: Invitation[]
-  isOwner: boolean
+  canInvite: boolean
   isPending: boolean
   onInvite?: (email: string) => Promise<{ error?: string }>
 }) {
@@ -101,7 +101,7 @@ export function InviteMembersList({
             Manage team invitations for this organization
           </p>
         </div>
-        {isOwner && onInvite && (
+        {canInvite && onInvite && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
@@ -169,7 +169,8 @@ export function InviteMembersList({
         </div>
       ) : invitations.length === 0 ? (
         <p className="py-4 text-sm text-muted-foreground">
-          No invitations yet. {isOwner && 'Invite team members to collaborate.'}
+          No invitations yet.{' '}
+          {canInvite && 'Invite team members to collaborate.'}
         </p>
       ) : (
         <div className="grid gap-3">
@@ -200,7 +201,7 @@ export function InviteMembersList({
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="capitalize">
-                    {inv.role}
+                    {inv.roleName}
                   </Badge>
                   <StatusBadge status={status} />
                 </div>
@@ -215,10 +216,10 @@ export function InviteMembersList({
 
 function InviteMembers({
   organizationId,
-  isOwner,
+  canInvite,
 }: {
   organizationId: string
-  isOwner: boolean
+  canInvite: boolean
 }) {
   const [invitations, setInvitations] = useState<Invitation[]>([])
   const [isPending, setIsPending] = useState(true)
@@ -244,7 +245,7 @@ function InviteMembers({
     const res = await fetch('/api/invitations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, organizationId, role: 'member' }),
+      body: JSON.stringify({ email, organizationId }),
     })
 
     if (!res.ok) {
@@ -259,7 +260,7 @@ function InviteMembers({
   return (
     <InviteMembersList
       invitations={invitations}
-      isOwner={isOwner}
+      canInvite={canInvite}
       isPending={isPending}
       onInvite={handleInvite}
     />

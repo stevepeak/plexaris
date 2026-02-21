@@ -1,4 +1,9 @@
 import { createDb, schema } from '@app/db'
+import {
+  ADMIN_ROLE_NAME,
+  ALL_PERMISSIONS,
+  DEFAULT_MEMBER_PERMISSIONS,
+} from '@app/db/schema'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
@@ -61,10 +66,33 @@ export async function POST(request: Request) {
     })
     .returning()
 
+  // Create Admin + Member roles
+  const [adminRole] = await db
+    .insert(schema.role)
+    .values({
+      organizationId: org.id,
+      name: ADMIN_ROLE_NAME,
+      isSystem: true,
+      permissions: ALL_PERMISSIONS,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()
+
+  await db.insert(schema.role).values({
+    organizationId: org.id,
+    name: 'Member',
+    isSystem: false,
+    permissions: DEFAULT_MEMBER_PERMISSIONS,
+    createdAt: now,
+    updatedAt: now,
+  })
+
+  // Assign creator as Admin
   await db.insert(schema.membership).values({
     userId: session.user.id,
     organizationId: org.id,
-    role: 'owner',
+    roleId: adminRole.id,
     createdAt: now,
     updatedAt: now,
   })

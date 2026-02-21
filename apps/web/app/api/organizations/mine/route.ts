@@ -21,13 +21,17 @@ export async function GET(request: Request) {
       type: schema.organization.type,
       claimed: schema.organization.claimed,
       logoUrl: schema.organization.logoUrl,
-      role: schema.membership.role,
+      roleId: schema.role.id,
+      roleName: schema.role.name,
+      isAdmin: schema.role.isSystem,
+      permissions: schema.role.permissions,
     })
     .from(schema.membership)
     .innerJoin(
       schema.organization,
       eq(schema.membership.organizationId, schema.organization.id),
     )
+    .innerJoin(schema.role, eq(schema.membership.roleId, schema.role.id))
     .where(
       and(
         eq(schema.membership.userId, session.user.id),
@@ -35,34 +39,35 @@ export async function GET(request: Request) {
       ),
     )
 
-  // For orgs where the user is an owner, determine if they're the sole owner
-  const ownerOrgIds = rows.filter((r) => r.role === 'owner').map((r) => r.id)
+  // For orgs where the user is an admin, determine if they're the sole admin
+  const adminOrgIds = rows.filter((r) => r.isAdmin).map((r) => r.id)
 
-  const ownerCounts = new Map<string, number>()
+  const adminCounts = new Map<string, number>()
 
-  if (ownerOrgIds.length > 0) {
+  if (adminOrgIds.length > 0) {
     const counts = await db
       .select({
         organizationId: schema.membership.organizationId,
         value: count(),
       })
       .from(schema.membership)
+      .innerJoin(schema.role, eq(schema.membership.roleId, schema.role.id))
       .where(
         and(
-          eq(schema.membership.role, 'owner'),
-          inArray(schema.membership.organizationId, ownerOrgIds),
+          eq(schema.role.isSystem, true),
+          inArray(schema.membership.organizationId, adminOrgIds),
         ),
       )
       .groupBy(schema.membership.organizationId)
 
     for (const c of counts) {
-      ownerCounts.set(c.organizationId, c.value)
+      adminCounts.set(c.organizationId, c.value)
     }
   }
 
   const organizations = rows.map((r) => ({
     ...r,
-    soleOwner: r.role === 'owner' && (ownerCounts.get(r.id) ?? 0) <= 1,
+    soleAdmin: r.isAdmin && (adminCounts.get(r.id) ?? 0) <= 1,
   }))
 
   return NextResponse.json({ organizations })

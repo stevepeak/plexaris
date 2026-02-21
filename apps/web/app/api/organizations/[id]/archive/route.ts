@@ -1,11 +1,12 @@
-import { and, createDb, eq, schema } from '@app/db'
+import { createDb, eq, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
+import { isAdmin } from '@/lib/permissions'
 
 const db = createDb()
 
-// POST /api/organizations/[id]/archive — Archive an organization (owners only)
+// POST /api/organizations/[id]/archive — Archive an organization (admins only)
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -20,18 +21,11 @@ export async function POST(
 
   const { id } = await params
 
-  // Verify user is an owner
-  const membership = await db.query.membership.findFirst({
-    where: and(
-      eq(schema.membership.userId, session.user.id),
-      eq(schema.membership.organizationId, id),
-      eq(schema.membership.role, 'owner'),
-    ),
-  })
+  const admin = await isAdmin(session.user.id, id)
 
-  if (!membership) {
+  if (!admin) {
     return NextResponse.json(
-      { error: 'Only organization owners can archive' },
+      { error: 'Only admins can archive the organization' },
       { status: 403 },
     )
   }

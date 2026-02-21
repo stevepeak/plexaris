@@ -7,11 +7,11 @@ import { type Product, ProductList } from '@/components/product-list'
 
 export function ProductsTab({
   organizationId,
-  isOwner,
+  permissions,
   initialProductId,
 }: {
   organizationId: string
-  isOwner: boolean
+  permissions: string[]
   initialProductId?: string | null
 }) {
   const router = useRouter()
@@ -43,7 +43,7 @@ export function ProductsTab({
     <ProductList
       products={products}
       isPending={isPending}
-      isOwner={isOwner}
+      permissions={permissions}
       onAddProduct={() => router.push(`/orgs/${organizationId}/products/new`)}
       onEditProduct={(p) =>
         router.push(`/orgs/${organizationId}/products/${p.id}`)

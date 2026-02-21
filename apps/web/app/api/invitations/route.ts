@@ -1,7 +1,12 @@
+import { getConfig } from '@app/config'
 import { and, createDb, eq, isNull, schema } from '@app/db'
+import { UserInviteEmail } from '@app/email'
+import { sendEmail } from '@app/resend'
 import { NextResponse } from 'next/server'
+import { createElement } from 'react'
 
 import { auth } from '@/lib/auth'
+import { checkPermission } from '@/lib/permissions'
 
 const db = createDb()
 
@@ -16,30 +21,41 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { email, organizationId, role } = body
+  const { email, organizationId, roleId } = body
 
-  if (!email || !organizationId) {
+  if (!email || !organizationId || !roleId) {
     return NextResponse.json(
-      { error: 'Email and organizationId are required' },
+      { error: 'Email, organizationId, and roleId are required' },
       { status: 400 },
     )
   }
 
-  const inviteRole = role === 'owner' ? 'owner' : 'member'
+  // Verify the user has invite_members permission
+  const perm = await checkPermission(
+    session.user.id,
+    organizationId,
+    'invite_members',
+  )
 
-  // Verify the user is an owner of the org
-  const membership = await db.query.membership.findFirst({
+  if (!perm) {
+    return NextResponse.json(
+      { error: 'You do not have permission to invite members' },
+      { status: 403 },
+    )
+  }
+
+  // Verify the roleId belongs to this org
+  const targetRole = await db.query.role.findFirst({
     where: and(
-      eq(schema.membership.userId, session.user.id),
-      eq(schema.membership.organizationId, organizationId),
-      eq(schema.membership.role, 'owner'),
+      eq(schema.role.id, roleId),
+      eq(schema.role.organizationId, organizationId),
     ),
   })
 
-  if (!membership) {
+  if (!targetRole) {
     return NextResponse.json(
-      { error: 'Only organization owners can invite members' },
-      { status: 403 },
+      { error: 'Invalid role for this organization' },
+      { status: 400 },
     )
   }
 
@@ -89,12 +105,34 @@ export async function POST(request: Request) {
       organizationId,
       invitedBy: session.user.id,
       email,
-      role: inviteRole,
+      roleId,
       token: crypto.randomUUID(),
       expiresAt,
       createdAt: now,
     })
     .returning()
+
+  // Send invitation email (best-effort — don't fail the invite if email fails)
+  try {
+    const org = await db.query.organization.findFirst({
+      where: eq(schema.organization.id, organizationId),
+    })
+
+    const baseURL = getConfig().BETTER_AUTH_BASE_URL
+    await sendEmail(
+      email,
+      `You've been invited to join ${org?.name ?? 'an organization'}`,
+      createElement(UserInviteEmail, {
+        invitedByName: session.user.name,
+        organizationName: org?.name ?? 'an organization',
+        inviteLink: `${baseURL}/dashboard`,
+        roleName: targetRole.name,
+      }),
+    )
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to send invitation email:', e)
+  }
 
   return NextResponse.json({ invitation }, { status: 201 })
 }
@@ -135,7 +173,7 @@ export async function GET(request: Request) {
     .select({
       id: schema.invitation.id,
       email: schema.invitation.email,
-      role: schema.invitation.role,
+      roleName: schema.role.name,
       createdAt: schema.invitation.createdAt,
       expiresAt: schema.invitation.expiresAt,
       acceptedAt: schema.invitation.acceptedAt,
@@ -144,6 +182,7 @@ export async function GET(request: Request) {
     })
     .from(schema.invitation)
     .innerJoin(schema.user, eq(schema.invitation.invitedBy, schema.user.id))
+    .innerJoin(schema.role, eq(schema.invitation.roleId, schema.role.id))
     .where(eq(schema.invitation.organizationId, organizationId))
 
   return NextResponse.json({ invitations })
