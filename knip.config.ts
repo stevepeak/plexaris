@@ -9,7 +9,11 @@ const config: KnipConfig = {
       ignoreDependencies: [],
     },
     'apps/web': {
-      entry: ['app/**/*.{ts,tsx}'],
+      entry: [
+        'app/**/*.{ts,tsx}',
+        'instrumentation.ts',
+        'instrumentation-client.ts',
+      ],
     },
     'apps/trigger': {
       entry: ['trigger.config.ts'],
