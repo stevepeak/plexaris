@@ -81,15 +81,18 @@ const triggerRouter = router({
 
       // Insert trigger_run row so the active tasks card picks it up immediately
       const now = new Date()
-      await ctx.db.insert(schema.triggerRun).values({
-        organizationId,
-        triggerRunId: handle.id,
-        taskType: 'scrape-organization',
-        label: `Scraping ${urls[0] ?? 'uploaded files'}`,
-        status: 'running',
-        createdAt: now,
-        updatedAt: now,
-      })
+      const [insertedRun] = await ctx.db
+        .insert(schema.triggerRun)
+        .values({
+          organizationId,
+          triggerRunId: handle.id,
+          taskType: 'scrape-organization',
+          label: `Scraping ${urls[0] ?? 'uploaded files'}`,
+          status: 'running',
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning({ id: schema.triggerRun.id })
 
       // Trigger product discovery for suppliers in parallel
       if (org.type === 'supplier') {
@@ -109,7 +112,11 @@ const triggerRouter = router({
         })
       }
 
-      return { runId: handle.id }
+      return {
+        runId: handle.id,
+        publicAccessToken: handle.publicAccessToken,
+        taskId: insertedRun!.id,
+      }
     }),
 
   scrapeOrganizationDetails: protectedProcedure

@@ -215,7 +215,7 @@ export function SuggestionCard({
           {hasLinkedDraft && organizationId ? (
             <Button size="sm" variant="default" asChild>
               <Link
-                href={`/orgs/${organizationId}?tab=products&productId=${suggestion.targetId}`}
+                href={`/orgs/${organizationId}/products/${suggestion.targetId}`}
               >
                 <ExternalLink className="mr-1 h-3 w-3" />
                 Review product

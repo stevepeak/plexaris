@@ -48,7 +48,7 @@ const SUGGESTION_SOURCES = [
     description:
       'Agents analyze your data and suggest improvements to products, pricing, and strategy.',
     iconColor: 'text-violet-500',
-    tab: 'agents',
+    path: '/agents/schedules',
   },
   {
     icon: Users,
@@ -56,7 +56,7 @@ const SUGGESTION_SOURCES = [
     description:
       'Your team can submit suggestions for changes based on their expertise and observations.',
     iconColor: 'text-blue-500',
-    tab: null,
+    path: null,
   },
   {
     icon: MessageSquare,
@@ -64,7 +64,7 @@ const SUGGESTION_SOURCES = [
     description:
       'Customer feedback and requests are captured as actionable suggestions.',
     iconColor: 'text-green-500',
-    tab: null,
+    path: null,
   },
 ] as const
 
@@ -120,11 +120,11 @@ function SuggestionSourceCards({ compact }: { compact?: boolean }) {
           </>
         )
 
-        if (source.tab) {
+        if (source.path) {
           return (
             <Link
               key={source.title}
-              href={`/orgs/${orgId}?tab=${source.tab}`}
+              href={`/orgs/${orgId}${source.path}`}
               className={`${className} transition-colors hover:bg-muted/50`}
             >
               {content}

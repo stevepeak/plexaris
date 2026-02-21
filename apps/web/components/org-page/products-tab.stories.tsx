@@ -34,20 +34,3 @@ export const Member: Story = {
     permissions: ['create_order', 'edit_order', 'place_order'],
   },
 }
-
-export const WithInitialProductId: Story = {
-  args: {
-    organizationId: 'org-1',
-    permissions: [
-      'create_order',
-      'edit_order',
-      'place_order',
-      'invite_members',
-      'manage_roles',
-      'manage_agents',
-      'manage_products',
-      'edit_org_details',
-    ],
-    initialProductId: 'prod-draft-456',
-  },
-}

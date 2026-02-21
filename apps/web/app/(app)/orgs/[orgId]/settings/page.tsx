@@ -1,10 +1,10 @@
-import { redirect } from 'next/navigation'
+'use client'
 
-export default async function OrgSettingsPage({
-  params,
-}: {
-  params: Promise<{ orgId: string }>
-}) {
-  const { orgId } = await params
-  redirect(`/orgs/${orgId}?tab=settings`)
+import { useOrg } from '@/components/org-context'
+import { SettingsTab } from '@/components/org-page/settings-tab'
+
+export default function SettingsPage() {
+  const { organizationId } = useOrg()
+
+  return <SettingsTab organizationId={organizationId} />
 }

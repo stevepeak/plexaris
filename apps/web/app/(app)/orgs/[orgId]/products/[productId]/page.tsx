@@ -55,7 +55,7 @@ export default function ProductEditPage() {
         const json = await res.json()
         return { error: json.error ?? 'Failed to update product' }
       }
-      router.push(`/orgs/${orgId}?tab=products`)
+      router.push(`/orgs/${orgId}/products`)
       return {}
     },
     [productId, orgId, router],
@@ -75,11 +75,11 @@ export default function ProductEditPage() {
   }, [productId])
 
   const handleCancel = useCallback(() => {
-    router.push(`/orgs/${orgId}?tab=products`)
+    router.push(`/orgs/${orgId}/products`)
   }, [orgId, router])
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <>
       {product?.status === 'draft' && (
         <Alert className="mb-6">
           <Bot className="h-4 w-4" />
@@ -110,6 +110,6 @@ export default function ProductEditPage() {
           isPending={isPending}
         />
       )}
-    </div>
+    </>
   )
 }

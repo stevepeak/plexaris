@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 
-type Organization = {
+export type Organization = {
   id: string
   name: string
   type: 'supplier' | 'horeca'

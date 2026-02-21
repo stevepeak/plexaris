@@ -24,19 +24,15 @@ export default function ProductNewPage() {
         const json = await res.json()
         return { error: json.error ?? 'Failed to create product' }
       }
-      router.push(`/orgs/${orgId}?tab=products`)
+      router.push(`/orgs/${orgId}/products`)
       return {}
     },
     [orgId, router],
   )
 
   const handleCancel = useCallback(() => {
-    router.push(`/orgs/${orgId}?tab=products`)
+    router.push(`/orgs/${orgId}/products`)
   }, [orgId, router])
 
-  return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <ProductForm onSubmit={handleCreate} onCancel={handleCancel} />
-    </div>
-  )
+  return <ProductForm onSubmit={handleCreate} onCancel={handleCancel} />
 }

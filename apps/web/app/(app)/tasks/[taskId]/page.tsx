@@ -163,9 +163,7 @@ export default function TaskDetailPage() {
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" asChild>
-              <Link
-                href={`/orgs/${task.organizationId}?tab=agents&agentsTab=runs`}
-              >
+              <Link href={`/orgs/${task.organizationId}/agents/runs`}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Link>

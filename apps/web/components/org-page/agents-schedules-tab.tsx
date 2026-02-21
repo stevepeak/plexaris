@@ -57,6 +57,16 @@ const FREQUENCY_LABELS: Record<string, string> = {
   monthly: 'Monthly',
 }
 
+const PLACEHOLDER_SCHEDULES = [
+  { name: 'Weekly Supplier Update', frequency: 'Weekly', next: 'in 3 days' },
+  {
+    name: 'Competitive Analysis',
+    frequency: 'Bi-weekly',
+    next: 'in 10 days',
+  },
+  { name: 'Product Catalog Refresh', frequency: 'Monthly', next: 'in 22 days' },
+]
+
 export function AgentsSchedulesTab({
   organizationId,
 }: {
@@ -98,13 +108,6 @@ export function AgentsSchedulesTab({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Schedules automatically run agents on a recurring basis.
-        </p>
-        <CreateScheduleDialog organizationId={organizationId} />
-      </div>
-
       {schedules && schedules.length > 0 ? (
         <div className="divide-y rounded-md border">
           {schedules.map((schedule) => (
@@ -163,15 +166,42 @@ export function AgentsSchedulesTab({
           ))}
         </div>
       ) : (
-        <p className="py-4 text-sm text-muted-foreground">
-          No schedules yet. Create one to automate your agents.
-        </p>
+        <div className="relative">
+          <div
+            aria-hidden
+            className="pointer-events-none select-none space-y-0 divide-y rounded-md border blur-[6px]"
+          >
+            {PLACEHOLDER_SCHEDULES.map((p) => (
+              <div
+                key={p.name}
+                className="flex items-center justify-between px-6 py-3 opacity-40"
+              >
+                <span className="text-sm font-medium">{p.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {p.frequency}, next {p.next}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+            <div className="text-center">
+              <p className="text-sm font-medium">No schedules yet</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Create a schedule to automate your agents on a recurring basis.
+              </p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
 }
 
-function CreateScheduleDialog({ organizationId }: { organizationId: string }) {
+export function CreateScheduleDialog({
+  organizationId,
+}: {
+  organizationId: string
+}) {
   const utils = trpc.useUtils()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
