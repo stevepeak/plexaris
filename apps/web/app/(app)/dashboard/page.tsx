@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
+import { ThemeSubmenu } from '@/components/theme-toggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -101,6 +102,7 @@ export default function DashboardPage() {
                     Settings
                   </Link>
                 </DropdownMenuItem>
+                <ThemeSubmenu />
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />

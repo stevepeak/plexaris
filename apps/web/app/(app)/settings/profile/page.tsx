@@ -12,6 +12,7 @@ import {
   type PasskeyItem,
   ProfileFormFields,
 } from '@/components/profile-form'
+import { ThemeSubmenu } from '@/components/theme-toggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -272,6 +273,7 @@ export default function ProfileSettingsPage() {
                     Settings
                   </Link>
                 </DropdownMenuItem>
+                <ThemeSubmenu />
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />

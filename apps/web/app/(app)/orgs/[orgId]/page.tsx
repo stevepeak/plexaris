@@ -30,6 +30,7 @@ import { RolesTab } from '@/components/org-page/roles-tab'
 import { SettingsTab } from '@/components/org-page/settings-tab'
 import { SuggestionsTab } from '@/components/org-page/suggestions-tab'
 import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
+import { ThemeSubmenu } from '@/components/theme-toggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -264,6 +265,7 @@ export default function OrgPage() {
                     Settings
                   </Link>
                 </DropdownMenuItem>
+                <ThemeSubmenu />
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />

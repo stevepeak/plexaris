@@ -7,6 +7,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 
 import './globals.css'
 import { PostHogProvider } from './providers/posthog-provider'
+import { ThemeProvider } from './providers/theme-provider'
 import { TRPCProvider } from './providers/trpc-provider'
 
 export const metadata: Metadata = {
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {isDev() && (
           <>
@@ -45,11 +46,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         )}
       </head>
       <body>
-        <TRPCProvider>
-          <PostHogProvider>
-            <TooltipProvider>{children}</TooltipProvider>
-          </PostHogProvider>
-        </TRPCProvider>
+        <ThemeProvider>
+          <TRPCProvider>
+            <PostHogProvider>
+              <TooltipProvider>{children}</TooltipProvider>
+            </PostHogProvider>
+          </TRPCProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
