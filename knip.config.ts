@@ -44,7 +44,6 @@ const config: KnipConfig = {
         'react-dom',
         '@react-email/preview-server',
         '@types/react-dom',
-        'esbuild',
       ],
       project: ['src/**/*.{ts,tsx}', 'emails/**/*.tsx'],
     },

@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@app/agents": "workspace:*",
+    "@app/config": "workspace:*",
     "@app/db": "workspace:*",
     "@app/http": "workspace:*",
     "@opentelemetry/api": "catalog:",
