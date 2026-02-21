@@ -1,9 +1,5 @@
 import { eq, schema } from '@app/db'
-import {
-  type discoverProductsTask,
-  type exampleAgentTask,
-  type scrapeOrganizationTask,
-} from '@app/trigger'
+import { type alignSourcesTask, type exampleAgentTask } from '@app/trigger'
 import { tasks } from '@trigger.dev/sdk'
 import { z } from 'zod'
 
@@ -53,12 +49,9 @@ const triggerRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { organizationId, filesOnly } = input
 
-      // Fetch the org's URLs and type from data jsonb
+      // Fetch the org's URLs from data jsonb
       const [org] = await ctx.db
-        .select({
-          data: schema.organization.data,
-          type: schema.organization.type,
-        })
+        .select({ data: schema.organization.data })
         .from(schema.organization)
         .where(eq(schema.organization.id, organizationId))
         .limit(1)
@@ -78,9 +71,9 @@ const triggerRouter = router({
 
       const fileIds = files.map((f) => f.id)
 
-      // Trigger the scrape-organization task
-      const handle = await tasks.trigger<typeof scrapeOrganizationTask>(
-        'scrape-organization',
+      // Trigger the align-sources orchestrator
+      const handle = await tasks.trigger<typeof alignSourcesTask>(
+        'align-sources',
         { organizationId, urls, fileIds },
       )
 
@@ -91,35 +84,16 @@ const triggerRouter = router({
         .values({
           organizationId,
           triggerRunId: handle.id,
-          taskType: 'scrape-organization',
+          taskType: 'align-sources',
           label: filesOnly
             ? 'Processing uploaded files'
-            : `Scraping ${urls[0] ?? 'uploaded files'}`,
+            : `Processing ${urls.length + fileIds.length} sources`,
           status: 'running',
           createdBy: ctx.session.user.id,
           createdAt: now,
           updatedAt: now,
         })
         .returning({ id: schema.triggerRun.id })
-
-      // Trigger product discovery for suppliers in parallel (skip for file-only uploads)
-      if (org.type === 'supplier' && !filesOnly) {
-        const discoverHandle = await tasks.trigger<typeof discoverProductsTask>(
-          'discover-products',
-          { organizationId, urls, fileIds },
-        )
-
-        await ctx.db.insert(schema.triggerRun).values({
-          organizationId,
-          triggerRunId: discoverHandle.id,
-          taskType: 'discover-products',
-          label: 'Discovering products...',
-          status: 'running',
-          createdBy: ctx.session.user.id,
-          createdAt: now,
-          updatedAt: now,
-        })
-      }
 
       return {
         runId: handle.id,
@@ -155,9 +129,9 @@ const triggerRouter = router({
 
       const fileIds = files.map((f) => f.id)
 
-      // Trigger the scrape-organization task
-      const handle = await tasks.trigger<typeof scrapeOrganizationTask>(
-        'scrape-organization',
+      // Trigger the align-sources orchestrator
+      const handle = await tasks.trigger<typeof alignSourcesTask>(
+        'align-sources',
         { organizationId, urls, fileIds },
       )
 
@@ -166,8 +140,8 @@ const triggerRouter = router({
       await ctx.db.insert(schema.triggerRun).values({
         organizationId,
         triggerRunId: handle.id,
-        taskType: 'scrape-organization',
-        label: `Scraping ${urls[0] ?? 'uploaded files'}`,
+        taskType: 'align-sources',
+        label: `Processing ${urls.length + fileIds.length} sources`,
         status: 'running',
         createdBy: ctx.session.user.id,
         createdAt: now,
@@ -204,9 +178,9 @@ const triggerRouter = router({
 
       const fileIds = files.map((f) => f.id)
 
-      // Trigger the discover-products task
-      const handle = await tasks.trigger<typeof discoverProductsTask>(
-        'discover-products',
+      // Trigger the align-sources orchestrator
+      const handle = await tasks.trigger<typeof alignSourcesTask>(
+        'align-sources',
         { organizationId, urls, fileIds },
       )
 
@@ -215,8 +189,8 @@ const triggerRouter = router({
       await ctx.db.insert(schema.triggerRun).values({
         organizationId,
         triggerRunId: handle.id,
-        taskType: 'discover-products',
-        label: 'Discovering products...',
+        taskType: 'align-sources',
+        label: `Discovering products from ${urls.length + fileIds.length} sources`,
         status: 'running',
         createdBy: ctx.session.user.id,
         createdAt: now,

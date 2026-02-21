@@ -176,6 +176,13 @@
       "when": 1771690030358,
       "tag": "0024_watery_princess_powerful",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1771691838792,
+      "tag": "0025_neat_pandemic",
+      "breakpoints": true
     }
   ]
 }

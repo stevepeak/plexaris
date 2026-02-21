@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Cable,
   CheckCircle2,
   Fingerprint,
   KeyRound,
@@ -12,6 +13,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import { ImageUpload } from '@/components/image-upload'
+import { McpTab } from '@/components/org-page/mcp-tab'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -227,6 +229,13 @@ export function ProfileFormFields({
             <KeyRound className="h-4 w-4 text-amber-500" />
             Security
           </TabsTrigger>
+          <TabsTrigger
+            value="mcp"
+            className="justify-start gap-2 data-[state=active]:bg-muted data-[state=active]:shadow-none"
+          >
+            <Cable className="h-4 w-4 text-violet-500" />
+            MCP
+          </TabsTrigger>
         </TabsList>
         <div className="min-w-0 flex-1">
           <TabsContent value="profile" className="mt-0">
@@ -244,6 +253,9 @@ export function ProfileFormFields({
               <div className="h-9 animate-pulse rounded bg-muted" />
               <div className="h-9 animate-pulse rounded bg-muted" />
             </div>
+          </TabsContent>
+          <TabsContent value="mcp" className="mt-0">
+            <McpTab />
           </TabsContent>
         </div>
       </Tabs>
@@ -270,6 +282,13 @@ export function ProfileFormFields({
         >
           <KeyRound className="h-4 w-4 text-amber-500" />
           Security
+        </TabsTrigger>
+        <TabsTrigger
+          value="mcp"
+          className="justify-start gap-2 data-[state=active]:bg-muted data-[state=active]:shadow-none"
+        >
+          <Cable className="h-4 w-4 text-violet-500" />
+          MCP
         </TabsTrigger>
         {onDeleteAccount && (
           <>
@@ -313,6 +332,7 @@ export function ProfileFormFields({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  className="max-w-sm"
                 />
               </div>
               <div className="grid gap-2">
@@ -323,6 +343,7 @@ export function ProfileFormFields({
                   autoComplete="email"
                   value={email}
                   disabled
+                  className="max-w-sm"
                 />
                 <p className="text-xs text-muted-foreground">
                   Email cannot be changed
@@ -348,6 +369,7 @@ export function ProfileFormFields({
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   disabled={!onUpdatePhone}
+                  className="max-w-xs"
                 />
               </div>
               <div className="grid gap-2">
@@ -418,9 +440,10 @@ export function ProfileFormFields({
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   required
+                  className="max-w-sm"
                 />
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid max-w-lg gap-4 sm:grid-cols-2">
                 <div className="grid gap-2">
                   <Label htmlFor="newPassword">New password</Label>
                   <Input
@@ -559,6 +582,9 @@ export function ProfileFormFields({
               )}
             </div>
           </div>
+        </TabsContent>
+        <TabsContent value="mcp" className="mt-0">
+          <McpTab />
         </TabsContent>
         {onDeleteAccount && (
           <TabsContent value="danger" className="mt-0">

@@ -11,6 +11,7 @@ import {
   Lightbulb,
   type LucideIcon,
   Package,
+  Plug,
   Settings,
   Shield,
   ShoppingCart,
@@ -88,6 +89,13 @@ const NAV_CONFIG: NavItem[] = [
     iconColor: 'text-orange-500',
   },
   { kind: 'separator' },
+  {
+    kind: 'link',
+    path: '/integrations',
+    label: 'Integrations',
+    icon: Plug,
+    iconColor: 'text-pink-500',
+  },
   {
     kind: 'link',
     path: '/mcp',

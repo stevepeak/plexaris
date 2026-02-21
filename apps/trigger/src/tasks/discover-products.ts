@@ -10,19 +10,20 @@ export const discoverProductsTask = task({
   run: async (
     args: {
       organizationId: string
-      urls: string[]
-      fileIds: string[]
+      url?: string
+      fileId?: string
+      parentRunId?: string
     },
     { ctx },
   ) => {
-    const { organizationId, urls, fileIds } = args
+    const { organizationId, url, fileId, parentRunId } = args
     const db = createDb()
     const triggerRunId = ctx.run.id
 
     logger.log('Starting product discovery', {
       organizationId,
-      urlCount: urls.length,
-      fileCount: fileIds.length,
+      url,
+      fileId,
     })
 
     // 1. Ensure trigger_run row exists (may already be inserted by the tRPC mutation)
@@ -38,7 +39,8 @@ export const discoverProductsTask = task({
         organizationId,
         triggerRunId,
         taskType: 'discover-products',
-        label: 'Discovering products...',
+        label: `Discovering products from ${url ?? 'uploaded file'}`,
+        parentRunId: parentRunId ?? null,
         status: 'running',
         createdAt: now,
         updatedAt: now,
@@ -68,8 +70,8 @@ export const discoverProductsTask = task({
       // 3. Run the discovery agent
       const result = await discoverProductsAgent({
         organizationId,
-        urls,
-        fileIds,
+        url,
+        fileId,
         tools,
         onProgress: (message) => {
           void streams.append('progress', message)

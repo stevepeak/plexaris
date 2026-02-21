@@ -72,7 +72,7 @@ function LoginForm() {
     : '/signup'
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="relative w-full max-w-md bg-white dark:bg-card">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Sign in</CardTitle>
         <CardDescription>
@@ -165,7 +165,7 @@ function LoginForm() {
 
 function LoginFallback() {
   return (
-    <Card className="w-full max-w-md">
+    <Card className="relative w-full max-w-md bg-white dark:bg-card">
       <CardHeader className="text-center">
         <Skeleton className="mx-auto h-7 w-32" />
         <Skeleton className="mx-auto mt-2 h-4 w-56" />
@@ -181,10 +181,67 @@ function LoginFallback() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Suspense fallback={<LoginFallback />}>
-        <LoginForm />
-      </Suspense>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+      {/* Background pattern with edge fade */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          maskImage:
+            'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/15 via-transparent to-cyan-500/15" />
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(128,128,128,1) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,1) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+        <div className="absolute left-1/4 top-1/4 h-64 w-64 animate-pulse rounded-full bg-violet-500/20 blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 h-64 w-64 animate-pulse rounded-full bg-cyan-500/20 blur-3xl [animation-delay:1s]" />
+        <svg className="absolute inset-0 h-full w-full opacity-[0.1]">
+          <line
+            x1="10%"
+            y1="20%"
+            x2="90%"
+            y2="80%"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="8 8"
+          />
+          <line
+            x1="90%"
+            y1="20%"
+            x2="10%"
+            y2="80%"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="8 8"
+          />
+          <line
+            x1="50%"
+            y1="0%"
+            x2="50%"
+            y2="100%"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="8 8"
+          />
+        </svg>
+      </div>
+
+      <div className="relative flex flex-col items-center gap-6">
+        <h1 className="font-bruno text-4xl tracking-wide text-foreground">
+          Plexaris
+        </h1>
+        <Suspense fallback={<LoginFallback />}>
+          <LoginForm />
+        </Suspense>
+      </div>
     </div>
   )
 }

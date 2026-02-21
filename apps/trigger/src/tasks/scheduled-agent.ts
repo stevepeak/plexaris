@@ -1,10 +1,7 @@
 import { createDb, eq, schema } from '@app/db'
 import { logger, schedules, tasks } from '@trigger.dev/sdk'
 
-import {
-  type discoverProductsTask,
-  type scrapeOrganizationTask,
-} from '../index'
+import { type alignSourcesTask } from '../index'
 
 export const scheduledAgentTask = schedules.task({
   id: 'scheduled-agent',
@@ -47,39 +44,19 @@ export const scheduledAgentTask = schedules.task({
     // Dispatch to the appropriate task based on schedule type
     const now = new Date()
 
-    if (
-      scheduleType === 'org_information_update' ||
-      scheduleType === 'competitive_analysis'
-    ) {
-      const handle = await tasks.trigger<typeof scrapeOrganizationTask>(
-        'scrape-organization',
-        { organizationId, urls, fileIds },
-      )
+    const handle = await tasks.trigger<typeof alignSourcesTask>(
+      'align-sources',
+      { organizationId, urls, fileIds },
+    )
 
-      await db.insert(schema.triggerRun).values({
-        organizationId,
-        triggerRunId: handle.id,
-        taskType: 'scrape-organization',
-        label: `Scheduled: ${scheduleType.replace(/_/g, ' ')}`,
-        status: 'running',
-        createdAt: now,
-        updatedAt: now,
-      })
-    } else if (scheduleType === 'product_updating') {
-      const handle = await tasks.trigger<typeof discoverProductsTask>(
-        'discover-products',
-        { organizationId, urls, fileIds },
-      )
-
-      await db.insert(schema.triggerRun).values({
-        organizationId,
-        triggerRunId: handle.id,
-        taskType: 'discover-products',
-        label: `Scheduled: product updating`,
-        status: 'running',
-        createdAt: now,
-        updatedAt: now,
-      })
-    }
+    await db.insert(schema.triggerRun).values({
+      organizationId,
+      triggerRunId: handle.id,
+      taskType: 'align-sources',
+      label: `Scheduled: ${scheduleType.replace(/_/g, ' ')}`,
+      status: 'running',
+      createdAt: now,
+      updatedAt: now,
+    })
   },
 })

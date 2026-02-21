@@ -11,6 +11,7 @@ export const triggerRun = pgTable('trigger_run', {
   triggerRunId: text('trigger_run_id').notNull().unique(),
   taskType: text('task_type').notNull(),
   label: text('label').notNull(),
+  parentRunId: text('parent_run_id'),
   status: text('status').notNull().default('running'),
   createdBy: text('created_by').references(() => user.id),
   createdAt: timestamp('created_at').notNull(),

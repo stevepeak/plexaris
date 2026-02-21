@@ -227,9 +227,9 @@ export default function ProfileSettingsPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+        <div className="flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-lg font-semibold">
+            <Link href="/dashboard" className="font-bruno text-lg">
               Plexaris
             </Link>
             <Separator orientation="vertical" className="h-6" />
@@ -285,8 +285,7 @@ export default function ProfileSettingsPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
-        <h1 className="mb-6 text-lg font-semibold">Profile settings</h1>
+      <main className="px-4 py-8">
         <ProfileFormFields
           name={session?.user.name ?? ''}
           email={session?.user.email ?? ''}

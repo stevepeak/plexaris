@@ -235,10 +235,10 @@ export function SuggestionCard({
           {!suggestion.source && 'Discovered by '}
           <Link
             href={`/tasks/${suggestion.triggerRunId}`}
-            className="inline-flex items-center gap-0.5 align-baseline hover:underline"
+            className="inline-flex items-center gap-0.5 align-baseline underline decoration-violet-500/60 decoration-wavy underline-offset-4 transition-all hover:underline-offset-2"
           >
-            <Zap className="h-3 w-3 shrink-0 translate-y-px" />
-            Agent
+            <Zap className="h-3 w-3 shrink-0 translate-y-px text-violet-500" />
+            <span className="font-medium text-foreground">Agent</span>
           </Link>
           {' on '}
           {new Date(suggestion.createdAt).toLocaleDateString()}

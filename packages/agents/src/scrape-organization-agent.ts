@@ -38,8 +38,8 @@ export interface ScrapeOrganizationInput {
   modelId?: string
   organizationId: string
   organizationType: 'supplier' | 'horeca'
-  urls: string[]
-  fileIds: string[]
+  url?: string
+  fileId?: string
   tools: ToolSet
   onProgress?: (message: string) => void
 }
@@ -55,8 +55,8 @@ export async function scrapeOrganizationAgent({
   modelId,
   organizationId,
   organizationType,
-  urls,
-  fileIds,
+  url,
+  fileId,
   tools,
   onProgress,
 }: ScrapeOrganizationInput): Promise<ScrapeOrganizationOutput> {
@@ -95,14 +95,14 @@ export async function scrapeOrganizationAgent({
 
       ## Instructions
 
-      1. For each URL provided:
+      1. If a URL is provided:
          a. Use "fetchPage" to fetch the URL - this returns page metadata and categorized links
          b. Use "getPageContent" to retrieve the main content (optimized for token efficiency)
          c. Analyze the content to extract relevant data fields
          d. Use "getLinks" with filters like "product", "about", "contact" to find related pages worth exploring
          e. Follow relevant links to gather more data
 
-      2. For each file ID provided, use the "readFile" tool to read the uploaded file content and extract relevant information.
+      2. If a file ID is provided, use the "readFile" tool to read the uploaded file content and extract relevant information.
 
       3. As you gather data, build up a structured object matching the ${organizationType} schema. For any field where the scraped value doesn't match the expected format, record it as a scrape issue with:
          - source: the URL or filename
@@ -136,13 +136,9 @@ export async function scrapeOrganizationAgent({
   const result = await agentGenerate(() =>
     agent.generate({
       prompt: dedent`
-        Scrape the following sources for organization ${organizationId} (type: ${organizationType}):
+        Scrape the following source for organization ${organizationId} (type: ${organizationType}):
 
-        URLs to scrape:
-        ${urls.length > 0 ? urls.map((u) => `- ${u}`).join('\n') : '(none)'}
-
-        File IDs to read:
-        ${fileIds.length > 0 ? fileIds.map((f) => `- ${f}`).join('\n') : '(none)'}
+        ${url ? `URL: ${url}` : `File ID: ${fileId}`}
 
         Extract all company/organization data you can find, create suggestions for actionable changes using suggestOrganization, and report back what you found.
       `,

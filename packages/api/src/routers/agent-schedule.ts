@@ -1,9 +1,5 @@
 import { and, type DB, eq, schema } from '@app/db'
-import {
-  type discoverProductsTask,
-  type scheduledAgentTask,
-  type scrapeOrganizationTask,
-} from '@app/trigger'
+import { type alignSourcesTask, type scheduledAgentTask } from '@app/trigger'
 import { schedules, tasks } from '@trigger.dev/sdk'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
@@ -263,52 +259,22 @@ export const agentScheduleRouter = router({
       const fileIds = files.map((f) => f.id)
       const now = new Date()
 
-      if (
-        scheduleType === 'org_information_update' ||
-        scheduleType === 'competitive_analysis'
-      ) {
-        const handle = await tasks.trigger<typeof scrapeOrganizationTask>(
-          'scrape-organization',
-          { organizationId, urls, fileIds },
-        )
+      const handle = await tasks.trigger<typeof alignSourcesTask>(
+        'align-sources',
+        { organizationId, urls, fileIds },
+      )
 
-        await ctx.db.insert(schema.triggerRun).values({
-          organizationId,
-          triggerRunId: handle.id,
-          taskType: 'scrape-organization',
-          label: `Manual run: ${scheduleType.replace(/_/g, ' ')}`,
-          status: 'running',
-          createdBy: ctx.session.user.id,
-          createdAt: now,
-          updatedAt: now,
-        })
-
-        return { runId: handle.id }
-      }
-
-      if (scheduleType === 'product_updating') {
-        const handle = await tasks.trigger<typeof discoverProductsTask>(
-          'discover-products',
-          { organizationId, urls, fileIds },
-        )
-
-        await ctx.db.insert(schema.triggerRun).values({
-          organizationId,
-          triggerRunId: handle.id,
-          taskType: 'discover-products',
-          label: 'Manual run: product updating',
-          status: 'running',
-          createdBy: ctx.session.user.id,
-          createdAt: now,
-          updatedAt: now,
-        })
-
-        return { runId: handle.id }
-      }
-
-      throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: `Schedule type "${scheduleType}" is not yet supported`,
+      await ctx.db.insert(schema.triggerRun).values({
+        organizationId,
+        triggerRunId: handle.id,
+        taskType: 'align-sources',
+        label: `Manual run: ${scheduleType.replace(/_/g, ' ')}`,
+        status: 'running',
+        createdBy: ctx.session.user.id,
+        createdAt: now,
+        updatedAt: now,
       })
+
+      return { runId: handle.id }
     }),
 })

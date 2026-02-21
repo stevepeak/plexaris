@@ -25,8 +25,8 @@ export type DiscoverProductsOutput = z.infer<
 export interface DiscoverProductsInput {
   modelId?: string
   organizationId: string
-  urls: string[]
-  fileIds: string[]
+  url?: string
+  fileId?: string
   tools: ToolSet
   onProgress?: (message: string) => void
 }
@@ -40,8 +40,8 @@ export interface DiscoverProductsInput {
 export async function discoverProductsAgent({
   modelId,
   organizationId,
-  urls,
-  fileIds,
+  url,
+  fileId,
   tools,
   onProgress,
 }: DiscoverProductsInput): Promise<DiscoverProductsOutput> {
@@ -56,14 +56,14 @@ export async function discoverProductsAgent({
 
       ## Instructions
 
-      1. For each URL provided:
+      1. If a URL is provided:
          a. Use "fetchPage" to fetch the URL — this returns page metadata and categorized links
          b. Use "getPageContent" to retrieve the main content (optimized for token efficiency)
          c. Use "getLinks" with filters like "product", "catalog", "assortment" to find product listing pages
          d. Follow relevant links to find product catalogs, price lists, and assortment pages
          e. Use "searchContent" to find product names, article numbers, EAN codes, etc.
 
-      2. For each file ID provided, use the "readFile" tool to read the uploaded file content and identify product listings.
+      2. If a file ID is provided, use the "readFile" tool to read the uploaded file content and identify product listings.
 
       3. For each product discovered, record:
          - name: the product name
@@ -86,13 +86,9 @@ export async function discoverProductsAgent({
   const result = await agentGenerate(() =>
     agent.generate({
       prompt: dedent`
-        Discover products from the following sources for organization ${organizationId}:
+        Discover products from the following source for organization ${organizationId}:
 
-        URLs to scrape:
-        ${urls.length > 0 ? urls.map((u) => `- ${u}`).join('\n') : '(none)'}
-
-        File IDs to read:
-        ${fileIds.length > 0 ? fileIds.map((f) => `- ${f}`).join('\n') : '(none)'}
+        ${url ? `URL: ${url}` : `File ID: ${fileId}`}
 
         Find all product listings, catalogs, and price lists. Record each product's name, URL, and any identifying hint.
       `,

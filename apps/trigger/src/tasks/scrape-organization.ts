@@ -12,19 +12,20 @@ export const scrapeOrganizationTask = task({
   run: async (
     args: {
       organizationId: string
-      urls: string[]
-      fileIds: string[]
+      url?: string
+      fileId?: string
+      parentRunId?: string
     },
     { ctx },
   ) => {
-    const { organizationId, urls, fileIds } = args
+    const { organizationId, url, fileId, parentRunId } = args
     const db = createDb()
     const triggerRunId = ctx.run.id
 
     logger.log('Starting organization scrape', {
       organizationId,
-      urlCount: urls.length,
-      fileCount: fileIds.length,
+      url,
+      fileId,
     })
 
     // 1. Fetch the organization to determine type
@@ -51,7 +52,8 @@ export const scrapeOrganizationTask = task({
         organizationId,
         triggerRunId,
         taskType: 'scrape-organization',
-        label: `Scraping ${urls[0] ?? 'uploaded files'}`,
+        label: `Extracting org details from ${url ?? 'uploaded file'}`,
+        parentRunId: parentRunId ?? null,
         status: 'running',
         createdAt: now,
         updatedAt: now,
@@ -83,26 +85,17 @@ export const scrapeOrganizationTask = task({
       const result = await scrapeOrganizationAgent({
         organizationId,
         organizationType: org.type,
-        urls,
-        fileIds,
+        url,
+        fileId,
         tools,
         onProgress: (message) => {
           void streams.append('progress', message)
         },
       })
 
-      void streams.append(
-        'progress',
-        'Scraping complete. Saving organization data...',
-      )
+      void streams.append('progress', 'Scraping complete.')
 
-      // 5. Persist extracted data to the organization's data column
-      await db
-        .update(schema.organization)
-        .set({ data: result.data, updatedAt: new Date() })
-        .where(eq(schema.organization.id, organizationId))
-
-      // 6. Update trigger_run status to completed
+      // 5. Update trigger_run status to completed
       await db
         .update(schema.triggerRun)
         .set({ status: 'completed', updatedAt: new Date() })

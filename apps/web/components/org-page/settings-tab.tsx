@@ -189,6 +189,7 @@ export function SettingsTab({ organizationId }: { organizationId: string }) {
                 onChange={(e) => setName(e.target.value)}
                 required
                 disabled={!canEdit}
+                className="max-w-sm"
               />
             </div>
 
@@ -204,7 +205,7 @@ export function SettingsTab({ organizationId }: { organizationId: string }) {
               />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid max-w-lg gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="org-phone">Phone</Label>
                 <Input
@@ -238,6 +239,7 @@ export function SettingsTab({ organizationId }: { organizationId: string }) {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 disabled={!canEdit}
+                className="max-w-md"
               />
             </div>
           </div>
@@ -277,6 +279,7 @@ export function SettingsTab({ organizationId }: { organizationId: string }) {
                   value={deliveryAddress}
                   onChange={(e) => setDeliveryAddress(e.target.value)}
                   disabled={!canEdit}
+                  className="max-w-md"
                 />
               </div>
             )}

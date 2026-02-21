@@ -139,7 +139,7 @@ const INTEGRATIONS: { name: string; icon: ReactNode; url: string }[] = [
 ]
 
 interface McpTabProps {
-  organizationId: string
+  organizationId?: string
 }
 
 export function McpTab(_props: McpTabProps) {

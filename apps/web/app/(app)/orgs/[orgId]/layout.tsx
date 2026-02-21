@@ -73,7 +73,7 @@ export default function OrgLayout({ children }: { children: React.ReactNode }) {
       <header className="border-b">
         <div className="flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-lg font-semibold">
+            <Link href="/dashboard" className="font-bruno text-lg">
               Plexaris
             </Link>
             <Separator orientation="vertical" className="h-6" />

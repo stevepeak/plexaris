@@ -1,0 +1,1 @@
+ALTER TABLE "trigger_run" ADD COLUMN "parent_run_id" text;
