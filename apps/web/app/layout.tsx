@@ -1,8 +1,11 @@
 import { isDev } from '@app/config'
+import { extractRouterConfig } from '@app/uploadthing'
+import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin'
 import { type Metadata } from 'next'
 import Script from 'next/script'
 import { type ReactNode } from 'react'
 
+import { uploadRouter } from '@/app/api/uploadthing/core'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 import './globals.css'
@@ -46,6 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         )}
       </head>
       <body>
+        <NextSSRPlugin routerConfig={extractRouterConfig(uploadRouter)} />
         <ThemeProvider>
           <TRPCProvider>
             <PostHogProvider>

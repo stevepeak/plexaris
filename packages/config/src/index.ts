@@ -25,21 +25,22 @@ const envSchema = z.object({
   // AI
   OPENROUTER_API_KEY: z.string().startsWith('sk-or-v1-'),
 
-  // Sentry
+  // Sentry - https://kyoto.sentry.io/insights/projects/plexaris/?project=4510890720231424
   SENTRY_DSN: z.string().startsWith('https://'),
   SENTRY_AUTH_TOKEN: z.string().startsWith('sntrys_').nullable(),
 
-  // UploadThing
+  // UploadThing - https://uploadthing.com/dashboard/plexaris/cogrg6sdb8/api-keys
   UPLOADTHING_TOKEN: z.string(),
+  UPLOADTHING_SECRET: z.string(),
 
-  // Resend
+  // Resend - https://resend.com/api-keys
   RESEND_API_KEY: z.string().startsWith('re_'),
 
   // Trigger.dev
   TRIGGER_PROJECT_REF: z.string().min(1).startsWith('proj_'),
   TRIGGER_SECRET_KEY: z.string().min(1).startsWith('tr_'),
 
-  // Cloudinary (cloudinary://API_KEY:API_SECRET@CLOUD_NAME)
+  // Cloudinary - https://console.cloudinary.com/app/c-03a0330147e90e3a816e25a4f3fdc2/settings/api-keys
   CLOUDINARY_URL: z.string().startsWith('cloudinary://'),
 
   // PostHog

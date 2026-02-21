@@ -37,6 +37,7 @@ export const suggestionRouter = router({
           .enum(['pending', 'accepted', 'rejected', 'dismissed'])
           .optional(),
         targetType: z.enum(['product', 'organization']).optional(),
+        triggerRunId: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -54,32 +55,45 @@ export const suggestionRouter = router({
         conditions.push(eq(schema.suggestion.targetType, input.targetType))
       }
 
+      if (input.triggerRunId) {
+        conditions.push(eq(schema.suggestion.triggerRunId, input.triggerRunId))
+      }
+
       const suggestions = await ctx.db
-        .select()
+        .select({
+          suggestion: schema.suggestion,
+          reviewerName: schema.user.name,
+          reviewerImage: schema.user.image,
+        })
         .from(schema.suggestion)
+        .leftJoin(schema.user, eq(schema.suggestion.reviewedBy, schema.user.id))
         .where(and(...conditions))
         .orderBy(desc(schema.suggestion.createdAt))
 
-      return suggestions.map((s) => ({
-        id: s.id,
-        organizationId: s.organizationId,
-        targetType: s.targetType,
-        targetId: s.targetId,
-        action: s.action,
-        field: s.field,
-        label: s.label,
-        currentValue: s.currentValue,
-        proposedValue: s.proposedValue,
-        confidence: s.confidence,
-        source: s.source,
-        reasoning: s.reasoning,
-        triggerRunId: s.triggerRunId,
-        status: s.status,
-        reviewedBy: s.reviewedBy,
-        reviewedAt: s.reviewedAt?.toISOString() ?? null,
-        createdAt: s.createdAt.toISOString(),
-        updatedAt: s.updatedAt.toISOString(),
-      }))
+      return suggestions.map(
+        ({ suggestion: s, reviewerName, reviewerImage }) => ({
+          id: s.id,
+          organizationId: s.organizationId,
+          targetType: s.targetType,
+          targetId: s.targetId,
+          action: s.action,
+          field: s.field,
+          label: s.label,
+          currentValue: s.currentValue,
+          proposedValue: s.proposedValue,
+          confidence: s.confidence,
+          source: s.source,
+          reasoning: s.reasoning,
+          triggerRunId: s.triggerRunId,
+          status: s.status,
+          reviewedBy: s.reviewedBy,
+          reviewedAt: s.reviewedAt?.toISOString() ?? null,
+          reviewerName: reviewerName ?? null,
+          reviewerImage: reviewerImage ?? null,
+          createdAt: s.createdAt.toISOString(),
+          updatedAt: s.updatedAt.toISOString(),
+        }),
+      )
     }),
 
   getById: protectedProcedure
@@ -470,6 +484,42 @@ export const suggestionRouter = router({
           })
           .where(eq(schema.product.id, s.targetId))
       }
+
+      return { success: true }
+    }),
+
+  revertToPending: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const [s] = await ctx.db
+        .select()
+        .from(schema.suggestion)
+        .where(eq(schema.suggestion.id, input.id))
+        .limit(1)
+
+      if (!s) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Suggestion not found',
+        })
+      }
+
+      await verifyMembership(ctx.db, ctx.session.user.id, s.organizationId)
+
+      if (s.status === 'pending') {
+        return { success: true }
+      }
+
+      const now = new Date()
+      await ctx.db
+        .update(schema.suggestion)
+        .set({
+          status: 'pending',
+          reviewedBy: null,
+          reviewedAt: null,
+          updatedAt: now,
+        })
+        .where(eq(schema.suggestion.id, input.id))
 
       return { success: true }
     }),

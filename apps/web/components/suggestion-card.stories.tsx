@@ -15,7 +15,7 @@ const baseSuggestion: SuggestionCardData = {
   targetId: null,
   action: 'create',
   field: null,
-  label: 'New product: Acme Hot Sauce 500ml',
+  label: 'Acme Hot Sauce 500ml',
   currentValue: null,
   proposedValue: {
     name: 'Acme Hot Sauce 500ml',
@@ -30,6 +30,9 @@ const baseSuggestion: SuggestionCardData = {
   reasoning: 'Extracted from product detail page with clear pricing and specs.',
   triggerRunId: 'run-abc123',
   status: 'pending',
+  reviewedAt: null,
+  reviewerName: null,
+  reviewerImage: null,
   createdAt: new Date().toISOString(),
 }
 
@@ -46,7 +49,7 @@ export const UpdateField: Story = {
       action: 'update_field',
       targetId: 'prod-123',
       field: 'price',
-      label: 'Update price: Acme Hot Sauce 500ml',
+      label: 'Acme Hot Sauce 500ml',
       currentValue: '3.99',
       proposedValue: '4.99',
       confidence: 'medium',
@@ -63,7 +66,7 @@ export const OrganizationUpdate: Story = {
       targetId: 'org-456',
       action: 'update_field',
       field: 'phone',
-      label: 'Update phone: +31 6 12345678',
+      label: 'Acme Foods B.V.',
       currentValue: null,
       proposedValue: '+31 6 12345678',
       confidence: 'high',
@@ -77,6 +80,9 @@ export const Accepted: Story = {
     suggestion: {
       ...baseSuggestion,
       status: 'accepted',
+      reviewedAt: new Date().toISOString(),
+      reviewerName: 'Jane Doe',
+      reviewerImage: null,
     },
   },
 }
@@ -86,6 +92,9 @@ export const Dismissed: Story = {
     suggestion: {
       ...baseSuggestion,
       status: 'dismissed',
+      reviewedAt: new Date().toISOString(),
+      reviewerName: 'John Smith',
+      reviewerImage: null,
     },
   },
 }

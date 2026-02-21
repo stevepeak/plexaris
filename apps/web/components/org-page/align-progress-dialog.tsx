@@ -1,12 +1,6 @@
 'use client'
 
-import {
-  AlertCircle,
-  CheckCircle2,
-  ExternalLink,
-  Lightbulb,
-  Loader2,
-} from 'lucide-react'
+import { AlertCircle, CheckCircle2, ExternalLink, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -75,12 +69,6 @@ export function AlignProgressDialogContent({
           <Link href={`/tasks/${taskId}`}>
             <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
             View Agent Run
-          </Link>
-        </Button>
-        <Button asChild>
-          <Link href={`/orgs/${orgId}/suggestions`}>
-            <Lightbulb className="mr-1.5 h-3.5 w-3.5" />
-            View Suggestions
           </Link>
         </Button>
       </DialogFooter>

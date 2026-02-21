@@ -9,11 +9,7 @@ const config: KnipConfig = {
       ignoreDependencies: [],
     },
     'apps/web': {
-      entry: [
-        'app/**/*.{ts,tsx}',
-        'instrumentation.ts',
-        'instrumentation-client.ts',
-      ],
+      entry: ['app/**/*.{ts,tsx}'],
     },
     'apps/trigger': {
       entry: ['trigger.config.ts'],
@@ -37,6 +33,9 @@ const config: KnipConfig = {
       project: ['src/**/*.ts'],
     },
     'packages/cloudinary': {
+      project: ['src/**/*.ts'],
+    },
+    'packages/uploadthing': {
       project: ['src/**/*.ts'],
     },
     'packages/resend': {

@@ -4,18 +4,28 @@ import {
   AlertCircle,
   ArrowLeft,
   CheckCircle2,
+  ChevronDown,
   Clock,
-  Construction,
+  Download,
+  FileIcon,
+  FileSpreadsheet,
+  FileText,
+  Image,
   Loader2,
+  Timer,
+  User,
   XCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
 import { useTriggerRun } from '@/app/hooks/use-trigger-run'
 import { CodeViewer } from '@/components/code-viewer'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { RelativeTime } from '@/components/relative-time'
+import { SuggestionCard } from '@/components/suggestion-card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,9 +35,19 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { trpc } from '@/lib/trpc'
 
 function StatusBadge({ status }: { status: string }) {
@@ -70,6 +90,29 @@ function StatusIcon({ status }: { status: string }) {
   return <Clock className="h-5 w-5 text-muted-foreground" />
 }
 
+function FileIconByMime({ mimeType }: { mimeType: string }) {
+  if (mimeType.startsWith('image/')) {
+    return <Image className="h-8 w-8 text-muted-foreground" />
+  }
+  if (
+    mimeType === 'text/csv' ||
+    mimeType.includes('spreadsheet') ||
+    mimeType.includes('excel')
+  ) {
+    return <FileSpreadsheet className="h-8 w-8 text-muted-foreground" />
+  }
+  if (mimeType === 'application/pdf' || mimeType.startsWith('text/')) {
+    return <FileText className="h-8 w-8 text-muted-foreground" />
+  }
+  return <FileIcon className="h-8 w-8 text-muted-foreground" />
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 export default function TaskDetailPage() {
   const { taskId } = useParams<{ taskId: string }>()
   const [logs, setLogs] = useState<string[]>([])
@@ -102,6 +145,43 @@ export default function TaskDetailPage() {
       setLogs((prev) => [...prev, text])
     },
   })
+
+  // Fetch suggestions created by this run
+  const utils = trpc.useUtils()
+
+  const invalidateSuggestions = () => {
+    void utils.suggestion.list.invalidate()
+    void utils.suggestion.pendingCount.invalidate()
+  }
+
+  const acceptMutation = trpc.suggestion.accept.useMutation({
+    onSuccess: () => invalidateSuggestions(),
+    onError: (err) => toast.error(err.message || 'Failed to accept suggestion'),
+  })
+
+  const dismissMutation = trpc.suggestion.dismiss.useMutation({
+    onSuccess: () => invalidateSuggestions(),
+    onError: (err) =>
+      toast.error(err.message || 'Failed to dismiss suggestion'),
+  })
+
+  const revertMutation = trpc.suggestion.revertToPending.useMutation({
+    onSuccess: () => invalidateSuggestions(),
+    onError: (err) => toast.error(err.message || 'Failed to undo'),
+  })
+
+  const isMutating =
+    acceptMutation.isPending ||
+    dismissMutation.isPending ||
+    revertMutation.isPending
+
+  const { data: suggestions } = trpc.suggestion.list.useQuery(
+    {
+      organizationId: task?.organizationId ?? '',
+      triggerRunId: task?.triggerRunId ?? '',
+    },
+    { enabled: !!task, refetchInterval: isMutating ? false : 5000 },
+  )
 
   if (isPending) {
     return (
@@ -157,6 +237,13 @@ export default function TaskDetailPage() {
   } | null
   const scrapeIssues = output?.scrapeIssues ?? []
 
+  // Extract input data from payload
+  const payload = task.payload as Record<string, unknown> | null
+  const inputUrls = Array.isArray(payload?.urls)
+    ? (payload.urls as string[])
+    : []
+  const files = task.files ?? []
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -177,16 +264,6 @@ export default function TaskDetailPage() {
       </header>
 
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <Alert>
-          <Construction className="h-4 w-4" />
-          <AlertTitle>Active Development</AlertTitle>
-          <AlertDescription>
-            This page exposes agent execution details that end-users may not
-            need. It will evolve as we learn what information is most useful to
-            surface.
-          </AlertDescription>
-        </Alert>
-
         {/* Task Header */}
         <Card>
           <CardHeader>
@@ -196,11 +273,26 @@ export default function TaskDetailPage() {
                 <div className="grid gap-1">
                   <CardTitle>{task.label}</CardTitle>
                   <CardDescription className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-mono text-xs">
-                      {task.taskType}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      Created {new Date(task.createdAt).toLocaleString()}
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      {task.creator ? (
+                        <>
+                          <Avatar className="h-4 w-4">
+                            {task.creator.image && (
+                              <AvatarImage src={task.creator.image} />
+                            )}
+                            <AvatarFallback className="text-[8px]">
+                              {task.creator.name?.charAt(0)?.toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          {task.creator.name} started{' '}
+                        </>
+                      ) : (
+                        <>
+                          <Timer className="h-3.5 w-3.5" />
+                          Scheduled{' '}
+                        </>
+                      )}
+                      <RelativeTime date={task.createdAt} />
                     </span>
                   </CardDescription>
                 </div>
@@ -210,142 +302,198 @@ export default function TaskDetailPage() {
           </CardHeader>
         </Card>
 
-        {/* Tabbed Content */}
-        <Tabs defaultValue="output" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="output">Output</TabsTrigger>
-            <TabsTrigger value="logs">
-              Logs {logs.length > 0 && `(${logs.length})`}
-            </TabsTrigger>
-            <TabsTrigger value="metadata">Metadata</TabsTrigger>
-            {scrapeIssues.length > 0 && (
-              <TabsTrigger value="issues">
-                Issues ({scrapeIssues.length})
-              </TabsTrigger>
-            )}
-            {effectiveError && <TabsTrigger value="error">Error</TabsTrigger>}
-          </TabsList>
+        {/* Input */}
+        {(inputUrls.length > 0 || files.length > 0) && (
+          <Card>
+            <CardContent className="space-y-6 p-4">
+              {inputUrls.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">URLs</h4>
+                  <ul className="space-y-1">
+                    {inputUrls.map((url) => (
+                      <li key={url}>
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          {url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-          <TabsContent value="output" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Task Output</CardTitle>
-                <CardDescription>
-                  The result returned by the task after execution
-                </CardDescription>
-              </CardHeader>
-              <Separator />
-              <CardContent className="p-4">
-                {effectiveOutput ? (
-                  <CodeViewer code={effectiveOutput} maxHeight={500} />
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No output available yet
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+              {files.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Files</h4>
+                  <TooltipProvider>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                      {files.map((file) => (
+                        <Tooltip key={file.id}>
+                          <TooltipTrigger asChild>
+                            <a
+                              href={file.url}
+                              download={file.name}
+                              className="flex flex-col items-center gap-2 rounded-lg border p-4 transition-colors hover:bg-muted"
+                            >
+                              <FileIconByMime mimeType={file.mimeType} />
+                              <span className="max-w-full truncate text-sm font-medium">
+                                {file.name}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {formatFileSize(file.size)}
+                              </span>
+                              <Download className="h-4 w-4 text-muted-foreground" />
+                            </a>
+                          </TooltipTrigger>
+                          <TooltipContent>Download</TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </div>
+                  </TooltipProvider>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-          <TabsContent value="logs" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Execution Logs</CardTitle>
-                <CardDescription>
-                  Real-time progress updates from the task
-                </CardDescription>
-              </CardHeader>
-              <Separator />
-              <CardContent className="p-4">
-                {logs.length > 0 ? (
-                  <CodeViewer
-                    code={logs.join('\n')}
-                    language="text"
-                    maxHeight={500}
-                  />
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No logs captured yet. Logs appear as the task runs.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="metadata" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Task Metadata</CardTitle>
-                <CardDescription>
-                  Technical details about the task execution
-                </CardDescription>
-              </CardHeader>
-              <Separator />
-              <CardContent className="p-4">
-                <CodeViewer
-                  code={{
-                    id: task.id,
-                    triggerRunId: task.triggerRunId,
-                    organizationId: task.organizationId,
-                    taskType: task.taskType,
-                    status: effectiveStatus,
-                    createdAt: task.createdAt,
-                    updatedAt: task.updatedAt,
-                    triggerRun: task.triggerRun
-                      ? {
-                          id: task.triggerRun.id,
-                          status: task.triggerRun.status,
-                          createdAt: task.triggerRun.createdAt,
-                          startedAt: task.triggerRun.startedAt,
-                          finishedAt: task.triggerRun.finishedAt,
-                          isCompleted: task.triggerRun.isCompleted,
-                          isFailed: task.triggerRun.isFailed,
-                          isExecuting: task.triggerRun.isExecuting,
-                        }
-                      : null,
-                  }}
-                  maxHeight={400}
+        {/* Suggestions */}
+        {suggestions && suggestions.length > 0 ? (
+          <>
+            <div className="space-y-3">
+              {suggestions.map((s) => (
+                <SuggestionCard
+                  key={s.id}
+                  suggestion={s}
+                  organizationId={task.organizationId}
+                  onAccept={(id) => acceptMutation.mutate({ id })}
+                  onDismiss={(id) => dismissMutation.mutate({ id })}
+                  onUndo={(id) => revertMutation.mutate({ id })}
+                  isLoading={isMutating}
                 />
-              </CardContent>
-            </Card>
-          </TabsContent>
+              ))}
+            </div>
+            <p className="text-center text-xs text-muted-foreground">
+              Review all suggestions on the{' '}
+              <Link
+                href={`/orgs/${task.organizationId}/suggestions`}
+                className="underline hover:text-foreground"
+              >
+                Suggestions page
+              </Link>
+            </p>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No suggestions were created by this run.
+          </p>
+        )}
 
-          {scrapeIssues.length > 0 && (
-            <TabsContent value="issues" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Scrape Issues</CardTitle>
-                  <CardDescription>
-                    Problems encountered during data extraction
-                  </CardDescription>
-                </CardHeader>
-                <Separator />
-                <CardContent className="p-4">
-                  <CodeViewer code={scrapeIssues} maxHeight={500} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
-
-          {effectiveError && (
-            <TabsContent value="error" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base text-destructive">
-                    Error Details
+        {/* Debug Data */}
+        <Collapsible defaultOpen={false}>
+          <Card className="bg-muted/40">
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer py-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Debug Data
                   </CardTitle>
-                  <CardDescription>
-                    Information about why the task failed
-                  </CardDescription>
-                </CardHeader>
-                <Separator />
-                <CardContent className="p-4">
-                  <CodeViewer code={effectiveError} maxHeight={400} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
-        </Tabs>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180" />
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <Separator />
+              <CardContent className="space-y-6 p-4">
+                <p className="text-xs text-muted-foreground">
+                  This is mostly for development purposes. Nothing to see
+                  here...
+                </p>
+                {/* Raw Output */}
+                {effectiveOutput && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">
+                      Raw Output
+                    </h4>
+                    <CodeViewer code={effectiveOutput} maxHeight={400} />
+                  </div>
+                )}
+
+                {/* Metadata */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    Metadata
+                  </h4>
+                  <CodeViewer
+                    code={{
+                      id: task.id,
+                      triggerRunId: task.triggerRunId,
+                      organizationId: task.organizationId,
+                      taskType: task.taskType,
+                      status: effectiveStatus,
+                      createdAt: task.createdAt,
+                      updatedAt: task.updatedAt,
+                      triggerRun: task.triggerRun
+                        ? {
+                            id: task.triggerRun.id,
+                            status: task.triggerRun.status,
+                            createdAt: task.triggerRun.createdAt,
+                            startedAt: task.triggerRun.startedAt,
+                            finishedAt: task.triggerRun.finishedAt,
+                            isCompleted: task.triggerRun.isCompleted,
+                            isFailed: task.triggerRun.isFailed,
+                            isExecuting: task.triggerRun.isExecuting,
+                          }
+                        : null,
+                    }}
+                    maxHeight={400}
+                  />
+                </div>
+
+                {/* Execution Logs */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    Execution Logs
+                  </h4>
+                  {logs.length > 0 ? (
+                    <CodeViewer
+                      code={logs.join('\n')}
+                      language="text"
+                      maxHeight={400}
+                    />
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No logs captured.
+                    </p>
+                  )}
+                </div>
+
+                {/* Scrape Issues */}
+                {scrapeIssues.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">
+                      Scrape Issues ({scrapeIssues.length})
+                    </h4>
+                    <CodeViewer code={scrapeIssues} maxHeight={400} />
+                  </div>
+                )}
+
+                {/* Error */}
+                {effectiveError && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-destructive">
+                      Error Details
+                    </h4>
+                    <CodeViewer code={effectiveError} maxHeight={400} />
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
       </main>
     </div>
   )

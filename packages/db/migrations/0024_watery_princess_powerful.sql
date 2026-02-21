@@ -1,0 +1,2 @@
+ALTER TABLE "trigger_run" ADD COLUMN "created_by" text;--> statement-breakpoint
+ALTER TABLE "trigger_run" ADD CONSTRAINT "trigger_run_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;

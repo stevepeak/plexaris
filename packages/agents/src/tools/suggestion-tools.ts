@@ -33,7 +33,7 @@ export function createSuggestProductTool(triggerRunId: string) {
       label: z
         .string()
         .describe(
-          'Human-readable summary (e.g. "New product: Acme Sauce 500ml")',
+          'The item name only, without action prefixes (e.g. "Acme Sauce 500ml")',
         ),
       currentValue: z
         .unknown()
@@ -215,7 +215,7 @@ export function createSuggestOrganizationTool(triggerRunId: string) {
       label: z
         .string()
         .describe(
-          'Human-readable summary (e.g. "Update phone: +31 6 12345678")',
+          'The item or field name only, without action prefixes (e.g. "Acme Foods B.V.")',
         ),
       currentValue: z
         .unknown()

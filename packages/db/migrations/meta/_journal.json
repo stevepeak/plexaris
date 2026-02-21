@@ -162,6 +162,20 @@
       "when": 1771635600000,
       "tag": "0022_drop_in_app_notification",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1771687766394,
+      "tag": "0023_broad_hellcat",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1771690030358,
+      "tag": "0024_watery_princess_powerful",
+      "breakpoints": true
     }
   ]
 }

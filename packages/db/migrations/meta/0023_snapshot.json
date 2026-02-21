@@ -1,6 +1,6 @@
 {
-  "id": "25eb23d7-5981-4d69-8a8c-54adf5a6488f",
-  "prevId": "4221747f-c6ec-4b21-8853-e717e0aaf695",
+  "id": "a84f8540-d524-4b7f-899c-4a43020eac71",
+  "prevId": "25eb23d7-5981-4d69-8a8c-54adf5a6488f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -92,15 +92,15 @@
         "account_user_id_user_id_fk": {
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
+          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -185,15 +185,15 @@
         "passkey_user_id_user_id_fk": {
           "name": "passkey_user_id_user_id_fk",
           "tableFrom": "passkey",
+          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -260,25 +260,25 @@
         "session_user_id_user_id_fk": {
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
+          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "session_token_unique": {
           "name": "session_token_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "token"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -356,10 +356,10 @@
       "uniqueConstraints": {
         "user_email_unique": {
           "name": "user_email_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -468,25 +468,25 @@
         "claim_token_organization_id_organization_id_fk": {
           "name": "claim_token_organization_id_organization_id_fk",
           "tableFrom": "claim_token",
+          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "claim_token_token_unique": {
           "name": "claim_token_token_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "token"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -522,13 +522,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "role": {
-          "name": "role",
-          "type": "membership_role",
-          "typeSchema": "public",
+        "role_id": {
+          "name": "role_id",
+          "type": "uuid",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'member'"
+          "notNull": true
         },
         "token": {
           "name": "token",
@@ -566,38 +564,51 @@
         "invitation_organization_id_organization_id_fk": {
           "name": "invitation_organization_id_organization_id_fk",
           "tableFrom": "invitation",
+          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "invitation_invited_by_user_id_fk": {
           "name": "invitation_invited_by_user_id_fk",
           "tableFrom": "invitation",
+          "tableTo": "user",
           "columnsFrom": [
             "invited_by"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "invitation_role_id_role_id_fk": {
+          "name": "invitation_role_id_role_id_fk",
+          "tableFrom": "invitation",
+          "tableTo": "role",
+          "columnsFrom": [
+            "role_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "invitation_token_unique": {
           "name": "invitation_token_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "token"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -627,13 +638,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "role": {
-          "name": "role",
-          "type": "membership_role",
-          "typeSchema": "public",
+        "role_id": {
+          "name": "role_id",
+          "type": "uuid",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'member'"
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -653,39 +662,52 @@
         "membership_user_id_user_id_fk": {
           "name": "membership_user_id_user_id_fk",
           "tableFrom": "membership",
+          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "membership_organization_id_organization_id_fk": {
           "name": "membership_organization_id_organization_id_fk",
           "tableFrom": "membership",
+          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "membership_role_id_role_id_fk": {
+          "name": "membership_role_id_role_id_fk",
+          "tableFrom": "membership",
+          "tableTo": "role",
+          "columnsFrom": [
+            "role_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "membership_user_id_organization_id_unique": {
           "name": "membership_user_id_organization_id_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "user_id",
             "organization_id"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -798,6 +820,87 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.role": {
+      "name": "role",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_system": {
+          "name": "is_system",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "permissions": {
+          "name": "permissions",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "role_organization_id_organization_id_fk": {
+          "name": "role_organization_id_organization_id_fk",
+          "tableFrom": "role",
+          "tableTo": "organization",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "role_organization_id_name_unique": {
+          "name": "role_organization_id_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "organization_id",
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.product": {
       "name": "product",
       "schema": "",
@@ -895,15 +998,15 @@
         "product_organization_id_organization_id_fk": {
           "name": "product_organization_id_organization_id_fk",
           "tableFrom": "product",
+          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1002,28 +1105,28 @@
         "product_version_product_id_product_id_fk": {
           "name": "product_version_product_id_product_id_fk",
           "tableFrom": "product_version",
+          "tableTo": "product",
           "columnsFrom": [
             "product_id"
           ],
-          "tableTo": "product",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "product_version_edited_by_user_id_fk": {
           "name": "product_version_edited_by_user_id_fk",
           "tableFrom": "product_version",
+          "tableTo": "user",
           "columnsFrom": [
             "edited_by"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1074,27 +1177,27 @@
         "favorite_organization_id_organization_id_fk": {
           "name": "favorite_organization_id_organization_id_fk",
           "tableFrom": "favorite",
+          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "favorite_organization_id_target_type_target_id_unique": {
           "name": "favorite_organization_id_target_type_target_id_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "organization_id",
             "target_type",
             "target_id"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -1168,28 +1271,28 @@
         "order_organization_id_organization_id_fk": {
           "name": "order_organization_id_organization_id_fk",
           "tableFrom": "order",
+          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "order_created_by_user_id_fk": {
           "name": "order_created_by_user_id_fk",
           "tableFrom": "order",
+          "tableTo": "user",
           "columnsFrom": [
             "created_by"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1247,28 +1350,28 @@
         "order_event_order_id_order_id_fk": {
           "name": "order_event_order_id_order_id_fk",
           "tableFrom": "order_event",
+          "tableTo": "order",
           "columnsFrom": [
             "order_id"
           ],
-          "tableTo": "order",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "order_event_actor_id_user_id_fk": {
           "name": "order_event_actor_id_user_id_fk",
           "tableFrom": "order_event",
+          "tableTo": "user",
           "columnsFrom": [
             "actor_id"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1355,54 +1458,54 @@
         "order_item_order_id_order_id_fk": {
           "name": "order_item_order_id_order_id_fk",
           "tableFrom": "order_item",
+          "tableTo": "order",
           "columnsFrom": [
             "order_id"
           ],
-          "tableTo": "order",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "order_item_product_id_product_id_fk": {
           "name": "order_item_product_id_product_id_fk",
           "tableFrom": "order_item",
+          "tableTo": "product",
           "columnsFrom": [
             "product_id"
           ],
-          "tableTo": "product",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "order_item_supplier_id_organization_id_fk": {
           "name": "order_item_supplier_id_organization_id_fk",
           "tableFrom": "order_item",
+          "tableTo": "organization",
           "columnsFrom": [
             "supplier_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "order_item_added_by_user_id_fk": {
           "name": "order_item_added_by_user_id_fk",
           "tableFrom": "order_item",
+          "tableTo": "user",
           "columnsFrom": [
             "added_by"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1473,40 +1576,40 @@
         "notification_preference_user_id_user_id_fk": {
           "name": "notification_preference_user_id_user_id_fk",
           "tableFrom": "notification_preference",
+          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "notification_preference_organization_id_organization_id_fk": {
           "name": "notification_preference_organization_id_organization_id_fk",
           "tableFrom": "notification_preference",
+          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "notification_preference_user_id_organization_id_notification_type_unique": {
           "name": "notification_preference_user_id_organization_id_notification_type_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "user_id",
             "organization_id",
             "notification_type"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -1548,9 +1651,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "content": {
-          "name": "content",
-          "type": "bytea",
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -1566,15 +1675,15 @@
         "file_organization_id_organization_id_fk": {
           "name": "file_organization_id_organization_id_fk",
           "tableFrom": "file",
+          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1643,25 +1752,25 @@
         "trigger_run_organization_id_organization_id_fk": {
           "name": "trigger_run_organization_id_organization_id_fk",
           "tableFrom": "trigger_run",
+          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "trigger_run_trigger_run_id_unique": {
           "name": "trigger_run_trigger_run_id_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "trigger_run_id"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -1791,15 +1900,15 @@
         "suggestion_organization_id_organization_id_fk": {
           "name": "suggestion_organization_id_organization_id_fk",
           "tableFrom": "suggestion",
+          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1882,26 +1991,26 @@
         "agent_schedule_organization_id_organization_id_fk": {
           "name": "agent_schedule_organization_id_organization_id_fk",
           "tableFrom": "agent_schedule",
+          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
-          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "agent_schedule_organization_id_schedule_type_unique": {
           "name": "agent_schedule_organization_id_schedule_type_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "organization_id",
             "schedule_type"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -1910,14 +2019,6 @@
     }
   },
   "enums": {
-    "public.membership_role": {
-      "name": "membership_role",
-      "schema": "public",
-      "values": [
-        "owner",
-        "member"
-      ]
-    },
     "public.organization_type": {
       "name": "organization_type",
       "schema": "public",
@@ -2026,10 +2127,10 @@
     }
   },
   "schemas": {},
-  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
+  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

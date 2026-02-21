@@ -16,6 +16,7 @@ import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { trpc } from '@/lib/trpc'
+import { useUploadThing } from '@/lib/uploadthing'
 import { cn } from '@/lib/utils'
 
 import { AlignProgressDialog } from './align-progress-dialog'
@@ -57,6 +58,7 @@ export function AlignTab(props: { organizationId: string }) {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const scrapeMutation = trpc.trigger.scrapeOrganization.useMutation()
+  const { startUpload } = useUploadThing('organizationDocument')
 
   const uploadFiles = useCallback(
     async (files: FileList) => {
@@ -65,22 +67,17 @@ export function AlignTab(props: { organizationId: string }) {
       setIsUploading(true)
 
       try {
-        const formData = new FormData()
-        for (const file of files) {
-          formData.append('files', file)
-        }
+        const uploaded = await startUpload(Array.from(files), {
+          organizationId: props.organizationId,
+        })
 
-        const res = await fetch(
-          `/api/organizations/${props.organizationId}/files`,
-          { method: 'POST', body: formData },
-        )
-
-        if (!res.ok) {
+        if (!uploaded) {
           throw new Error('File upload failed')
         }
 
         const result = await scrapeMutation.mutateAsync({
           organizationId: props.organizationId,
+          filesOnly: true,
         })
 
         setTriggerDevRunId(result.runId)
@@ -93,7 +90,7 @@ export function AlignTab(props: { organizationId: string }) {
         setIsUploading(false)
       }
     },
-    [isUploading, props.organizationId, scrapeMutation],
+    [isUploading, props.organizationId, scrapeMutation, startUpload],
   )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -245,15 +242,15 @@ export function AlignTab(props: { organizationId: string }) {
             {isDragging ? 'Drop files here' : 'Drop any document here'}
           </p>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Agents will turn it into{' '}
+            Plexaris AI will discover product and organization details and turn
+            them into{' '}
             <Link
               href={`/orgs/${orgId}/suggestions`}
               className="inline-flex items-center gap-1 decoration-yellow-500/60 decoration-wavy underline-offset-4 transition-all hover:underline-offset-2 underline"
             >
               <Lightbulb className="h-3.5 w-3.5 text-yellow-500" />
               <span className="font-medium text-foreground">Suggestions</span>
-            </Link>{' '}
-            for your org
+            </Link>
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-2">

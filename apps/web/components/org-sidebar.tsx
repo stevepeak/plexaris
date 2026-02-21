@@ -88,6 +88,13 @@ const NAV_CONFIG: NavItem[] = [
     iconColor: 'text-orange-500',
   },
   { kind: 'separator' },
+  {
+    kind: 'link',
+    path: '/mcp',
+    label: 'MCP',
+    icon: Cable,
+    iconColor: 'text-teal-500',
+  },
   { kind: 'label', label: 'Agents', icon: Zap, iconColor: 'text-violet-500' },
   {
     kind: 'link',
@@ -112,13 +119,6 @@ const NAV_CONFIG: NavItem[] = [
     icon: Shield,
     iconColor: 'text-orange-500',
     permission: 'manage_roles',
-  },
-  {
-    kind: 'link',
-    path: '/mcp',
-    label: 'MCP',
-    icon: Cable,
-    iconColor: 'text-teal-500',
   },
   {
     kind: 'link',

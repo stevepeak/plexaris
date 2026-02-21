@@ -1,4 +1,4 @@
-import { type DB, eq, schema } from '@app/db'
+import { type DB, eq, inArray, schema } from '@app/db'
 import { auth, runs } from '@trigger.dev/sdk'
 import { TRPCError } from '@trpc/server'
 import { and, count, desc } from 'drizzle-orm'
@@ -116,11 +116,21 @@ export const triggerRunRouter = router({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       // Fetch the task from our database
-      const [task] = await ctx.db
-        .select()
+      const [result] = await ctx.db
+        .select({
+          task: schema.triggerRun,
+          creatorName: schema.user.name,
+          creatorImage: schema.user.image,
+        })
         .from(schema.triggerRun)
+        .leftJoin(schema.user, eq(schema.triggerRun.createdBy, schema.user.id))
         .where(eq(schema.triggerRun.id, input.id))
         .limit(1)
+
+      const task = result?.task
+      const creator = result?.creatorName
+        ? { name: result.creatorName, image: result.creatorImage }
+        : null
 
       if (!task) {
         throw new TRPCError({
@@ -145,6 +155,29 @@ export const triggerRunRouter = router({
       // Get public access token for real-time updates
       const publicAccessToken = await fetchPublicAccessToken(task.triggerRunId)
 
+      // Extract payload and resolve file records
+      const payload = (triggerRunDetails?.payload ?? null) as Record<
+        string,
+        unknown
+      > | null
+      const fileIds = Array.isArray(payload?.fileIds)
+        ? (payload.fileIds as string[])
+        : []
+
+      const files =
+        fileIds.length > 0
+          ? await ctx.db
+              .select({
+                id: schema.file.id,
+                name: schema.file.name,
+                mimeType: schema.file.mimeType,
+                size: schema.file.size,
+                url: schema.file.url,
+              })
+              .from(schema.file)
+              .where(inArray(schema.file.id, fileIds))
+          : []
+
       return {
         id: task.id,
         triggerRunId: task.triggerRunId,
@@ -152,9 +185,12 @@ export const triggerRunRouter = router({
         taskType: task.taskType,
         label: task.label,
         status: task.status,
+        creator,
         createdAt: task.createdAt.toISOString(),
         updatedAt: task.updatedAt.toISOString(),
         publicAccessToken,
+        payload,
+        files,
         triggerRun: triggerRunDetails
           ? {
               id: triggerRunDetails.id,
@@ -188,10 +224,18 @@ export const triggerRunRouter = router({
 
       const where = eq(schema.triggerRun.organizationId, input.organizationId)
 
-      const [tasks, [{ total }]] = await Promise.all([
+      const [rows, [{ total }]] = await Promise.all([
         ctx.db
-          .select()
+          .select({
+            task: schema.triggerRun,
+            creatorName: schema.user.name,
+            creatorImage: schema.user.image,
+          })
           .from(schema.triggerRun)
+          .leftJoin(
+            schema.user,
+            eq(schema.triggerRun.createdBy, schema.user.id),
+          )
           .where(where)
           .orderBy(desc(schema.triggerRun.createdAt))
           .limit(input.limit)
@@ -200,12 +244,15 @@ export const triggerRunRouter = router({
       ])
 
       return {
-        items: tasks.map((task) => ({
+        items: rows.map(({ task, creatorName, creatorImage }) => ({
           id: task.id,
           triggerRunId: task.triggerRunId,
           taskType: task.taskType,
           label: task.label,
           status: task.status,
+          creator: creatorName
+            ? { name: creatorName, image: creatorImage }
+            : null,
           createdAt: task.createdAt.toISOString(),
           updatedAt: task.updatedAt.toISOString(),
         })),

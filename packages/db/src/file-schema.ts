@@ -1,19 +1,6 @@
-import {
-  customType,
-  integer,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from 'drizzle-orm/pg-core'
+import { integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 import { organization } from './org-schema'
-
-const bytea = customType<{ data: Buffer }>({
-  dataType() {
-    return 'bytea'
-  },
-})
 
 export const file = pgTable('file', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -23,6 +10,7 @@ export const file = pgTable('file', {
   name: text('name').notNull(),
   mimeType: text('mime_type').notNull(),
   size: integer('size').notNull(),
-  content: bytea('content').notNull(),
+  url: text('url').notNull(),
+  key: text('key').notNull(),
   createdAt: timestamp('created_at').notNull(),
 })

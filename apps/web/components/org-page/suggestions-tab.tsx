@@ -4,8 +4,10 @@ import {
   Bot,
   Building2,
   Check,
+  CircleDot,
   EyeOff,
   HelpCircle,
+  List,
   MessageSquare,
   Package,
   Users,
@@ -148,6 +150,35 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
 
   const utils = trpc.useUtils()
 
+  const invalidate = () => {
+    void utils.suggestion.list.invalidate({ organizationId })
+    void utils.suggestion.pendingCount.invalidate({ organizationId })
+  }
+
+  const acceptMutation = trpc.suggestion.accept.useMutation({
+    onError: (error) => {
+      toast.error(error.message || 'Failed to accept suggestion')
+    },
+  })
+
+  const dismissMutation = trpc.suggestion.dismiss.useMutation({
+    onError: (error) => {
+      toast.error(error.message || 'Failed to dismiss suggestion')
+    },
+  })
+
+  const revertMutation = trpc.suggestion.revertToPending.useMutation({
+    onSuccess: () => invalidate(),
+    onError: (error) => {
+      toast.error(error.message || 'Failed to undo')
+    },
+  })
+
+  const isMutating =
+    acceptMutation.isPending ||
+    dismissMutation.isPending ||
+    revertMutation.isPending
+
   const { data: suggestions, isPending } = trpc.suggestion.list.useQuery(
     {
       organizationId,
@@ -160,32 +191,10 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
           ? undefined
           : (targetTypeFilter as 'product' | 'organization'),
     },
-    { refetchInterval: 5000 },
+    // Pause refetch while a mutation is in-flight to avoid removing
+    // cards the user just acted on (they stay visible via local state).
+    { refetchInterval: isMutating ? false : 5000 },
   )
-
-  const acceptMutation = trpc.suggestion.accept.useMutation({
-    onSuccess: () => {
-      toast.success('Suggestion accepted')
-      void utils.suggestion.list.invalidate({ organizationId })
-      void utils.suggestion.pendingCount.invalidate({ organizationId })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to accept suggestion')
-    },
-  })
-
-  const dismissMutation = trpc.suggestion.dismiss.useMutation({
-    onSuccess: () => {
-      toast.success('Suggestion dismissed')
-      void utils.suggestion.list.invalidate({ organizationId })
-      void utils.suggestion.pendingCount.invalidate({ organizationId })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to dismiss suggestion')
-    },
-  })
-
-  const isMutating = acceptMutation.isPending || dismissMutation.isPending
 
   return (
     <div>
@@ -219,10 +228,30 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="accepted">Accepted</SelectItem>
-            <SelectItem value="dismissed">Dismissed</SelectItem>
+            <SelectItem value="pending">
+              <span className="flex items-center gap-2">
+                <CircleDot className="h-3.5 w-3.5 text-amber-500" />
+                Pending
+              </span>
+            </SelectItem>
+            <SelectItem value="all">
+              <span className="flex items-center gap-2">
+                <List className="h-3.5 w-3.5 text-muted-foreground" />
+                All
+              </span>
+            </SelectItem>
+            <SelectItem value="accepted">
+              <span className="flex items-center gap-2">
+                <Check className="h-3.5 w-3.5 text-green-500" />
+                Accepted
+              </span>
+            </SelectItem>
+            <SelectItem value="dismissed">
+              <span className="flex items-center gap-2">
+                <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
+                Dismissed
+              </span>
+            </SelectItem>
           </SelectContent>
         </Select>
 
@@ -231,9 +260,24 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
-            <SelectItem value="product">Products</SelectItem>
-            <SelectItem value="organization">Organization</SelectItem>
+            <SelectItem value="all">
+              <span className="flex items-center gap-2">
+                <List className="h-3.5 w-3.5 text-muted-foreground" />
+                All types
+              </span>
+            </SelectItem>
+            <SelectItem value="product">
+              <span className="flex items-center gap-2">
+                <Package className="h-3.5 w-3.5 text-amber-500" />
+                Products
+              </span>
+            </SelectItem>
+            <SelectItem value="organization">
+              <span className="flex items-center gap-2">
+                <Building2 className="h-3.5 w-3.5 text-blue-500" />
+                Organization
+              </span>
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -253,6 +297,7 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
               organizationId={organizationId}
               onAccept={(id) => acceptMutation.mutate({ id })}
               onDismiss={(id) => dismissMutation.mutate({ id })}
+              onUndo={(id) => revertMutation.mutate({ id })}
               isLoading={isMutating}
             />
           ))}

@@ -44,9 +44,14 @@ const triggerRouter = router({
     }),
 
   scrapeOrganization: protectedProcedure
-    .input(z.object({ organizationId: z.string().uuid() }))
+    .input(
+      z.object({
+        organizationId: z.string().uuid(),
+        filesOnly: z.boolean().optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const { organizationId } = input
+      const { organizationId, filesOnly } = input
 
       // Fetch the org's URLs and type from data jsonb
       const [org] = await ctx.db
@@ -63,7 +68,7 @@ const triggerRouter = router({
       }
 
       const orgData = org.data as { urls?: string[] } | null
-      const urls = orgData?.urls ?? []
+      const urls = filesOnly ? [] : (orgData?.urls ?? [])
 
       // Fetch file IDs for this org
       const files = await ctx.db
@@ -87,15 +92,18 @@ const triggerRouter = router({
           organizationId,
           triggerRunId: handle.id,
           taskType: 'scrape-organization',
-          label: `Scraping ${urls[0] ?? 'uploaded files'}`,
+          label: filesOnly
+            ? 'Processing uploaded files'
+            : `Scraping ${urls[0] ?? 'uploaded files'}`,
           status: 'running',
+          createdBy: ctx.session.user.id,
           createdAt: now,
           updatedAt: now,
         })
         .returning({ id: schema.triggerRun.id })
 
-      // Trigger product discovery for suppliers in parallel
-      if (org.type === 'supplier') {
+      // Trigger product discovery for suppliers in parallel (skip for file-only uploads)
+      if (org.type === 'supplier' && !filesOnly) {
         const discoverHandle = await tasks.trigger<typeof discoverProductsTask>(
           'discover-products',
           { organizationId, urls, fileIds },
@@ -107,6 +115,7 @@ const triggerRouter = router({
           taskType: 'discover-products',
           label: 'Discovering products...',
           status: 'running',
+          createdBy: ctx.session.user.id,
           createdAt: now,
           updatedAt: now,
         })
@@ -160,6 +169,7 @@ const triggerRouter = router({
         taskType: 'scrape-organization',
         label: `Scraping ${urls[0] ?? 'uploaded files'}`,
         status: 'running',
+        createdBy: ctx.session.user.id,
         createdAt: now,
         updatedAt: now,
       })
@@ -208,6 +218,7 @@ const triggerRouter = router({
         taskType: 'discover-products',
         label: 'Discovering products...',
         status: 'running',
+        createdBy: ctx.session.user.id,
         createdAt: now,
         updatedAt: now,
       })

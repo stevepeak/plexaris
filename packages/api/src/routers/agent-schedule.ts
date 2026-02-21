@@ -278,6 +278,7 @@ export const agentScheduleRouter = router({
           taskType: 'scrape-organization',
           label: `Manual run: ${scheduleType.replace(/_/g, ' ')}`,
           status: 'running',
+          createdBy: ctx.session.user.id,
           createdAt: now,
           updatedAt: now,
         })
@@ -297,6 +298,7 @@ export const agentScheduleRouter = router({
           taskType: 'discover-products',
           label: 'Manual run: product updating',
           status: 'running',
+          createdBy: ctx.session.user.id,
           createdAt: now,
           updatedAt: now,
         })

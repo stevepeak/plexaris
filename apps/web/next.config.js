@@ -11,6 +11,7 @@ const nextConfig = {
 }
 
 export default withSentryConfig(nextConfig, {
+  // eslint-disable-next-line no-process-env
   silent: !process.env.CI,
   // Source maps are uploaded in CI via @sentry/cli
   sourcemaps: {

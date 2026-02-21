@@ -6,10 +6,13 @@ import {
   ExternalLink,
   EyeOff,
   Package,
+  Undo2,
   Zap,
 } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -35,6 +38,9 @@ export interface SuggestionCardData {
   reasoning: string | null
   triggerRunId: string
   status: 'pending' | 'accepted' | 'rejected' | 'dismissed'
+  reviewedAt: string | null
+  reviewerName: string | null
+  reviewerImage: string | null
   createdAt: string
 }
 
@@ -43,19 +49,31 @@ interface SuggestionCardProps {
   organizationId?: string
   onAccept?: (id: string) => void
   onDismiss?: (id: string) => void
+  onUndo?: (id: string) => void
   isLoading?: boolean
 }
 
-function confidenceColor(confidence: string | null) {
-  switch (confidence) {
-    case 'high':
-      return 'bg-green-100 text-green-800 border-green-200'
-    case 'medium':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-    case 'low':
-      return 'bg-red-100 text-red-800 border-red-200'
-    default:
-      return ''
+function categoryInfo(
+  action: SuggestionCardData['action'],
+  targetType: SuggestionCardData['targetType'],
+): { label: string; className: string } {
+  const target = targetType === 'product' ? 'product' : 'organization'
+  switch (action) {
+    case 'create':
+      return {
+        label: `New ${target}`,
+        className: 'border-green-200 bg-green-50 text-green-700',
+      }
+    case 'update':
+      return {
+        label: `Update ${target}`,
+        className: 'border-blue-200 bg-blue-50 text-blue-700',
+      }
+    case 'update_field':
+      return {
+        label: `Update ${target}`,
+        className: 'border-blue-200 bg-blue-50 text-blue-700',
+      }
   }
 }
 
@@ -83,10 +101,17 @@ export function SuggestionCard({
   organizationId,
   onAccept,
   onDismiss,
+  onUndo,
   isLoading,
 }: SuggestionCardProps) {
-  const isPending = suggestion.status === 'pending'
+  const [resolvedAs, setResolvedAs] = useState<'accepted' | 'dismissed' | null>(
+    null,
+  )
+
+  const effectiveStatus = resolvedAs ?? suggestion.status
+  const isPending = effectiveStatus === 'pending'
   const Icon = suggestion.targetType === 'product' ? Package : Building2
+  const category = categoryInfo(suggestion.action, suggestion.targetType)
 
   // Product create with a linked draft — show review link instead of raw JSON
   const hasLinkedDraft =
@@ -94,40 +119,50 @@ export function SuggestionCard({
     suggestion.action === 'create' &&
     suggestion.targetId != null
 
+  function handleAccept() {
+    setResolvedAs('accepted')
+    onAccept?.(suggestion.id)
+  }
+
+  function handleDismiss() {
+    setResolvedAs('dismissed')
+    onDismiss?.(suggestion.id)
+  }
+
+  function handleUndo() {
+    setResolvedAs(null)
+    onUndo?.(suggestion.id)
+  }
+
   return (
-    <Card className={cn('transition-opacity', !isPending && 'opacity-60')}>
+    <Card
+      className={cn(
+        'transition-opacity duration-300',
+        !isPending && 'opacity-60',
+      )}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <Badge
+              variant="outline"
+              className={cn('shrink-0 text-xs', category.className)}
+            >
+              <Icon className="h-3 w-3" />
+              {category.label}
+            </Badge>
             <CardTitle className="text-sm font-medium">
               {suggestion.label}
             </CardTitle>
           </div>
-          <div className="flex shrink-0 items-center gap-1.5">
-            <Badge variant="outline" className="text-xs">
-              {suggestion.action}
+          {!isPending && (
+            <Badge
+              variant={statusVariant(effectiveStatus)}
+              className="shrink-0 text-xs"
+            >
+              {effectiveStatus}
             </Badge>
-            {suggestion.confidence && (
-              <Badge
-                variant="outline"
-                className={cn(
-                  'text-xs',
-                  confidenceColor(suggestion.confidence),
-                )}
-              >
-                {suggestion.confidence}
-              </Badge>
-            )}
-            {!isPending && (
-              <Badge
-                variant={statusVariant(suggestion.status)}
-                className="text-xs"
-              >
-                {suggestion.status}
-              </Badge>
-            )}
-          </div>
+          )}
         </div>
       </CardHeader>
 
@@ -207,6 +242,26 @@ export function SuggestionCard({
           </Link>
           {' on '}
           {new Date(suggestion.createdAt).toLocaleDateString()}
+          {effectiveStatus !== 'pending' &&
+            suggestion.reviewerName &&
+            suggestion.reviewedAt && (
+              <>
+                {` and ${effectiveStatus} by `}
+                <span className="inline-flex items-center gap-1 align-baseline">
+                  <Avatar className="inline-block h-4 w-4 translate-y-0.5">
+                    {suggestion.reviewerImage && (
+                      <AvatarImage src={suggestion.reviewerImage} />
+                    )}
+                    <AvatarFallback className="text-[8px]">
+                      {suggestion.reviewerName.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {suggestion.reviewerName}
+                </span>
+                {' on '}
+                {new Date(suggestion.reviewedAt).toLocaleDateString()}
+              </>
+            )}
         </p>
       </CardContent>
 
@@ -225,7 +280,7 @@ export function SuggestionCard({
             <Button
               size="sm"
               variant="default"
-              onClick={() => onAccept?.(suggestion.id)}
+              onClick={handleAccept}
               disabled={isLoading}
             >
               <Check className="mr-1 h-3 w-3" />
@@ -235,11 +290,25 @@ export function SuggestionCard({
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => onDismiss?.(suggestion.id)}
+            onClick={handleDismiss}
             disabled={isLoading}
           >
             <EyeOff className="mr-1 h-3 w-3" />
             Dismiss
+          </Button>
+        </CardFooter>
+      )}
+
+      {resolvedAs && (
+        <CardFooter className="pt-0">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleUndo}
+            disabled={isLoading}
+          >
+            <Undo2 className="mr-1 h-3 w-3" />
+            Undo
           </Button>
         </CardFooter>
       )}
