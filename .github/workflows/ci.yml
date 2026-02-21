@@ -38,7 +38,7 @@ jobs:
 
   vercel:
     name: Deploy to Vercel
-    needs: [lint, typecheck, knip, build]
+    needs: [migrate]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
@@ -63,7 +63,7 @@ jobs:
 
   trigger:
     name: Deploy to Trigger.dev
-    needs: [lint, typecheck, knip, build]
+    needs: [migrate]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -78,7 +78,7 @@ jobs:
 
   migrate:
     name: Run Database Migrations
-    needs: [vercel, trigger]
+    needs: [lint, typecheck, knip, build]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
