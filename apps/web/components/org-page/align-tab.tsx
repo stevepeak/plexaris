@@ -211,8 +211,8 @@ export function AlignTab(props: { organizationId: string }) {
           className={cn(
             'relative z-10 flex w-full max-w-lg cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 transition-all duration-200',
             isDragging
-              ? 'border-primary bg-primary/5 shadow-[0_0_0_4px_rgba(var(--primary)/0.1)]'
-              : 'border-muted-foreground/25 bg-background/80 backdrop-blur-sm hover:border-muted-foreground/40 hover:bg-background/90',
+              ? 'border-primary bg-background shadow-[0_0_0_4px_rgba(var(--primary)/0.1)]'
+              : 'border-muted-foreground/25 bg-background backdrop-blur-sm hover:border-muted-foreground/40',
           )}
         >
           {isUploading && (
@@ -233,10 +233,7 @@ export function AlignTab(props: { organizationId: string }) {
             )}
           >
             <Upload
-              className={cn(
-                'h-10 w-10 transition-transform duration-200',
-                isDragging && 'scale-110',
-              )}
+              className={cn('h-10 w-10', isDragging && 'animate-wobble')}
             />
           </div>
           <p
@@ -264,9 +261,9 @@ export function AlignTab(props: { organizationId: string }) {
               <div
                 key={hint.label}
                 className={cn(
-                  'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-opacity',
+                  'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium',
                   hint.color,
-                  isDragging && 'opacity-40',
+                  isDragging && 'animate-wobble',
                 )}
               >
                 <hint.icon className="h-3.5 w-3.5" />
