@@ -103,7 +103,7 @@ function ChatBubble({
 }) {
   return (
     <div
-      className={`absolute ${position} z-10 flex max-w-[260px] items-start gap-2.5`}
+      className={`absolute ${position} z-20 hidden max-w-[260px] items-start gap-2.5 md:flex`}
     >
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border/40 bg-muted/60 text-base">
         {emoji}
@@ -152,7 +152,7 @@ export function McpTab(_props: McpTabProps) {
   }
 
   return (
-    <div className="relative flex min-h-[calc(100vh-8rem)] items-center justify-center overflow-hidden">
+    <div className="relative flex min-h-[calc(100vh-8rem)] flex-col items-center justify-start gap-6 overflow-hidden pt-8 md:justify-center md:pt-0">
       {/* Background pattern with edge fade */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -218,6 +218,20 @@ export function McpTab(_props: McpTabProps) {
           position={prompt.position}
         />
       ))}
+
+      {/* Mobile chat bubbles */}
+      <div className="relative z-10 flex w-full max-w-lg flex-col gap-3 px-4 md:hidden">
+        {CHAT_PROMPTS.map((prompt) => (
+          <div key={prompt.text} className="flex items-start gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border/40 bg-muted/60 text-base">
+              {prompt.emoji}
+            </div>
+            <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-card/70 px-3.5 py-2.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
+              {prompt.text}
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Coming soon pill + blurred card */}
       <div className="relative z-10 flex w-full max-w-lg flex-col items-center">

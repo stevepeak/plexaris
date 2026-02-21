@@ -62,17 +62,20 @@ function categoryInfo(
     case 'create':
       return {
         label: `New ${target}`,
-        className: 'border-green-200 bg-green-50 text-green-700',
+        className:
+          'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300',
       }
     case 'update':
       return {
         label: `Update ${target}`,
-        className: 'border-blue-200 bg-blue-50 text-blue-700',
+        className:
+          'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300',
       }
     case 'update_field':
       return {
         label: `Update ${target}`,
-        className: 'border-blue-200 bg-blue-50 text-blue-700',
+        className:
+          'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300',
       }
   }
 }
@@ -182,7 +185,7 @@ export function SuggestionCard({
               </div>
               <div>
                 <p className="font-medium text-muted-foreground">Proposed</p>
-                <pre className="mt-0.5 max-h-24 overflow-auto whitespace-pre-wrap rounded bg-green-50 p-2">
+                <pre className="mt-0.5 max-h-24 overflow-auto whitespace-pre-wrap rounded bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100 p-2">
                   {formatValue(suggestion.proposedValue)}
                 </pre>
               </div>
@@ -195,7 +198,7 @@ export function SuggestionCard({
             <p className="text-xs font-medium text-muted-foreground">
               Proposed data
             </p>
-            <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded bg-green-50 p-2 text-xs">
+            <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100 p-2 text-xs">
               {formatValue(suggestion.proposedValue)}
             </pre>
           </div>
@@ -206,7 +209,7 @@ export function SuggestionCard({
             <p className="text-xs font-medium text-muted-foreground">
               Proposed update
             </p>
-            <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded bg-green-50 p-2 text-xs">
+            <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100 p-2 text-xs">
               {formatValue(suggestion.proposedValue)}
             </pre>
           </div>

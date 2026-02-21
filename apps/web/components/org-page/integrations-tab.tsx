@@ -38,7 +38,7 @@ interface IntegrationsTabProps {
 
 export function IntegrationsTab(_props: IntegrationsTabProps) {
   return (
-    <div className="relative flex min-h-[calc(100vh-8rem)] items-center justify-center overflow-hidden">
+    <div className="relative flex min-h-[calc(100vh-8rem)] flex-col items-center justify-start gap-6 overflow-hidden pt-8 md:justify-center md:pt-0">
       {/* Background pattern with edge fade */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -96,7 +96,7 @@ export function IntegrationsTab(_props: IntegrationsTabProps) {
       </div>
 
       {/* Floating integration icons */}
-      <div className="absolute left-[15%] top-[25%] flex items-center gap-2.5 -rotate-3">
+      <div className="absolute left-[15%] top-[25%] z-20 hidden items-center gap-2.5 -rotate-3 md:flex">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-muted/60 shadow-sm backdrop-blur-sm">
           <ArrowRightLeft className="h-5 w-5 text-pink-400" />
         </div>
@@ -104,7 +104,7 @@ export function IntegrationsTab(_props: IntegrationsTabProps) {
           Sync orders in real-time
         </div>
       </div>
-      <div className="absolute right-[12%] top-[30%] flex items-center gap-2.5 rotate-2">
+      <div className="absolute right-[12%] top-[30%] z-20 hidden items-center gap-2.5 rotate-2 md:flex">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-muted/60 shadow-sm backdrop-blur-sm">
           <Warehouse className="h-5 w-5 text-amber-400" />
         </div>
@@ -112,7 +112,7 @@ export function IntegrationsTab(_props: IntegrationsTabProps) {
           Auto-update inventory levels
         </div>
       </div>
-      <div className="absolute bottom-[25%] left-[12%] flex items-center gap-2.5 rotate-1">
+      <div className="absolute bottom-[25%] left-[12%] z-20 hidden items-center gap-2.5 rotate-1 md:flex">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-muted/60 shadow-sm backdrop-blur-sm">
           <Package className="h-5 w-5 text-emerald-400" />
         </div>
@@ -120,12 +120,48 @@ export function IntegrationsTab(_props: IntegrationsTabProps) {
           Connect your ERP system
         </div>
       </div>
-      <div className="absolute bottom-[30%] right-[15%] flex items-center gap-2.5 -rotate-2">
+      <div className="absolute bottom-[30%] right-[15%] z-20 hidden items-center gap-2.5 -rotate-2 md:flex">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-muted/60 shadow-sm backdrop-blur-sm">
           <ShoppingCart className="h-5 w-5 text-violet-400" />
         </div>
         <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-card/70 px-3.5 py-2.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
           Import from ordering platforms
+        </div>
+      </div>
+
+      {/* Mobile floating bubbles */}
+      <div className="relative z-10 flex w-full max-w-lg flex-col gap-3 px-4 md:hidden">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-muted/60 shadow-sm backdrop-blur-sm">
+            <ArrowRightLeft className="h-5 w-5 text-pink-400" />
+          </div>
+          <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-card/70 px-3.5 py-2.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
+            Sync orders in real-time
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-muted/60 shadow-sm backdrop-blur-sm">
+            <Warehouse className="h-5 w-5 text-amber-400" />
+          </div>
+          <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-card/70 px-3.5 py-2.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
+            Auto-update inventory levels
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-muted/60 shadow-sm backdrop-blur-sm">
+            <Package className="h-5 w-5 text-emerald-400" />
+          </div>
+          <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-card/70 px-3.5 py-2.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
+            Connect your ERP system
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-muted/60 shadow-sm backdrop-blur-sm">
+            <ShoppingCart className="h-5 w-5 text-violet-400" />
+          </div>
+          <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-card/70 px-3.5 py-2.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
+            Import from ordering platforms
+          </div>
         </div>
       </div>
 
