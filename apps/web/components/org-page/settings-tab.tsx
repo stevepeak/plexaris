@@ -1,21 +1,9 @@
 'use client'
 
-import { Loader2, TriangleAlert } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { ImageUpload } from '@/components/image-upload'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,18 +24,9 @@ type OrgDetails = {
   deliveryAreas: string | null
 }
 
-export function SettingsTab({
-  organizationId,
-  onOrgLeft,
-  onOrgArchived,
-}: {
-  organizationId: string
-  onOrgLeft?: () => void
-  onOrgArchived?: () => void
-}) {
+export function SettingsTab({ organizationId }: { organizationId: string }) {
   const [org, setOrg] = useState<OrgDetails | null>(null)
   const [canEdit, setCanEdit] = useState(false)
-  const [isOrgAdmin, setIsOrgAdmin] = useState(false)
   const [isPending, setIsPending] = useState(true)
 
   const [name, setName] = useState('')
@@ -61,8 +40,6 @@ export function SettingsTab({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [dangerLoading, setDangerLoading] = useState(false)
-  const [dangerError, setDangerError] = useState<string | null>(null)
 
   useEffect(() => {
     void fetch(`/api/organizations/${organizationId}`)
@@ -78,7 +55,6 @@ export function SettingsTab({
           setCanEdit(
             role.isSystem || role.permissions.includes('edit_org_details'),
           )
-          setIsOrgAdmin(role.isSystem)
           setName(o.name)
           setDescription(o.description ?? '')
           setPhone(o.phone ?? '')
@@ -160,36 +136,6 @@ export function SettingsTab({
     return {}
   }
 
-  const handleLeaveOrg = async () => {
-    setDangerLoading(true)
-    setDangerError(null)
-    const res = await fetch(`/api/organizations/${organizationId}/leave`, {
-      method: 'POST',
-    })
-    if (!res.ok) {
-      const json = await res.json()
-      setDangerError(json.error ?? 'Failed to leave organization')
-    } else {
-      onOrgLeft?.()
-    }
-    setDangerLoading(false)
-  }
-
-  const handleArchiveOrg = async () => {
-    setDangerLoading(true)
-    setDangerError(null)
-    const res = await fetch(`/api/organizations/${organizationId}/archive`, {
-      method: 'POST',
-    })
-    if (!res.ok) {
-      const json = await res.json()
-      setDangerError(json.error ?? 'Failed to archive organization')
-    } else {
-      onOrgArchived?.()
-    }
-    setDangerLoading(false)
-  }
-
   if (isPending) {
     return (
       <div className="space-y-4">
@@ -206,127 +152,136 @@ export function SettingsTab({
 
   return (
     <div>
-      <div className="flex items-center gap-3">
-        <h2 className="text-lg font-semibold">Organization details</h2>
-        <Badge variant="secondary" className="capitalize">
-          {org.type}
-        </Badge>
-      </div>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {canEdit
-          ? 'Update your organization information'
-          : 'View your organization information'}
-      </p>
-      <Separator className="my-6" />
+      <form onSubmit={handleSubmit} className="grid gap-8">
+        {/* Public profile section */}
+        <div>
+          <h2 className="text-lg font-semibold">Public profile</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            This information is visible to customers in the ordering experience.
+          </p>
+          <Separator className="my-6" />
 
-      <form onSubmit={handleSubmit} className="grid gap-4">
-        <div className="grid gap-2">
-          <Label>Logo</Label>
-          <ImageUpload
-            value={org.logoUrl}
-            fallback={org.name
-              .split(' ')
-              .map((part) => part[0])
-              .join('')
-              .toUpperCase()
-              .slice(0, 2)}
-            variant="square"
-            alt={`${org.name} logo`}
-            disabled={!canEdit}
-            onUpload={handleUpdateImage}
-          />
-        </div>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label>Logo</Label>
+              <ImageUpload
+                value={org.logoUrl}
+                fallback={org.name
+                  .split(' ')
+                  .map((part) => part[0])
+                  .join('')
+                  .toUpperCase()
+                  .slice(0, 2)}
+                variant="square"
+                alt={`${org.name} logo`}
+                disabled={!canEdit}
+                onUpload={handleUpdateImage}
+              />
+            </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="org-name">Business name</Label>
-          <Input
-            id="org-name"
-            type="text"
-            autoComplete="organization"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            disabled={!canEdit}
-          />
-        </div>
+            <div className="grid gap-2">
+              <Label htmlFor="org-name">Business name</Label>
+              <Input
+                id="org-name"
+                type="text"
+                autoComplete="organization"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                disabled={!canEdit}
+              />
+            </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="org-description">Description</Label>
-          <Textarea
-            id="org-description"
-            autoComplete="off"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            disabled={!canEdit}
-          />
-        </div>
+            <div className="grid gap-2">
+              <Label htmlFor="org-description">Description</Label>
+              <Textarea
+                id="org-description"
+                autoComplete="off"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                disabled={!canEdit}
+              />
+            </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor="org-phone">Phone</Label>
-            <Input
-              id="org-phone"
-              type="tel"
-              autoComplete="off"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              disabled={!canEdit}
-            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="org-phone">Phone</Label>
+                <Input
+                  id="org-phone"
+                  type="tel"
+                  autoComplete="off"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  disabled={!canEdit}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="org-email">Contact email</Label>
+                <Input
+                  id="org-email"
+                  type="email"
+                  autoComplete="off"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={!canEdit}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="org-address">Business address</Label>
+              <Input
+                id="org-address"
+                type="text"
+                autoComplete="off"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                disabled={!canEdit}
+              />
+            </div>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="org-email">Contact email</Label>
-            <Input
-              id="org-email"
-              type="email"
-              autoComplete="off"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={!canEdit}
-            />
-          </div>
         </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="org-address">Business address</Label>
-          <Input
-            id="org-address"
-            type="text"
-            autoComplete="off"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            disabled={!canEdit}
-          />
+        {/* Delivery section */}
+        <div>
+          <h2 className="text-lg font-semibold">Delivery</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            This information is shared with delivery companies.
+          </p>
+          <Separator className="my-6" />
+
+          <div className="grid gap-4">
+            {org.type === 'supplier' && (
+              <div className="grid gap-2">
+                <Label htmlFor="org-delivery-areas">Delivery areas</Label>
+                <Textarea
+                  id="org-delivery-areas"
+                  autoComplete="off"
+                  placeholder="e.g. Amsterdam, Rotterdam, The Hague"
+                  value={deliveryAreas}
+                  onChange={(e) => setDeliveryAreas(e.target.value)}
+                  rows={2}
+                  disabled={!canEdit}
+                />
+              </div>
+            )}
+
+            {org.type === 'horeca' && (
+              <div className="grid gap-2">
+                <Label htmlFor="org-delivery-address">Delivery address</Label>
+                <Input
+                  id="org-delivery-address"
+                  type="text"
+                  autoComplete="off"
+                  value={deliveryAddress}
+                  onChange={(e) => setDeliveryAddress(e.target.value)}
+                  disabled={!canEdit}
+                />
+              </div>
+            )}
+          </div>
         </div>
-
-        {org.type === 'supplier' && (
-          <div className="grid gap-2">
-            <Label htmlFor="org-delivery-areas">Delivery areas</Label>
-            <Textarea
-              id="org-delivery-areas"
-              autoComplete="off"
-              placeholder="e.g. Amsterdam, Rotterdam, The Hague"
-              value={deliveryAreas}
-              onChange={(e) => setDeliveryAreas(e.target.value)}
-              rows={2}
-              disabled={!canEdit}
-            />
-          </div>
-        )}
-
-        {org.type === 'horeca' && (
-          <div className="grid gap-2">
-            <Label htmlFor="org-delivery-address">Delivery address</Label>
-            <Input
-              id="org-delivery-address"
-              type="text"
-              autoComplete="off"
-              value={deliveryAddress}
-              onChange={(e) => setDeliveryAddress(e.target.value)}
-              disabled={!canEdit}
-            />
-          </div>
-        )}
 
         {error && <p className="text-sm text-destructive">{error}</p>}
         {success && (
@@ -348,106 +303,6 @@ export function SettingsTab({
           </Button>
         )}
       </form>
-
-      {/* Danger zone */}
-      <Separator className="my-8" />
-      <div>
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-destructive">
-          <TriangleAlert className="h-5 w-5" />
-          Danger zone
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          These actions are irreversible. Please be certain.
-        </p>
-        <Separator className="my-6" />
-        <div className="grid gap-4">
-          {dangerError && (
-            <p className="text-sm text-destructive">{dangerError}</p>
-          )}
-
-          {!isOrgAdmin && (
-            <div className="flex items-center justify-between rounded-md border px-4 py-3">
-              <div>
-                <p className="text-sm font-medium">Leave organization</p>
-                <p className="text-xs text-muted-foreground">
-                  Remove yourself from this organization
-                </p>
-              </div>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="sm">
-                    Leave
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Leave organization?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      You will lose access to {org.name}. You will need a new
-                      invitation to rejoin.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      disabled={dangerLoading}
-                      onClick={handleLeaveOrg}
-                    >
-                      {dangerLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        'Leave organization'
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          )}
-
-          {isOrgAdmin && (
-            <div className="flex items-center justify-between rounded-md border px-4 py-3">
-              <div>
-                <p className="text-sm font-medium">Archive organization</p>
-                <p className="text-xs text-muted-foreground">
-                  Permanently archive this organization and all its data
-                </p>
-              </div>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="sm">
-                    Archive
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Archive organization?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {org.name} will be permanently archived. All members will
-                      lose access. This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      disabled={dangerLoading}
-                      onClick={handleArchiveOrg}
-                    >
-                      {dangerLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        'Archive organization'
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   )
 }

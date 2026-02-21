@@ -11,6 +11,7 @@ import {
   Settings,
   Shield,
   ShoppingCart,
+  TriangleAlert,
   Users,
   Zap,
 } from 'lucide-react'
@@ -20,6 +21,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { AgentsTab } from '@/components/org-page/agents-tab'
 import { AlignTab } from '@/components/org-page/align-tab'
+import { DangerZoneTab } from '@/components/org-page/danger-zone-tab'
 import { DashboardTab } from '@/components/org-page/dashboard-tab'
 import { InsightsTab } from '@/components/org-page/insights-tab'
 import { MembersTab } from '@/components/org-page/members-tab'
@@ -129,6 +131,13 @@ const TAB_CONFIG = [
     label: 'Settings',
     icon: Settings,
     iconColor: 'text-gray-500',
+  },
+  { value: 'sep-4' as const, label: '', icon: null, iconColor: '' },
+  {
+    value: 'danger-zone',
+    label: 'Danger zone',
+    icon: TriangleAlert,
+    iconColor: 'text-rose-500',
   },
 ] as const
 
@@ -375,7 +384,11 @@ export default function OrgPage() {
               </TabsContent>
 
               <TabsContent value="settings" className="mt-0">
-                <SettingsTab
+                <SettingsTab organizationId={activeOrg.id} />
+              </TabsContent>
+
+              <TabsContent value="danger-zone" className="mt-0">
+                <DangerZoneTab
                   organizationId={activeOrg.id}
                   onOrgLeft={handleOrgLeft}
                   onOrgArchived={handleOrgArchived}
