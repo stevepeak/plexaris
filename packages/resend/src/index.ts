@@ -1,4 +1,4 @@
-import { getConfig } from '@app/config'
+import { getConfig, isDev } from '@app/config'
 import { renderEmail } from '@app/email'
 import { type ReactElement } from 'react'
 import { Resend } from 'resend'
@@ -17,6 +17,12 @@ export async function sendEmail(
   subject: string,
   react: ReactElement,
 ): Promise<void> {
+  if (isDev()) {
+    // eslint-disable-next-line no-console
+    console.log(`[email] Skipped in dev — to: ${to}, subject: ${subject}`)
+    return
+  }
+
   const html = await renderEmail(react)
   const { error } = await getResend().emails.send({
     from: 'Plexaris <onboarding@resend.dev>',

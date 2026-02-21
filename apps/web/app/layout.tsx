@@ -1,3 +1,4 @@
+import { isDev } from '@app/config'
 import { type Metadata } from 'next'
 import Script from 'next/script'
 import { type ReactNode } from 'react'
@@ -28,8 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        {/* eslint-disable-next-line no-process-env */}
-        {process.env.NODE_ENV === 'development' && (
+        {isDev() && (
           <>
             <Script
               src="//unpkg.com/react-grab/dist/index.global.js"

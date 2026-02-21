@@ -1,4 +1,4 @@
-import { getConfig } from '@app/config'
+import { getConfig, isDev } from '@app/config'
 import { PostHog as PostHogClient } from 'posthog-node'
 
 let posthogClient: PostHogClient | null = null
@@ -8,8 +8,7 @@ let posthogClient: PostHogClient | null = null
  */
 function getPostHogClient(): PostHogClient | null {
   // Skip PostHog in local development
-  // eslint-disable-next-line no-process-env
-  if (process.env.NODE_ENV === 'development') {
+  if (isDev()) {
     return null
   }
 

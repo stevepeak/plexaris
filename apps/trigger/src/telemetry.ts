@@ -1,3 +1,4 @@
+import { isDev } from '@app/config'
 import { trace, type Tracer } from '@opentelemetry/api'
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import * as Sentry from '@sentry/node'
@@ -38,9 +39,7 @@ async function startSdk(): Promise<Tracer | undefined> {
           ? // eslint-disable-next-line no-process-env
             { release: process.env.TRIGGER_RELEASE }
           : {}),
-        environment:
-          // eslint-disable-next-line no-process-env
-          process.env.NODE_ENV === 'production' ? 'production' : 'development',
+        environment: isDev() ? 'development' : 'production',
       })
       sentryInitialized = true
     }

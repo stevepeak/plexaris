@@ -46,6 +46,11 @@ const envSchema = z.object({
 
 export type ParsedEnv = z.infer<typeof envSchema>
 
+export function isDev(): boolean {
+  // eslint-disable-next-line no-process-env
+  return process.env.NODE_ENV === 'development'
+}
+
 /**
  * Get environment variables
  * Usage
