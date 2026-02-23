@@ -171,7 +171,7 @@ submit: protectedProcedure
 
 ## Step 3: CSS — Stamp Animation Keyframe
 
-> passes: false
+> passes: true
 
 **File:** `apps/web/app/globals.css`
 

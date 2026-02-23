@@ -51,6 +51,24 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-wobble: wobble 0.8s ease-in-out infinite;
+  --animate-stamp: stamp 0.5s ease-out forwards;
+
+  @keyframes stamp {
+    0% {
+      opacity: 0;
+      transform: rotate(-12deg) scale(2.5);
+    }
+    60% {
+      opacity: 1;
+      transform: rotate(-12deg) scale(0.9);
+    }
+    80% {
+      transform: rotate(-12deg) scale(1.05);
+    }
+    100% {
+      transform: rotate(-12deg) scale(1);
+    }
+  }
 
   @keyframes wobble {
     0%,
