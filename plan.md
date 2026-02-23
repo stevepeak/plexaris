@@ -1,217 +1,719 @@
-# Onboarding & Scraping Workflow
+# Checkout Flow Implementation Plan
 
-Onboard new Horeca/Supplier organizations by collecting URLs and documents, then use AI agents to scrape and structure data into the database using the Zod schemas defined in `docs/schema.ts`.
+## Context
 
----
+The order page (`/order/[orderId]`) currently only supports the shopping experience — a 3-panel layout for browsing products, adding to cart, and managing items. The "Checkout" button in the cart sidebar does nothing. There is no way to submit an order, view an invoice, or track a submitted order.
 
-## Task 1: Database — Add JSON data field and file storage table
+This plan introduces a full checkout experience designed for B2B supplier-to-restaurant ordering:
 
-**passes:** true
-
-**Goal:** Store structured scraped data on organizations and products, and store uploaded files in the database. Scrape issues are stored alongside the data in the same jsonb column.
-
-1. Add a `data jsonb` column to the `organization` table to hold the parsed `horecaSchema` or `supplierSchema` payload **plus** a `scrapeIssues` array (see `scrapeIssueSchema` in Task 2).
-2. Add a `data jsonb` column to the `product` table to hold the parsed `productSchema` payload **plus** a `scrapeIssues` array.
-3. Create a new `file` table with columns: `id`, `organizationId`, `name`, `mimeType`, `size` (integer, max 5MB enforced at upload), `content` (bytea), `createdAt`.
-4. Create a new `trigger_run` table to track active Trigger.dev runs per organization:
-   - `id` (uuid, PK)
-   - `organizationId` (uuid, FK → organization)
-   - `triggerRunId` (text, unique) — the Trigger.dev run ID
-   - `taskType` (text) — e.g. `"scrape-organization"`, `"scrape-product"`
-   - `label` (text) — human-readable description (e.g. `"Scraping example.com"`, `"Processing product: Heinz Ketchup"`)
-   - `status` (text, default `"running"`) — `"running"` | `"completed"` | `"failed"`
-   - `createdAt`, `updatedAt`
-   - **Note:** No `publicAccessToken` column — tokens are ephemeral and fetched on demand from the Trigger.dev API (see Task 4a).
-5. Generate and apply migrations, regenerate types, typecheck.
-
-**Files:**
-
-- `packages/db/src/schema/org-schema.ts`
-- `packages/db/src/schema/product-schema.ts`
-- `packages/db/src/schema/file-schema.ts` (new)
-- `packages/db/src/schema/trigger-run-schema.ts` (new)
+- A 2-panel checkout layout (invoice on left, form/tracking on right)
+- Permission-gated order submission (`place_order` permission)
+- A post-checkout animation (PAID stamp on invoice)
+- Order tracking view for submitted orders
+- Seamless navigation: clicking a non-draft order from the orders list goes directly to the checkout/tracking view
 
 ---
 
-## Task 2: Move Zod schemas into `packages/db`
+## Architecture Decision
 
-**passes:** true
+No new routes are needed. The existing `/order/[orderId]` page gains a `checkoutMode` boolean state:
 
-**Goal:** The `docs/schema.ts` schemas need to live alongside the database code so both the API and agents can import them for `zod.parse()` on insert and select.
+- `checkoutMode = false` → existing 3-panel shopping layout (browse, content, cart)
+- `checkoutMode = true` → new 2-panel checkout layout (invoice, form/tracking)
 
-1. Move `docs/schema.ts` → `packages/db/src/data-schemas.ts` (or similar).
-2. Export from the `packages/db` package index.
-3. Remove the `orderSchema` for now (out of scope per caveats).
-4. Add a `scrapeIssueSchema` to the data schemas:
-   ```ts
-   scrapeIssueSchema = z.object({
-     source: z.string(), // URL or filename where the issue occurred
-     field: z.string(), // schema field path (e.g. "unit.gtin")
-     rawValue: z.unknown(), // the value that failed validation
-     error: z.string(), // human-readable reason
-     timestamp: z.string().datetime(),
-   })
-   ```
-5. Wrap each top-level entity schema with its issues in a combined shape, e.g.:
-   ```ts
-   organizationDataSchema = z.object({
-     ...horecaSchema.shape, // or supplierSchema, based on org type
-     scrapeIssues: z.array(scrapeIssueSchema).default([]),
-   })
-   ```
-
-**Files:**
-
-- `packages/db/src/data-schemas.ts` (new, moved from docs)
-- `packages/db/src/index.ts`
+This mode is set automatically for non-draft orders (submitted, confirmed, delivered) and manually when the user clicks "Checkout" on a draft order.
 
 ---
 
-## Task 3: Onboarding flow — Add URL and file upload steps
+## Step 1: Backend — Permission Helper
 
-**passes:** true
+> passes: true
 
-**Goal:** Expand the current 2-step onboarding (type → name) to 4 steps.
+**File:** `packages/api/src/lib/verify-access.ts`
 
-**Current flow:** Type Selection → Name Entry → Done
-**New flow:** Type Selection → Name Entry → URLs → File Upload → Submit
+Currently, `verifyAccess()` only checks org membership (is the user a member?). We need a complementary function that checks specific permissions.
 
-1. **Step 3 — URLs:** Text area for the user to enter one or more URLs (one per line). Prompt: "Provide URLs to your website, product catalogs, or any pages we can scrape for product and company details."
-2. **Step 4 — File Upload:** Drag-and-drop or file picker to upload documents (CSV, Excel, PDF, images — all types accepted). 5MB max per file, enforced client-side and server-side. Files are stored in the new `file` table.
-3. **Submit:** Create the organization, store files, and trigger the scraping workflow (Task 5).
-4. Update `getSteps()` in `apps/web/components/onboarding/types.ts`.
+Add `hasPermission()`:
 
-**Files:**
+```typescript
+export async function hasPermission(
+  db: DB,
+  userId: string,
+  organizationId: string,
+  superAdmin: boolean,
+  permission: string,
+): Promise<boolean> {
+  if (superAdmin) return true
 
-- `apps/web/components/onboarding/types.ts`
-- `apps/web/components/onboarding/url-step.tsx` (new)
-- `apps/web/components/onboarding/file-upload-step.tsx` (new)
-- `apps/web/app/(app)/onboarding/page.tsx`
-- API route or tRPC mutation to handle file uploads
+  const [row] = await db
+    .select({ permissions: schema.role.permissions })
+    .from(schema.membership)
+    .innerJoin(schema.role, eq(schema.membership.roleId, schema.role.id))
+    .where(
+      and(
+        eq(schema.membership.userId, userId),
+        eq(schema.membership.organizationId, organizationId),
+      ),
+    )
+    .limit(1)
 
----
-
-## Task 4: Active tasks card + scrape issues on the organization page
-
-**passes:** true
-
-**Goal:** Show live agent progress and scrape issues inline on the existing org page.
-
-### 4a: Active tasks card
-
-1. New tRPC query: fetch all `trigger_run` rows for an org where `status = 'running'`. For each run, call the Trigger.dev API server-side to retrieve a fresh `publicAccessToken`. Return `triggerRunId`, `publicAccessToken`, `taskType`, and `label` to the client.
-2. New card on the org page: "Active Tasks". For each running task, render a row with:
-   - `label` (e.g. "Scraping example.com")
-   - Latest streaming log line from the `progress` stream (via `useTriggerRun` hook from `apps/web/app/hooks/use-trigger-run.ts`)
-   - Status indicator (spinner while running, check on complete, x on failed)
-3. When a run completes or fails, the card updates in realtime. The card hides when there are no active runs.
-4. Agents must insert a `trigger_run` row when they start and update `status` to `"completed"` or `"failed"` when done. Sub-agents (product scrape) also insert their own rows so they appear in the card.
-
-### 4b: Scrape issues section
-
-5. Below the active tasks card, show a "Scrape Issues" section that renders the `scrapeIssues` array from the org's `data` jsonb column.
-6. Display as a table with columns: **Source** (URL or filename), **Field**, **Raw Value**, **Error**.
-7. Same pattern for products — show per-product issues on the product detail view if issues exist.
-8. Section is hidden when `scrapeIssues` is empty.
-
-**Files:**
-
-- `packages/api/src/router/` — new tRPC query for active trigger runs
-- `apps/web/app/(app)/orgs/[orgId]/page.tsx` (add both sections)
-- `apps/web/components/active-tasks-card.tsx` (new)
-- `apps/web/components/scrape-issues-table.tsx` (new, reusable for org and product)
-
----
-
-## Task 5: Trigger.dev agent workflows
-
-**passes:** true
-
-**Goal:** Three agent workflows that scrape URLs and documents, then insert structured data.
-
-All agents follow the pattern in `packages/agents/src/example-agent.ts` and use tools from `packages/browserbase`.
-
-### Agent 1: Organization Discovery
-
-- **Input:** `organizationId`, `urls[]`, `fileIds[]`
-- **Behavior:**
-  1. **Insert a `trigger_run` row** with `taskType: "scrape-organization"`, `status: "running"`, and a descriptive `label`.
-  2. Scrape each URL using browserbase `extract` tool for company details (address, VAT, contacts, etc.).
-  3. Read uploaded files for additional org-level data.
-  4. Parse results against `horecaSchema` or `supplierSchema`.
-  5. Update the organization's `data` jsonb field with parsed data.
-  6. Append any fields that failed validation to the `scrapeIssues` array in the org's `data` column.
-  7. Discover product listings/pages; for each product found, spawn Agent 2.
-  8. **Update `trigger_run` status** to `"completed"` or `"failed"` on exit.
-
-### Agent 2: Product Discovery (sub-agent, fire-and-forget)
-
-- **Input:** `organizationId`, `productUrl` or `fileId`, `productHint` (name or identifier)
-- **Behavior:**
-  1. **Insert a `trigger_run` row** with `taskType: "scrape-product"`, `status: "running"`, and label from `productHint`.
-  2. Scrape the product page or extract from the relevant file section.
-  3. Parse against `productSchema`.
-  4. Upsert into the `product` table using the deduplication strategy below.
-  5. Store parsed data in the product's `data` jsonb field.
-  6. Append any fields that failed validation to the `scrapeIssues` array in the product's `data` column.
-  7. **Update `trigger_run` status** to `"completed"` or `"failed"` on exit.
-
-### Product deduplication strategy
-
-Products are **universal** — the same physical product can be supplied by multiple organizations. The agent should use `articleNumber` (distributor article number) and/or `unit.gtin` (EAN code) as the primary match keys. The AI determines the best identifier available from the scraped data, but hard identifiers (article number, GTIN) are always preferred over soft ones (name).
-
-- **Match found (same article number or GTIN across any org):** Update the existing product's `data` jsonb with any new/richer fields. Link the product to the current organization as an additional supplier.
-- **No match:** Insert a new product row.
-- **Same name but different numbers:** Treat as distinct products — name alone is not sufficient for deduplication since different orgs may have identically named but different products.
-
-### Tools needed in `packages/agents`:
-
-- `readFile` — read an uploaded file from the `file` table by ID, return contents.
-- Browserbase tools — already exist: `goto`, `extract`, `observe`, `act`, `agent`.
-- `queryDatabase` — select/insert/update against the DB via Drizzle.
-
-**Files:**
-
-- `apps/trigger/src/tasks/scrape-organization.ts` (new)
-- `apps/trigger/src/tasks/scrape-product.ts` (new)
-- `packages/agents/src/scrape-organization-agent.ts` (new)
-- `packages/agents/src/scrape-product-agent.ts` (new)
-- `packages/agents/src/tools/read-file.ts` (new)
-- `packages/agents/src/tools/query-database.ts` (new)
-
----
-
-## Task 6: Wire it all together
-
-**passes:** true
-
-1. Onboarding submit triggers the `scrape-organization` task via tRPC → Trigger.dev (returns `runId`).
-2. The tRPC mutation inserts the initial `trigger_run` row (with the `triggerRunId`) before returning, so the active tasks card picks it up immediately. The frontend uses the Task 4a query to fetch a fresh public access token from the Trigger.dev API when it needs to subscribe.
-3. Redirect user to the org page. The active tasks card shows the running agent(s) with live streaming logs. As sub-agents spawn for products, new rows appear in the card automatically.
-4. When all runs complete, the active tasks card hides and the scrape issues section shows any problems.
-
----
-
-## Out of Scope
-
-- **Orders** — focus is onboarding and scraping org/product data only.
-- **File hosting migration** — files stored as bytea in Postgres for now; will move to object storage later.
-- **File type restrictions / security** — accept all types now, restrict later.
-- **Production hardening** — no backwards-compat shims, deprecation paths, or migration logic needed.
-
----
-
-## Task Dependencies
-
-```
-Task 1 (DB schema) ──┐
-                      ├──→ Task 3 (Onboarding UI)
-Task 2 (Zod schemas) ┤
-                      ├──→ Task 4 (Org page: active tasks + issues)
-                      │
-                      └──→ Task 5 (Agent workflows)
-                                │
-Task 3 + 4 + 5 ────────────────┴──→ Task 6 (Wire together)
+  return row?.permissions.includes(permission) ?? false
+}
 ```
 
-Tasks 1 and 2 are prerequisites — everything else depends on them. Tasks 3, 4, and 5 can be built in parallel after that. Task 6 is the integration pass once 3–5 are done.
+This returns a boolean rather than throwing, so the caller decides the behavior. The `order.submit` mutation will throw `FORBIDDEN` if this returns false.
+
+**Why not a new tRPC query for permissions?** The client already has `activeOrg.permissions: string[]` from `useActiveOrg()` (populated by `/api/organizations/mine`). The client uses this for UI gating (show/hide "Place Order" button). The server enforces via the `submit` mutation.
+
+---
+
+## Step 2: Backend — `order.submit` Mutation
+
+> passes: true
+
+**File:** `packages/api/src/routers/order.ts`
+
+New procedure added to `orderRouter`:
+
+```typescript
+submit: protectedProcedure
+  .input(
+    z.object({
+      orderId: z.string().uuid(),
+      deliveryNotes: z.string().optional(),
+    }),
+  )
+  .mutation(async ({ ctx, input }) => {
+    // 1. Verify membership
+    const orderRow = await verifyOrderAccess(
+      ctx.db,
+      ctx.session.user.id,
+      input.orderId,
+      ctx.session.user.superAdmin,
+    )
+
+    // 2. Verify place_order permission
+    const canPlace = await hasPermission(
+      ctx.db,
+      ctx.session.user.id,
+      orderRow.organizationId,
+      ctx.session.user.superAdmin,
+      'place_order',
+    )
+    if (!canPlace)
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'Missing place_order permission',
+      })
+
+    // 3. Verify order is draft
+    const [order] = await ctx.db
+      .select()
+      .from(schema.order)
+      .where(eq(schema.order.id, input.orderId))
+      .limit(1)
+    if (order?.status !== 'draft')
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'Order is not a draft',
+      })
+
+    // 4. Verify order has items
+    const [itemCount] = await ctx.db
+      .select({ count: count() })
+      .from(schema.orderItem)
+      .where(
+        and(
+          eq(schema.orderItem.orderId, input.orderId),
+          isNull(schema.orderItem.removedAt),
+        ),
+      )
+    if (!itemCount?.count)
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'Order has no items',
+      })
+
+    // 5. Update order status
+    const now = new Date()
+    await ctx.db
+      .update(schema.order)
+      .set({
+        status: 'submitted',
+        submittedAt: now,
+        updatedAt: now,
+        notes: input.deliveryNotes ?? order.notes,
+      })
+      .where(eq(schema.order.id, input.orderId))
+
+    // 6. Log events
+    await logEvent(
+      ctx.db,
+      input.orderId,
+      'order_submitted',
+      ctx.session.user.id,
+    )
+    await trackEvent(ctx.db, {
+      organizationId: orderRow.organizationId,
+      actorId: ctx.session.user.id,
+      action: 'order.submitted',
+      entityType: 'order',
+      entityId: input.orderId,
+    })
+
+    return { success: true }
+  })
+```
+
+**File:** `packages/api/src/lib/audit.ts` — Add `'order.submitted'` to the `AuditAction` type union.
+
+---
+
+## Step 3: CSS — Stamp Animation Keyframe
+
+> passes: false
+
+**File:** `apps/web/app/globals.css`
+
+Add a `@keyframes stamp` animation that mimics a rubber stamp being pressed down:
+
+```css
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: rotate(-12deg) scale(2.5);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-12deg) scale(0.9);
+  }
+  80% {
+    transform: rotate(-12deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(-12deg) scale(1);
+  }
+}
+```
+
+Starts large and invisible, slams down to slightly small (0.9), bounces back (1.05), settles at 1.0. The `-12deg` rotation gives it that authentic hand-stamped look. Duration: 0.5s ease-out.
+
+---
+
+## Step 4: `CheckoutInvoice` Component (Left Panel)
+
+> passes: false
+
+**New file:** `apps/web/components/order/checkout/checkout-invoice.tsx`
+**Story:** `apps/web/components/order/checkout/checkout-invoice.stories.tsx`
+
+### Props
+
+```typescript
+interface CheckoutInvoiceProps {
+  orderId: string
+  items: CartItemData[]
+  subtotal: number
+  isPaid: boolean // controls PAID stamp visibility
+  createdAt?: Date
+  submittedAt?: Date | null
+}
+```
+
+### Layout
+
+The left panel occupies roughly 60% of the checkout layout width (`flex-[3]`).
+
+**Background layer:**
+
+- Subtle gradient background (`bg-gradient-to-br from-muted/30 to-muted/10`) similar to the existing `ContentViewer` empty state pattern
+- Optional subtle grid pattern overlay for a "paper" feel
+
+**Invoice card (centered on the background):**
+
+- White card (`bg-card rounded-xl shadow-lg`) with generous padding
+- **Header section:**
+  - "INVOICE" in large, bold uppercase text
+  - Order ID (first 8 chars of UUID, formatted like `#a1b2c3d4`)
+  - Date (created date for drafts, submitted date for submitted orders)
+- **Line items table:**
+  - Columns: Item Name | Qty | Unit Price | Line Total
+  - Each row shows: `productName`, `quantity`, `$unitPrice`, `$quantity * unitPrice`
+  - Clean table with subtle row separators
+- **Footer:**
+  - Separator line
+  - Subtotal row right-aligned, bold
+  - Potential tax/total row (placeholder for future)
+
+**PAID stamp overlay:**
+
+- Absolutely positioned over the invoice card
+- `border-4 border-red-500 text-red-500 font-bold text-5xl uppercase rounded-lg px-8 py-3`
+- `rotate(-12deg)` transform
+- When `isPaid` is false: `opacity-0 pointer-events-none`
+- When `isPaid` becomes true: animate in using the `stamp` keyframe from Step 3
+- Slightly transparent (`opacity-80`) when settled for a realistic rubber stamp look
+
+### Storybook Stories
+
+- `Default` — items displayed, no PAID stamp
+- `Paid` — items with PAID stamp visible
+- `SingleItem` — minimal invoice with one line
+- `ManyItems` — 10+ items to test scrolling
+
+---
+
+## Step 5: `CheckoutForm` Component (Right Panel — Pre-Submit)
+
+> passes: false
+
+**New file:** `apps/web/components/order/checkout/checkout-form.tsx`
+**Story:** `apps/web/components/order/checkout/checkout-form.stories.tsx`
+
+### Props
+
+```typescript
+interface CheckoutFormProps {
+  hasPlaceOrderPermission: boolean
+  isSubmitting: boolean
+  onSubmit: (deliveryNotes: string) => void
+  onBack: () => void
+  subtotal: number
+  itemCount: number
+}
+```
+
+### Layout
+
+The right panel occupies roughly 40% (`flex-[2]`) with a scroll area for overflow.
+
+**Section 1 — Delivery Instructions:**
+
+- Label: "Delivery Notes"
+- `<Textarea>` (shadcn) for free-form delivery instructions
+- Placeholder: "Add any special delivery instructions, gate codes, or notes for the supplier..."
+- Full width, 4 rows default
+
+**Section 2 — Expected Delivery Date:**
+
+- Label: "Expected Delivery"
+- A card-like area with a `<Calendar>` icon and "Coming soon" `<Badge>` overlay
+- Disabled/dimmed appearance (`opacity-50`)
+- Brief description: "Schedule delivery windows and set expected dates"
+
+**Section 3 — Payment Method:**
+
+- Label: "Payment Method"
+- A card with `<CreditCard>` icon and "Coming soon" `<Badge>`
+- Disabled/dimmed appearance
+- Brief description: "Configure payment terms and methods"
+
+**Section 4 — Order Summary:**
+
+- Small summary card showing:
+  - Item count: `{itemCount} items`
+  - Subtotal: `${subtotal.toFixed(2)}`
+
+**Section 5 — Actions:**
+
+If `hasPlaceOrderPermission` is **true**:
+
+- "Place Order" primary `<Button>` (full width, shows spinner when `isSubmitting`)
+- "Back to Cart" ghost `<Button>` below it (calls `onBack`)
+
+If `hasPlaceOrderPermission` is **false**:
+
+- Info card with `<ShieldAlert>` icon:
+  - Title: "Requires team approval"
+  - Description: "You don't have permission to place orders. A team admin will need to review and submit this order."
+- "Place Order" button — disabled
+- "Back to Cart" ghost button still functional
+
+### Storybook Stories
+
+- `Default` — with `place_order` permission
+- `NoPermission` — shows approval card, disabled button
+- `Submitting` — loading state with spinner
+
+---
+
+## Step 6: `OrderTracking` Component (Right Panel — Post-Submit)
+
+> passes: false
+
+**New file:** `apps/web/components/order/checkout/order-tracking.tsx`
+**Story:** `apps/web/components/order/checkout/order-tracking.stories.tsx`
+
+### Props
+
+```typescript
+interface OrderTrackingProps {
+  orderId: string
+  status: 'submitted' | 'confirmed' | 'delivered' | 'cancelled'
+  submittedAt: Date | null
+  deliveryNotes?: string | null
+}
+```
+
+### Layout
+
+**Section 1 — Status Timeline:**
+A vertical stepper with 3 steps:
+
+1. **Submitted** — `CheckCircle2` icon, timestamp
+2. **Confirmed** — `PackageCheck` icon, "Awaiting confirmation" or timestamp
+3. **Delivered** — `Truck` icon, "Pending" or timestamp
+
+Visual approach:
+
+- Each step is a row: colored dot + vertical connecting line + label + timestamp
+- Completed steps: green dot, solid line, normal text
+- Current step: green dot with pulse animation, bold text
+- Future steps: gray dot, dashed line, muted text
+- Cancelled: red styling with `XCircle` icon
+
+All built with Tailwind — divs with `rounded-full` dots, `border-l-2` connecting lines.
+
+**Section 2 — Delivery Notes:**
+
+- If notes exist, display them in a muted card
+- Read-only display of what was entered during checkout
+
+**Section 3 — Delivery Updates:**
+
+- "Delivery Updates" heading
+- "Coming soon" placeholder card with `<Truck>` icon
+- Description: "Track real-time delivery status and updates from your suppliers"
+
+**Section 4 — Actions:**
+
+- "Request Modification" outline button — disabled, with `<Tooltip>` saying "Coming soon"
+- "Duplicate as New Order" outline button — functional, uses existing `order.duplicate` mutation pattern and navigates to the new order
+
+### Storybook Stories
+
+- `Submitted` — first step active
+- `Confirmed` — second step active
+- `Delivered` — all steps complete, green checkmarks
+- `Cancelled` — cancelled state with red styling
+
+---
+
+## Step 7: `CheckoutLayout` Orchestrator Component
+
+> passes: false
+
+**New file:** `apps/web/components/order/checkout/checkout-layout.tsx`
+**Story:** `apps/web/components/order/checkout/checkout-layout.stories.tsx`
+
+### Props
+
+```typescript
+interface CheckoutLayoutProps {
+  orderId: string
+  items: CartItemData[]
+  subtotal: number
+  itemCount: number
+  orderStatus: string
+  submittedAt: Date | null
+  createdAt?: Date
+  notes: string | null
+  hasPlaceOrderPermission: boolean
+  onBack: () => void
+}
+```
+
+### Internal State Machine
+
+```typescript
+type CheckoutPhase =
+  | 'form'
+  | 'submitting'
+  | 'slide-out'
+  | 'stamp'
+  | 'slide-in'
+  | 'tracking'
+```
+
+**Initialization logic:**
+
+- If `orderStatus !== 'draft'` → start at `'tracking'` with `isPaid: true`
+- If `orderStatus === 'draft'` → start at `'form'`
+
+**Transition sequence after successful submit:**
+
+1. `'form'` → `'submitting'` — user clicks Place Order, mutation fires
+2. `'submitting'` → `'slide-out'` — mutation succeeds, right panel begins sliding out
+3. After 300ms: `'slide-out'` → `'stamp'` — right panel gone, PAID stamp animates onto invoice
+4. After 800ms: `'stamp'` → `'slide-in'` — tracking panel begins sliding in from right
+5. After 500ms: `'slide-in'` → `'tracking'` — animation complete, tracking panel fully visible
+
+Implementation uses `useEffect` + `setTimeout` chain with cleanup:
+
+```typescript
+useEffect(() => {
+  if (phase !== 'slide-out') return
+  const t1 = setTimeout(() => setPhase('stamp'), 300)
+  const t2 = setTimeout(() => setPhase('slide-in'), 1100)
+  const t3 = setTimeout(() => setPhase('tracking'), 1600)
+  return () => {
+    clearTimeout(t1)
+    clearTimeout(t2)
+    clearTimeout(t3)
+  }
+}, [phase])
+```
+
+### Animation CSS Classes
+
+**Right panel slide-out** (form disappearing):
+
+```
+translate-x-0 opacity-100 → translate-x-full opacity-0
+transition-all duration-300 ease-in
+```
+
+**Right panel slide-in** (tracking appearing):
+
+```
+translate-x-full opacity-0 → translate-x-0 opacity-100
+transition-all duration-500 ease-out
+```
+
+**PAID stamp**: Uses the `stamp` keyframe from Step 3 via `animate-[stamp_0.5s_ease-out_forwards]`
+
+### Layout Structure
+
+```tsx
+<div className="flex min-h-0 flex-1">
+  {/* Left panel — Invoice */}
+  <div className="flex-[3] border-r">
+    <CheckoutInvoice
+      orderId={orderId}
+      items={items}
+      subtotal={subtotal}
+      isPaid={phase === 'stamp' || phase === 'slide-in' || phase === 'tracking'}
+    />
+  </div>
+
+  {/* Right panel — Form or Tracking */}
+  <div className="flex-[2] overflow-hidden">
+    {(phase === 'form' || phase === 'submitting') && (
+      <CheckoutForm ... />
+    )}
+    {(phase === 'slide-in' || phase === 'tracking') && (
+      <OrderTracking ... />
+    )}
+  </div>
+</div>
+```
+
+### Uses `useOrderSubmit` Hook
+
+Calls the hook from Step 8 to handle the mutation. On `isSuccess`, triggers the animation sequence.
+
+### Storybook Stories
+
+- `DraftWithPermission` — form view, place order enabled
+- `DraftNoPermission` — form view, approval required
+- `Submitted` — tracking view with paid stamp
+- `Delivered` — tracking view, all steps complete
+
+---
+
+## Step 8: `useOrderSubmit` Hook
+
+> passes: false
+
+**New file:** `apps/web/hooks/use-order-submit.ts`
+
+Thin wrapper around `trpc.order.submit`:
+
+```typescript
+export function useOrderSubmit(orderId: string) {
+  const utils = trpc.useUtils()
+
+  const mutation = trpc.order.submit.useMutation({
+    onSuccess: () => {
+      void utils.order.get.invalidate({ orderId })
+      void utils.order.list.invalidate()
+      void utils.order.getEvents.invalidate({ orderId })
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to submit order')
+    },
+  })
+
+  const submit = useCallback(
+    (deliveryNotes: string) => {
+      mutation.mutate({ orderId, deliveryNotes: deliveryNotes || undefined })
+    },
+    [orderId, mutation],
+  )
+
+  return {
+    submit,
+    isSubmitting: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+  }
+}
+```
+
+---
+
+## Step 9: Wire Up `OrderCart` Checkout Button
+
+> passes: false
+
+**File:** `apps/web/components/order/order-cart.tsx`
+
+**Change 1:** Add `onCheckout` to props:
+
+```typescript
+interface OrderCartProps {
+  cart: CartStateReturn
+  onCheckout?: () => void  // NEW
+  onOpenProduct?: ...
+  ...
+}
+```
+
+**Change 2:** Wire the existing Checkout button:
+
+```tsx
+<Button
+  className={onOpenCartTab ? 'flex-1' : 'w-full'}
+  disabled={cart.allItems.length === 0}
+  onClick={onCheckout} // NEW
+>
+  Checkout
+</Button>
+```
+
+**Change 3:** Update the story file to include `onCheckout` in args.
+
+---
+
+## Step 10: Wire Up `OrderPage` — Conditional Rendering
+
+> passes: false
+
+**File:** `apps/web/app/(app)/order/[orderId]/page.tsx`
+
+This is the main integration point. Changes:
+
+**1. Add checkout state:**
+
+```typescript
+const [checkoutMode, setCheckoutMode] = useState(false)
+```
+
+**2. Auto-enter checkout for non-draft orders:**
+
+```typescript
+useEffect(() => {
+  if (cart.isLoading) return
+  const order = cart.orderData?.order // from the order.get query
+  if (order && order.status !== 'draft') {
+    setCheckoutMode(true)
+  }
+}, [cart.isLoading, cart.orderData?.order?.status])
+```
+
+Note: `useOrderCart` currently doesn't expose `orderData` directly — we'll need to either:
+
+- Expose `orderQuery.data` from the hook (minimal change), OR
+- Use a separate `trpc.order.get.useQuery({ orderId })` in the page (already called inside useOrderCart, would be deduplicated by tRPC)
+
+Recommended: Add `orderData` to the return of `useOrderCart`.
+
+**3. Conditional rendering in the body:**
+
+```tsx
+{
+  checkoutMode ? (
+    <CheckoutLayout
+      orderId={orderId}
+      items={cart.allItems}
+      subtotal={cart.subtotal}
+      itemCount={cart.itemCount}
+      orderStatus={orderData?.order.status ?? 'draft'}
+      submittedAt={orderData?.order.submittedAt ?? null}
+      createdAt={orderData?.order.createdAt}
+      notes={orderData?.order.notes ?? null}
+      hasPlaceOrderPermission={
+        activeOrg?.permissions?.includes('place_order') ?? false
+      }
+      onBack={() => setCheckoutMode(false)}
+    />
+  ) : (
+    <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+      {/* existing 3-panel layout unchanged */}
+    </div>
+  )
+}
+```
+
+**4. Pass `onCheckout` to `OrderCart`:**
+
+```tsx
+<OrderCart
+  ref={cartRef}
+  cart={cart}
+  onCheckout={() => setCheckoutMode(true)}  // NEW
+  onOpenProduct={handleOpenProduct}
+  ...
+/>
+```
+
+**5. Header adjustments in checkout mode:**
+
+- Hide `PanelToggleBar` when in checkout mode (panels aren't relevant)
+- For draft orders in checkout mode: show a "Back to Cart" button in the header
+- For non-draft orders: show a "Back to Orders" link instead (navigates to `/orgs/${orgId}/orders`)
+
+---
+
+## Files Summary
+
+### Modified Files
+
+| File                                               | Change                                                                 |
+| -------------------------------------------------- | ---------------------------------------------------------------------- |
+| `packages/api/src/lib/verify-access.ts`            | Add `hasPermission()` function                                         |
+| `packages/api/src/lib/audit.ts`                    | Add `'order.submitted'` to `AuditAction` union                         |
+| `packages/api/src/routers/order.ts`                | Add `submit` procedure                                                 |
+| `apps/web/app/globals.css`                         | Add `@keyframes stamp` animation                                       |
+| `apps/web/components/order/order-cart.tsx`         | Add `onCheckout` prop, wire button                                     |
+| `apps/web/components/order/order-cart.stories.tsx` | Add `onCheckout` to story args                                         |
+| `apps/web/hooks/use-order-cart.ts`                 | Expose `orderData` in return value                                     |
+| `apps/web/app/(app)/order/[orderId]/page.tsx`      | Add `checkoutMode` state, conditional rendering, auto-detect non-draft |
+
+### New Files
+
+| File                                                              | Purpose                                            |
+| ----------------------------------------------------------------- | -------------------------------------------------- |
+| `apps/web/components/order/checkout/checkout-invoice.tsx`         | Invoice display with PAID stamp                    |
+| `apps/web/components/order/checkout/checkout-invoice.stories.tsx` | Stories                                            |
+| `apps/web/components/order/checkout/checkout-form.tsx`            | Delivery notes, payment placeholder, submit button |
+| `apps/web/components/order/checkout/checkout-form.stories.tsx`    | Stories                                            |
+| `apps/web/components/order/checkout/order-tracking.tsx`           | Status timeline, delivery tracking placeholder     |
+| `apps/web/components/order/checkout/order-tracking.stories.tsx`   | Stories                                            |
+| `apps/web/components/order/checkout/checkout-layout.tsx`          | Orchestrator with animation state machine          |
+| `apps/web/components/order/checkout/checkout-layout.stories.tsx`  | Stories                                            |
+| `apps/web/hooks/use-order-submit.ts`                              | Submit mutation hook                               |
+
+---
+
+## Verification
+
+1. `bun run fix && bun run knip:fix`
+2. `bun run ci` (typecheck, lint, knip, build)
+3. Manual testing at `http://localhost:3000/`:
+   - Create an order, add items, click Checkout → see 2-panel layout with invoice on left, form on right
+   - Fill in delivery notes, click Place Order → watch right panel slide out, PAID stamp animate onto invoice, tracking panel slide in
+   - Navigate to orders list → click the submitted order → see checkout view with tracking directly (not the shopping view)
+   - Test with a user role that lacks `place_order` → see "Requires team approval" card with disabled Place Order button
+   - Test "Back to Cart" from checkout form → returns to shopping view
+   - Test "Duplicate as New Order" from tracking view → creates new draft and navigates to it
+4. Storybook: verify all 8 new story files render correctly

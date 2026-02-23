@@ -7,6 +7,7 @@ type AuditAction =
   | 'order.item_removed'
   | 'order.archived'
   | 'order.duplicated'
+  | 'order.submitted'
   | 'suggestion.accepted'
   | 'suggestion.dismissed'
   | 'suggestion.reverted'

@@ -4,7 +4,7 @@ import { and } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { trackEvent } from '../lib/audit'
-import { verifyAccess } from '../lib/verify-access'
+import { hasPermission, verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
 
 async function verifyOrderAccess(
@@ -421,6 +421,91 @@ export const orderRouter = router({
         organizationId: orderRow.organizationId,
         actorId: ctx.session.user.id,
         action: 'order.archived',
+        entityType: 'order',
+        entityId: input.orderId,
+      })
+
+      return { success: true }
+    }),
+
+  submit: protectedProcedure
+    .input(
+      z.object({
+        orderId: z.string().uuid(),
+        deliveryNotes: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const orderRow = await verifyOrderAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.orderId,
+        ctx.session.user.superAdmin,
+      )
+
+      const canPlace = await hasPermission(
+        ctx.db,
+        ctx.session.user.id,
+        orderRow.organizationId,
+        ctx.session.user.superAdmin,
+        'place_order',
+      )
+      if (!canPlace) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Missing place_order permission',
+        })
+      }
+
+      const [order] = await ctx.db
+        .select()
+        .from(schema.order)
+        .where(eq(schema.order.id, input.orderId))
+        .limit(1)
+      if (order?.status !== 'draft') {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Order is not a draft',
+        })
+      }
+
+      const [itemCount] = await ctx.db
+        .select({ count: count() })
+        .from(schema.orderItem)
+        .where(
+          and(
+            eq(schema.orderItem.orderId, input.orderId),
+            isNull(schema.orderItem.removedAt),
+          ),
+        )
+      if (!itemCount?.count) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Order has no items',
+        })
+      }
+
+      const now = new Date()
+      await ctx.db
+        .update(schema.order)
+        .set({
+          status: 'submitted',
+          submittedAt: now,
+          updatedAt: now,
+          notes: input.deliveryNotes ?? order.notes,
+        })
+        .where(eq(schema.order.id, input.orderId))
+
+      await logEvent(
+        ctx.db,
+        input.orderId,
+        'order_submitted',
+        ctx.session.user.id,
+      )
+      await trackEvent(ctx.db, {
+        organizationId: orderRow.organizationId,
+        actorId: ctx.session.user.id,
+        action: 'order.submitted',
         entityType: 'order',
         entityId: input.orderId,
       })
