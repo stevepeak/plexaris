@@ -110,7 +110,7 @@ export async function PATCH(
     .limit(1)
 
   const updates = {
-    name: name.trim() as string | null,
+    name: name.trim(),
     description: (description || null) as string | null,
     phone: (phone || null) as string | null,
     email: (email || null) as string | null,
