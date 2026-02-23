@@ -303,7 +303,7 @@ export function McpTab(_props: McpTabProps) {
                 <p className="text-center text-sm font-medium text-muted-foreground">
                   Connect to
                 </p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {INTEGRATIONS.map((integration) => (
                     <Button
                       key={integration.name}
