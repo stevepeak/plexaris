@@ -1,7 +1,7 @@
 'use client'
 
 import { Bot } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
+import { notFound, useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 import { ProductForm } from '@/components/product-form/product-form'
@@ -26,6 +26,7 @@ export default function ProductEditPage() {
 
   const [product, setProduct] = useState<ProductData | null>(null)
   const [isPending, setIsPending] = useState(true)
+  const [productNotFound, setProductNotFound] = useState(false)
   const [isActivating, setIsActivating] = useState(false)
   const [view, setView] = useState<'edit' | 'history'>('edit')
 
@@ -34,10 +35,16 @@ export default function ProductEditPage() {
     void fetch(`/api/products/${productId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.product) setProduct(data.product)
+        if (data?.product) {
+          setProduct(data.product)
+        } else {
+          setProductNotFound(true)
+        }
       })
       .finally(() => setIsPending(false))
   }, [productId])
+
+  if (productNotFound) notFound()
 
   const handleUpdate = useCallback(
     async (data: {

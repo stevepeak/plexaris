@@ -2,7 +2,7 @@
 
 import { LogOut, Settings } from 'lucide-react'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { notFound, useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 import { OrgProvider } from '@/components/org-context'
@@ -95,6 +95,8 @@ export default function OrgLayout({ children }: { children: React.ReactNode }) {
   const orgNotFound =
     !orgsPending && !effectiveOrg && !superAdmin && organizations.length > 0
 
+  if (orgNotFound) notFound()
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -158,11 +160,7 @@ export default function OrgLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       <main className="px-4 py-8">
-        {orgNotFound ? (
-          <p className="text-sm text-muted-foreground">
-            Organization not found.
-          </p>
-        ) : !effectiveOrg ? (
+        {!effectiveOrg ? (
           <div className="space-y-4">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-64 w-full" />

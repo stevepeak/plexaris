@@ -46,6 +46,7 @@ export interface OrderItemMapping {
 
 export function useOrderCart(orderId: string): CartStateReturn & {
   isLoading: boolean
+  isError: boolean
   addItemToOrder: (item: {
     id: string
     name: string
@@ -235,5 +236,6 @@ export function useOrderCart(orderId: string): CartStateReturn & {
     updateSupplier: wrappedUpdateSupplier,
     addItemToOrder,
     isLoading: orderQuery.isLoading,
+    isError: orderQuery.isError,
   }
 }

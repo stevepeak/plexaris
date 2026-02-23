@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { notFound, useParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { type ActivityEntry } from '@/components/order/activity-log'
@@ -373,6 +373,8 @@ export default function OrderPage() {
     openTab({ type: 'product', id: productId, label: productName })
   }
 
+  if (cart.isError) notFound()
+
   if (cart.isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -427,9 +429,9 @@ export default function OrderPage() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         {panels.search && (
-          <div className="w-[280px] shrink-0 border-r">
+          <div className="w-full shrink-0 border-b md:w-[280px] md:border-b-0 md:border-r">
             <CategorySidebar
               searchInputRef={searchInputRef}
               activeSection={activeSection}
@@ -475,7 +477,7 @@ export default function OrderPage() {
         </div>
 
         {panels.order && (
-          <div className="w-[320px] shrink-0 border-l">
+          <div className="w-full shrink-0 border-t md:w-[320px] md:border-t-0 md:border-l">
             <OrderCart
               ref={cartRef}
               cart={cart}
@@ -489,7 +491,7 @@ export default function OrderPage() {
         )}
 
         {panels.chat && (
-          <div className="w-[320px] shrink-0 border-l">
+          <div className="w-full shrink-0 border-t md:w-[320px] md:border-t-0 md:border-l">
             <OrderChat />
           </div>
         )}
