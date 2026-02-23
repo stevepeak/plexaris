@@ -16,7 +16,7 @@ import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { trpc } from '@/lib/trpc'
-import { useUploadThing } from '@/lib/uploadthing'
+import { uploadOrganizationFiles } from '@/lib/upload-files'
 import { cn } from '@/lib/utils'
 
 import { AlignProgressDialog } from './align-progress-dialog'
@@ -58,7 +58,6 @@ export function AlignTab(props: { organizationId: string }) {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const scrapeMutation = trpc.trigger.scrapeOrganization.useMutation()
-  const { startUpload } = useUploadThing('organizationDocument')
 
   const uploadFiles = useCallback(
     async (files: FileList) => {
@@ -67,13 +66,7 @@ export function AlignTab(props: { organizationId: string }) {
       setIsUploading(true)
 
       try {
-        const uploaded = await startUpload(Array.from(files), {
-          organizationId: props.organizationId,
-        })
-
-        if (!uploaded) {
-          throw new Error('File upload failed')
-        }
+        await uploadOrganizationFiles(Array.from(files), props.organizationId)
 
         const result = await scrapeMutation.mutateAsync({
           organizationId: props.organizationId,
@@ -90,7 +83,7 @@ export function AlignTab(props: { organizationId: string }) {
         setIsUploading(false)
       }
     },
-    [isUploading, props.organizationId, scrapeMutation, startUpload],
+    [isUploading, props.organizationId, scrapeMutation],
   )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {

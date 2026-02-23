@@ -35,9 +35,6 @@ const config: KnipConfig = {
     'packages/cloudinary': {
       project: ['src/**/*.ts'],
     },
-    'packages/uploadthing': {
-      project: ['src/**/*.ts'],
-    },
     'packages/resend': {
       project: ['src/**/*.ts'],
     },

@@ -27,6 +27,39 @@ function sign(params: Record<string, string>): string {
     .digest('hex')
 }
 
+export async function uploadFile(
+  file: File,
+  folder: string,
+): Promise<{ url: string; publicId: string }> {
+  const timestamp = String(Math.floor(Date.now() / 1000))
+  const params = { folder: `leftman/${folder}`, timestamp }
+  const signature = sign(params)
+
+  const body = new FormData()
+  body.append('file', file)
+  body.append('folder', params.folder)
+  body.append('timestamp', timestamp)
+  const { apiKey, cloudName } = getCloudinaryConfig()
+  body.append('api_key', apiKey)
+  body.append('signature', signature)
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+    { method: 'POST', body },
+  )
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Cloudinary upload failed: ${text}`)
+  }
+
+  const json = (await res.json()) as {
+    secure_url: string
+    public_id: string
+  }
+  return { url: json.secure_url, publicId: json.public_id }
+}
+
 export async function uploadImage(file: File, folder: string): Promise<string> {
   const timestamp = String(Math.floor(Date.now() / 1000))
   const params = { folder: `leftman/${folder}`, timestamp }

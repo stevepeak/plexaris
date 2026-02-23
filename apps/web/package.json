@@ -17,8 +17,6 @@
   "dependencies": {
     "@app/api": "workspace:*",
     "@app/cloudinary": "workspace:*",
-    "@app/uploadthing": "workspace:*",
-    "@uploadthing/react": "^7.3.0",
     "@app/config": "workspace:*",
     "@app/email": "workspace:*",
     "@app/resend": "workspace:*",

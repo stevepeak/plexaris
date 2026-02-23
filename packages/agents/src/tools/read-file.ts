@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 /**
  * Tool that reads an uploaded file by ID. Fetches the file content from
- * UploadThing's CDN and returns metadata plus content as a UTF-8 string.
+ * Cloudinary and returns metadata plus content as a UTF-8 string.
  */
 export function createReadFileTool() {
   return tool({

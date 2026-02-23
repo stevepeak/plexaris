@@ -26,7 +26,7 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { authClient } from '@/lib/auth-client'
 import { trpc } from '@/lib/trpc'
-import { useUploadThing } from '@/lib/uploadthing'
+import { uploadOrganizationFiles } from '@/lib/upload-files'
 
 function getInitials(name: string | undefined): string {
   if (!name) {
@@ -73,7 +73,6 @@ export default function OnboardingPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const scrapeMutation = trpc.trigger.scrapeOrganization.useMutation()
-  const { startUpload } = useUploadThing('organizationDocument')
 
   useEffect(() => {
     if (
@@ -160,8 +159,9 @@ export default function OnboardingPage() {
 
     // Upload files if any
     if (files.length > 0) {
-      const result = await startUpload(files, { organizationId: orgId })
-      if (!result) {
+      try {
+        await uploadOrganizationFiles(files, orgId)
+      } catch {
         setError('Failed to upload files')
         setIsLoading(false)
         return
