@@ -1,84 +1,33 @@
 'use client'
 
-import { MessageSquare, Send } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { MessageSquare } from 'lucide-react'
 
 import { Kbd } from '@/components/kbd'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { cn } from '@/lib/utils'
 
-interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-}
-
-const ASSISTANT_REPLIES = [
-  "Got it! I'll add that to your order.",
-  'Sure thing — anything else you need?',
-  "Good choice! I've noted that down.",
-  'Let me check on that for you.',
-  'Added! Want to review your order?',
+const EXAMPLE_PROMPTS = [
+  {
+    role: 'user' as const,
+    text: 'Show me the most popular bread',
+  },
+  {
+    role: 'assistant' as const,
+    text: 'Your top seller this week is the sourdough boule — 34 units sold!',
+  },
+  {
+    role: 'user' as const,
+    text: 'What items have the best promotions?',
+  },
+  {
+    role: 'assistant' as const,
+    text: 'Right now the organic oat milk is 20% off and the almond butter has a buy-2-get-1 deal.',
+  },
+  {
+    role: 'user' as const,
+    text: 'Add 5 cases of oat milk to my order',
+  },
 ]
 
-function pickReply(index: number) {
-  return ASSISTANT_REPLIES[index % ASSISTANT_REPLIES.length]!
-}
-
-interface OrderChatProps {
-  initialMessages?: ChatMessage[]
-}
-
-export function OrderChat({ initialMessages = [] }: OrderChatProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
-  const [input, setInput] = useState('')
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const replyCount = useRef(0)
-
-  const scrollToBottom = useCallback(() => {
-    const el = scrollRef.current
-    if (el) {
-      // ScrollArea renders a viewport div as first child
-      const viewport = el.querySelector('[data-radix-scroll-area-viewport]')
-      if (viewport) {
-        viewport.scrollTop = viewport.scrollHeight
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages, scrollToBottom])
-
-  const sendMessage = useCallback(() => {
-    const text = input.trim()
-    if (!text) return
-
-    const userMsg: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: text,
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, userMsg])
-    setInput('')
-
-    const replyIndex = replyCount.current++
-    setTimeout(() => {
-      const assistantMsg: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: pickReply(replyIndex),
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, assistantMsg])
-    }, 800)
-  }, [input])
-
+export function OrderChat() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 border-b px-4 py-3">
@@ -87,57 +36,33 @@ export function OrderChat({ initialMessages = [] }: OrderChatProps) {
         <Kbd>c</Kbd>
       </div>
 
-      <ScrollArea ref={scrollRef} className="flex-1">
-        {messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center p-4">
-            <p className="text-sm text-muted-foreground">
-              Chat with the assistant to build your order.
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3 p-4">
-            {messages.map((msg) => (
+      <div className="relative flex flex-1 flex-col">
+        {/* Example chat bubbles */}
+        <div className="flex flex-1 flex-col gap-3 p-4 opacity-50">
+          {EXAMPLE_PROMPTS.map((msg) => (
+            <div
+              key={msg.text}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
               <div
-                key={msg.id}
-                className={cn(
-                  'flex',
-                  msg.role === 'user' ? 'justify-end' : 'justify-start',
-                )}
+                className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                  msg.role === 'user'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted'
+                }`}
               >
-                <div
-                  className={cn(
-                    'max-w-[80%] rounded-lg px-3 py-2 text-sm',
-                    msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted',
-                  )}
-                >
-                  {msg.content}
-                </div>
+                {msg.text}
               </div>
-            ))}
-          </div>
-        )}
-      </ScrollArea>
+            </div>
+          ))}
+        </div>
 
-      <div className="border-t px-3 py-2">
-        <form
-          className="flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault()
-            sendMessage()
-          }}
-        >
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a message…"
-            className="flex-1"
-          />
-          <Button type="submit" size="icon" disabled={!input.trim()}>
-            <Send className="h-4 w-4" />
-          </Button>
-        </form>
+        {/* Coming soon overlay */}
+        <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
+          <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-sm font-medium text-violet-400">
+            Coming soon
+          </span>
+        </div>
       </div>
     </div>
   )
