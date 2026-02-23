@@ -11,3 +11,5 @@ Sentry.init({
   // eslint-disable-next-line no-process-env
   environment: process.env.NODE_ENV ?? 'production',
 })
+
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart
