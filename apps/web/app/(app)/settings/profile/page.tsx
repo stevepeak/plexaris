@@ -11,7 +11,7 @@ import {
   type OrgMembership,
   type PasskeyItem,
   ProfileFormFields,
-} from '@/components/profile-form'
+} from '@/components/profile-form/profile-form'
 import { ThemeSubmenu } from '@/components/theme-toggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'

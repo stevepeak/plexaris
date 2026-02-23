@@ -133,27 +133,6 @@ Several queries do not fully verify data belongs to the requesting user's organi
 
 ---
 
-### 8. Missing Database Indexes
-
-No indexes exist on commonly queried foreign key columns. This will cause full table scans as data grows.
-
-**Columns that need indexes:**
-
-| Table                     | Column(s)                | Used in                             |
-| ------------------------- | ------------------------ | ----------------------------------- |
-| `order`                   | `organizationId`         | `order.list`, `order.get`           |
-| `order_item`              | `orderId`                | `order.duplicate`, `order.get`      |
-| `product`                 | `organizationId`         | Product list, browse, search        |
-| `suggestion`              | `organizationId`         | `suggestion.list`                   |
-| `membership`              | `userId`                 | Auth checks, org membership queries |
-| `notification_preference` | `userId, organizationId` | Notification queries                |
-| `organization`            | `archivedAt`             | Filtered in many queries            |
-
-**What needs to happen:**
-
-- Create a new migration adding these indexes
-- Use `CREATE INDEX CONCURRENTLY` if running against a live database
-
 ---
 
 ---
@@ -182,41 +161,7 @@ find all the endpionts and apply ZOD schema to them
 
 ---
 
-### 11. Unsafe Non-null Assertions
-
-`packages/api/src/routers/order.ts` has ~8 instances of `!` (non-null assertion) without null checks. If a query returns empty results, these throw unhandled runtime errors.
-
-**Locations:**
-
-- Line 129: `row!.id`
-- Line 131: `row!.id`
-- Lines 182-184: `orderData!`
-- Line 219: `item!.id`
-- Line 225: `item!.id`
-- Line 389: `newOrder!.id`
-- Lines 412-415: `newOrder!.id`
-
-**Also in `packages/api/src/routers/suggestion.ts`:**
-
-- Line 151: `as Record<string, unknown>` unsafe cast
-- Line 339: `[s.field!]: s.proposedValue` non-null assertion on field name
-
-**What needs to happen:**
-
-- Replace `!` assertions with proper null checks
-- Throw `TRPCError({ code: 'NOT_FOUND' })` when expected data is missing
-- Validate field names against allowed list before dynamic property access
-
 ---
-
-### 12. Inconsistent Error Types
-
-`packages/api/src/index.ts` throws generic `Error()` instead of `TRPCError` in 3 places (lines 62, 128, 176). This prevents the frontend from properly handling error codes.
-
-**What needs to happen:**
-
-- Replace `throw new Error('Organization not found')` with `throw new TRPCError({ code: 'NOT_FOUND', message: 'Organization not found' })`
-- Review all error throws across tRPC routers for consistency
 
 ---
 
@@ -255,16 +200,6 @@ All foreign keys use `ON DELETE no action`. Deleting records leaves orphaned dat
 
 ---
 
-### 18. Large Component Files
-
-Several components are overly large and should be decomposed.
-
-| Component                                       | Lines | Recommendation                                                                                         |
-| ----------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------------ |
-| `apps/web/components/product-form.tsx`          | 1,570 | Split into PhotosSection, IngredientsSection, AllergensSection, PricingSection, etc.                   |
-| `apps/web/components/profile-form.tsx`          | ~900  | Split profile editing, password change, org memberships, and account deletion into separate components |
-| `apps/web/components/org-page/settings-tab.tsx` | ~600  | Split general settings, contact info, and delivery areas                                               |
-
 ---
 
 ### 19. Claim Token Leaks Organization Details
@@ -292,14 +227,6 @@ Several components are overly large and should be decomposed.
 
 ## P3 — Low Priority (Quality of Life)
 
-### 21. Incomplete `.env.example`
-
-Only lists `DATABASE_URL` and `BETTER_AUTH_SECRET`. Missing 15+ required variables.
-
-**What needs to happen:**
-
-- Add all env vars from `packages/config/src/index.ts` to `.env.example` with descriptions and example values
-
 ---
 
 ### 22. TypeScript Strictness Inconsistency
@@ -313,18 +240,6 @@ Only lists `DATABASE_URL` and `BETTER_AUTH_SECRET`. Missing 15+ required variabl
 
 ---
 
-### 23. Missing Storybook Stories
-
-Per project rules: "All components must have corresponding Storybook stories." ~44 UI components and several order-related components lack stories.
-
-**Missing stories (partial list):**
-
-- `active-task-row.tsx`
-- `scrape-issues-table.tsx`
-- `browse-home.tsx`, `category-sidebar.tsx`, `cart-item.tsx`
-- `keyboard-shortcuts-dialog.tsx`, `order-chat.tsx`
-- `supplier-detail.tsx`, `tab-bar.tsx`
-
 ---
 
 ### 24. Accessibility Gaps
@@ -335,15 +250,6 @@ Per project rules: "All components must have corresponding Storybook stories." ~
 - Only ~31 aria attributes across the entire components directory
 
 ---
-
-### 25. Timestamps Without Timezone
-
-All timestamp columns use `timestamp` without `with time zone`. This can cause timezone confusion in multi-region deployments.
-
-**What needs to happen:**
-
-- Use `timestamp('column_name', { withTimezone: true, mode: 'date' })` for new columns
-- Plan a migration to convert existing columns (requires careful testing)
 
 ---
 

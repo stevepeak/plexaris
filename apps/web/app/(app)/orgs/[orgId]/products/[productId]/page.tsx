@@ -4,7 +4,7 @@ import { Bot } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
-import { ProductForm } from '@/components/product-form'
+import { ProductForm } from '@/components/product-form/product-form'
 import { ProductVersionHistory } from '@/components/product-version-history'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'

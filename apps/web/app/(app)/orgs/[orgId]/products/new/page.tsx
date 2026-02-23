@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 
-import { ProductForm } from '@/components/product-form'
+import { ProductForm } from '@/components/product-form/product-form'
 
 export default function ProductNewPage() {
   const { orgId } = useParams<{ orgId: string }>()
