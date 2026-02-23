@@ -2,7 +2,7 @@
 
 import { MessageSquare, Search } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
+import { Card, CardDescription, CardTitle } from '@/components/ui/card'
 import { type CartStateReturn } from '@/hooks/use-cart-state'
 
 import { type ActivityEntry, ActivityLog } from './activity-log'
@@ -60,27 +60,57 @@ export function ContentViewer({
 
   if (tabs.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="flex items-center gap-16">
-          <div className="flex flex-col items-center gap-2">
-            <Button variant="outline" className="gap-2" onClick={onFocusSearch}>
-              <Search className="h-4 w-4" />
-              Search products or recipes
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Browse the catalog on the left
-            </p>
-          </div>
+      <div className="relative flex h-full items-center justify-center overflow-hidden">
+        {/* Background pattern with edge fade */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            maskImage:
+              'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+            WebkitMaskImage:
+              'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-pink-500/15 via-transparent to-amber-500/15" />
+          <div
+            className="absolute inset-0 opacity-[0.08]"
+            style={{
+              backgroundImage:
+                'linear-gradient(rgba(128,128,128,1) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,1) 1px, transparent 1px)',
+              backgroundSize: '48px 48px',
+            }}
+          />
+          <div className="absolute left-1/4 top-1/4 h-64 w-64 animate-pulse rounded-full bg-pink-500/20 blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 h-64 w-64 animate-pulse rounded-full bg-amber-500/20 blur-3xl [animation-delay:1s]" />
+        </div>
 
-          <div className="flex flex-col items-center gap-2">
-            <Button variant="outline" className="gap-2" onClick={onOpenChat}>
-              <MessageSquare className="h-4 w-4" />
-              Start chat with agent
-            </Button>
-            <p className="text-xs text-muted-foreground">
+        {/* Action cards */}
+        <div className="relative z-10 flex gap-6">
+          <Card
+            className="group flex w-56 cursor-pointer flex-col items-center gap-3 border-border/50 bg-card/80 p-6 shadow-lg backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-0.5"
+            onClick={onFocusSearch}
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-500/10">
+              <Search className="h-6 w-6 text-pink-400" />
+            </div>
+            <CardTitle className="text-base">Search catalog</CardTitle>
+            <CardDescription className="text-center text-sm">
+              Browse products or recipes from the catalog
+            </CardDescription>
+          </Card>
+
+          <Card
+            className="group flex w-56 cursor-pointer flex-col items-center gap-3 border-border/50 bg-card/80 p-6 shadow-lg backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-0.5"
+            onClick={onOpenChat}
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10">
+              <MessageSquare className="h-6 w-6 text-amber-400" />
+            </div>
+            <CardTitle className="text-base">Chat with agent</CardTitle>
+            <CardDescription className="text-center text-sm">
               Let an assistant pick items for you
-            </p>
-          </div>
+            </CardDescription>
+          </Card>
         </div>
       </div>
     )
