@@ -563,7 +563,7 @@ export function useOrderSubmit(orderId: string) {
 
 ## Step 9: Wire Up `OrderCart` Checkout Button
 
-> passes: false
+> passes: true
 
 **File:** `apps/web/components/order/order-cart.tsx`
 

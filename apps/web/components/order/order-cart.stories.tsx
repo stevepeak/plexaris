@@ -114,6 +114,8 @@ function OrderCartStory({
       <OrderCart
         cart={cart}
         // eslint-disable-next-line @typescript-eslint/no-empty-function
+        onCheckout={() => {}}
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         onOpenCartTab={showActions ? () => {} : undefined}
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         onOpenActivityTab={showActions ? () => {} : undefined}

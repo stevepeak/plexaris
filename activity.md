@@ -53,3 +53,11 @@
 - Created `apps/web/components/order/checkout/checkout-layout.stories.tsx` with 4 stories: DraftWithPermission, DraftNoPermission, Submitted, Delivered
 - CI passes (typecheck, lint, knip, build)
 - Screenshot: `screenshots/step7-checkout-layout.png`
+
+## 2026-02-23 — Step 9: Wire Up OrderCart Checkout Button
+
+- Added `onCheckout` optional prop to `OrderCartProps` in `apps/web/components/order/order-cart.tsx`
+- Wired the existing Checkout button's `onClick` handler to call `onCheckout`
+- Updated `apps/web/components/order/order-cart.stories.tsx` to pass `onCheckout` in the story wrapper
+- CI passes (typecheck, lint, knip, build)
+- Screenshot: `screenshots/step9-order-cart-checkout-button.png`

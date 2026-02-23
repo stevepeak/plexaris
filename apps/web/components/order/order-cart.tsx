@@ -35,6 +35,7 @@ export interface OrderCartHandle {
 
 interface OrderCartProps {
   cart: CartStateReturn
+  onCheckout?: () => void
   onOpenProduct?: (productId: string, productName: string) => void
   onOpenSupplier?: (supplierId: string, supplierName: string) => void
   onOpenCartTab?: () => void
@@ -46,6 +47,7 @@ export const OrderCart = forwardRef<OrderCartHandle, OrderCartProps>(
   function OrderCart(
     {
       cart,
+      onCheckout,
       onOpenProduct,
       onOpenSupplier,
       onOpenCartTab,
@@ -227,6 +229,7 @@ export const OrderCart = forwardRef<OrderCartHandle, OrderCartProps>(
               <Button
                 className={onOpenCartTab ? 'flex-1' : 'w-full'}
                 disabled={cart.allItems.length === 0}
+                onClick={onCheckout}
               >
                 Checkout
               </Button>
