@@ -9,6 +9,7 @@ import { protectedProcedure, router } from '../trpc'
 
 async function fetchPublicAccessToken(
   triggerRunId: string,
+  captureException?: (error: unknown, extra?: Record<string, unknown>) => void,
 ): Promise<string | null> {
   try {
     // Use the Trigger.dev SDK to create a public access token
@@ -23,8 +24,7 @@ async function fetchPublicAccessToken(
     })
     return token
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('[fetchPublicAccessToken] Failed to create token:', error)
+    captureException?.(error, { triggerRunId })
     return null
   }
 }
@@ -54,6 +54,7 @@ export const triggerRunRouter = router({
         runs.map(async (run) => {
           const publicAccessToken = await fetchPublicAccessToken(
             run.triggerRunId,
+            ctx.captureException,
           )
           return {
             id: run.id,
@@ -95,7 +96,10 @@ export const triggerRunRouter = router({
         ctx.session.user.superAdmin,
       )
 
-      const token = await fetchPublicAccessToken(input.triggerRunId)
+      const token = await fetchPublicAccessToken(
+        input.triggerRunId,
+        ctx.captureException,
+      )
       return { publicAccessToken: token }
     }),
 
@@ -140,12 +144,17 @@ export const triggerRunRouter = router({
       try {
         triggerRunDetails = await runs.retrieve(task.triggerRunId)
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('[getById] Failed to fetch run details:', error)
+        ctx.captureException(error, {
+          triggerRunId: task.triggerRunId,
+          taskId: input.id,
+        })
       }
 
       // Get public access token for real-time updates
-      const publicAccessToken = await fetchPublicAccessToken(task.triggerRunId)
+      const publicAccessToken = await fetchPublicAccessToken(
+        task.triggerRunId,
+        ctx.captureException,
+      )
 
       // Extract payload and resolve file records
       const payload = (triggerRunDetails?.payload ?? null) as Record<

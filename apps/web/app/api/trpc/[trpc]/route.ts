@@ -1,10 +1,20 @@
 import { appRouter, type Context } from '@app/api'
 import { createDb, eq, schema } from '@app/db'
+import * as Sentry from '@sentry/nextjs'
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
 import { auth } from '@/lib/auth'
 
 const db = createDb()
+
+const CLIENT_ERROR_CODES = new Set([
+  'BAD_REQUEST',
+  'UNAUTHORIZED',
+  'FORBIDDEN',
+  'NOT_FOUND',
+  'CONFLICT',
+  'PARSE_ERROR',
+])
 
 const handler = (req: Request) =>
   fetchRequestHandler({
@@ -13,7 +23,9 @@ const handler = (req: Request) =>
     router: appRouter,
     createContext: async (): Promise<Context> => {
       const result = await auth.api.getSession({ headers: req.headers })
-      if (!result) return { db, session: null }
+      if (!result) {
+        return { db, session: null, captureException: Sentry.captureException }
+      }
 
       const [row] = await db
         .select({ superAdmin: schema.user.superAdmin })
@@ -31,7 +43,12 @@ const handler = (req: Request) =>
             superAdmin: row?.superAdmin ?? false,
           },
         },
+        captureException: Sentry.captureException,
       }
+    },
+    onError: ({ error, path }) => {
+      if (CLIENT_ERROR_CODES.has(error.code)) return
+      Sentry.captureException(error, { extra: { path } })
     },
   })
 

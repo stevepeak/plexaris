@@ -51,15 +51,13 @@ jobs:
       - name: Pull Vercel environment
         run: bunx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
       - name: Build Vercel production output
-        run: bunx vercel build --prod --token=$VERCEL_TOKEN
-      - name: Deploy to Vercel
-        run: bunx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
-      - name: Upload Sentry sourcemaps
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-        run: bunx @sentry/cli sourcemaps upload --release=${{ github.sha }} .vercel/output
+        run: bunx vercel build --prod --token=$VERCEL_TOKEN
+      - name: Deploy to Vercel
+        run: bunx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
 
   trigger:
     name: Deploy to Trigger.dev

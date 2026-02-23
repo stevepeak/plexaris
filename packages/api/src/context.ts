@@ -10,4 +10,5 @@ export interface Context {
       superAdmin: boolean
     }
   } | null
+  captureException: (error: unknown, extra?: Record<string, unknown>) => void
 }
