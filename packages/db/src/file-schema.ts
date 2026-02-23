@@ -12,5 +12,8 @@ export const file = pgTable('file', {
   size: integer('size').notNull(),
   url: text('url').notNull(),
   key: text('key').notNull(),
-  createdAt: timestamp('created_at').notNull(),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
 })

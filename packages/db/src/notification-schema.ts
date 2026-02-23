@@ -35,8 +35,14 @@ export const notificationPreference = pgTable(
     notificationType: notificationTypeEnum('notification_type').notNull(),
     email: boolean('email').notNull().default(true),
     sms: boolean('sms').notNull().default(true),
-    createdAt: timestamp('created_at').notNull(),
-    updatedAt: timestamp('updated_at').notNull(),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
   },
   (table) => [
     unique().on(table.userId, table.organizationId, table.notificationType),

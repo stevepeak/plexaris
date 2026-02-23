@@ -24,7 +24,10 @@ export const auditLog = pgTable(
     entityType: text('entity_type').notNull(),
     entityId: text('entity_id'),
     payload: jsonb('payload').$type<Record<string, unknown>>().default({}),
-    createdAt: timestamp('created_at').notNull(),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
   },
   (table) => [
     index('audit_log_org_created_idx').on(

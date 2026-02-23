@@ -17,7 +17,10 @@ export const favorite = pgTable(
       .references(() => organization.id),
     targetType: favoriteTargetTypeEnum('target_type').notNull(),
     targetId: uuid('target_id').notNull(),
-    createdAt: timestamp('created_at').notNull(),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
   },
   (table) => [
     unique().on(table.organizationId, table.targetType, table.targetId),

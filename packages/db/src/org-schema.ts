@@ -56,9 +56,15 @@ export const organization = pgTable('organization', {
   deliveryAddress: text('delivery_address'),
   deliveryAreas: text('delivery_areas'),
   data: jsonb('data'),
-  createdAt: timestamp('created_at').notNull(),
-  updatedAt: timestamp('updated_at').notNull(),
-  archivedAt: timestamp('archived_at'),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
+  updatedAt: timestamp('updated_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
+  archivedAt: timestamp('archived_at', { withTimezone: true, mode: 'date' }),
 })
 
 export const role = pgTable(
@@ -71,8 +77,14 @@ export const role = pgTable(
     name: text('name').notNull(),
     isSystem: boolean('is_system').notNull().default(false),
     permissions: text('permissions').array().notNull().default([]),
-    createdAt: timestamp('created_at').notNull(),
-    updatedAt: timestamp('updated_at').notNull(),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
   },
   (table) => [unique().on(table.organizationId, table.name)],
 )
@@ -90,8 +102,14 @@ export const membership = pgTable(
     roleId: uuid('role_id')
       .notNull()
       .references(() => role.id),
-    createdAt: timestamp('created_at').notNull(),
-    updatedAt: timestamp('updated_at').notNull(),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
   },
   (table) => [unique().on(table.userId, table.organizationId)],
 )
@@ -103,9 +121,15 @@ export const claimToken = pgTable('claim_token', {
     .references(() => organization.id),
   email: text('email').notNull(),
   token: text('token').notNull().unique(),
-  expiresAt: timestamp('expires_at').notNull(),
-  usedAt: timestamp('used_at'),
-  createdAt: timestamp('created_at').notNull(),
+  expiresAt: timestamp('expires_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
 })
 
 export const invitation = pgTable('invitation', {
@@ -121,8 +145,14 @@ export const invitation = pgTable('invitation', {
     .notNull()
     .references(() => role.id),
   token: text('token').notNull().unique(),
-  expiresAt: timestamp('expires_at').notNull(),
-  acceptedAt: timestamp('accepted_at'),
-  rejectedAt: timestamp('rejected_at'),
-  createdAt: timestamp('created_at').notNull(),
+  expiresAt: timestamp('expires_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
+  acceptedAt: timestamp('accepted_at', { withTimezone: true, mode: 'date' }),
+  rejectedAt: timestamp('rejected_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
 })

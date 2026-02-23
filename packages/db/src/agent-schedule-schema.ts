@@ -36,8 +36,14 @@ export const agentSchedule = pgTable(
     cron: text('cron').notNull(),
     urls: text('urls').array().notNull().default([]),
     triggerScheduleId: text('trigger_schedule_id'),
-    createdAt: timestamp('created_at').notNull(),
-    updatedAt: timestamp('updated_at').notNull(),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
   },
   (table) => [unique().on(table.organizationId, table.scheduleType)],
 )

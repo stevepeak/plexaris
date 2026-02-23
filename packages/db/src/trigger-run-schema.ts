@@ -14,6 +14,12 @@ export const triggerRun = pgTable('trigger_run', {
   parentRunId: text('parent_run_id'),
   status: text('status').notNull().default('running'),
   createdBy: text('created_by').references(() => user.id),
-  createdAt: timestamp('created_at').notNull(),
-  updatedAt: timestamp('updated_at').notNull(),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
+  updatedAt: timestamp('updated_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
 })

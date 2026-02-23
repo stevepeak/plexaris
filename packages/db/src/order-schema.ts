@@ -1,4 +1,5 @@
 import {
+  index,
   integer,
   jsonb,
   numeric,
@@ -43,43 +44,66 @@ export const orderEventTypeEnum = pgEnum('order_event_type', [
 // Tables
 // ---------------------------------------------------------------------------
 
-export const order = pgTable('order', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organization.id),
-  createdBy: text('created_by')
-    .notNull()
-    .references(() => user.id),
-  status: orderStatusEnum('status').notNull().default('draft'),
-  notes: text('notes'),
-  createdAt: timestamp('created_at').notNull(),
-  updatedAt: timestamp('updated_at').notNull(),
-  submittedAt: timestamp('submitted_at'),
-  archivedAt: timestamp('archived_at'),
-})
+export const order = pgTable(
+  'order',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organization.id),
+    createdBy: text('created_by')
+      .notNull()
+      .references(() => user.id),
+    status: orderStatusEnum('status').notNull().default('draft'),
+    notes: text('notes'),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
+    submittedAt: timestamp('submitted_at', {
+      withTimezone: true,
+      mode: 'date',
+    }),
+    archivedAt: timestamp('archived_at', { withTimezone: true, mode: 'date' }),
+  },
+  (table) => [index('order_organization_id_idx').on(table.organizationId)],
+)
 
-export const orderItem = pgTable('order_item', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  orderId: uuid('order_id')
-    .notNull()
-    .references(() => order.id),
-  productId: uuid('product_id')
-    .notNull()
-    .references(() => product.id),
-  supplierId: uuid('supplier_id')
-    .notNull()
-    .references(() => organization.id),
-  quantity: integer('quantity').notNull().default(1),
-  unitPrice: numeric('unit_price', { precision: 10, scale: 2 }).notNull(),
-  unit: text('unit'),
-  addedBy: text('added_by')
-    .notNull()
-    .references(() => user.id),
-  createdAt: timestamp('created_at').notNull(),
-  updatedAt: timestamp('updated_at').notNull(),
-  removedAt: timestamp('removed_at'),
-})
+export const orderItem = pgTable(
+  'order_item',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orderId: uuid('order_id')
+      .notNull()
+      .references(() => order.id),
+    productId: uuid('product_id')
+      .notNull()
+      .references(() => product.id),
+    supplierId: uuid('supplier_id')
+      .notNull()
+      .references(() => organization.id),
+    quantity: integer('quantity').notNull().default(1),
+    unitPrice: numeric('unit_price', { precision: 10, scale: 2 }).notNull(),
+    unit: text('unit'),
+    addedBy: text('added_by')
+      .notNull()
+      .references(() => user.id),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
+    removedAt: timestamp('removed_at', { withTimezone: true, mode: 'date' }),
+  },
+  (table) => [index('order_item_order_id_idx').on(table.orderId)],
+)
 
 export const orderEvent = pgTable('order_event', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -91,5 +115,8 @@ export const orderEvent = pgTable('order_event', {
     .notNull()
     .references(() => user.id),
   payload: jsonb('payload').$type<Record<string, unknown>>().default({}),
-  createdAt: timestamp('created_at').notNull(),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
 })

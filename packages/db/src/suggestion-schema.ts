@@ -1,4 +1,5 @@
 import {
+  index,
   jsonb,
   pgEnum,
   pgTable,
@@ -27,25 +28,35 @@ export const suggestionStatusEnum = pgEnum('suggestion_status', [
   'dismissed',
 ])
 
-export const suggestion = pgTable('suggestion', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organization.id),
-  targetType: suggestionTargetTypeEnum('target_type').notNull(),
-  targetId: uuid('target_id'),
-  action: suggestionActionEnum('action').notNull(),
-  field: text('field'),
-  label: text('label').notNull(),
-  currentValue: jsonb('current_value'),
-  proposedValue: jsonb('proposed_value').notNull(),
-  confidence: text('confidence'),
-  source: text('source'),
-  reasoning: text('reasoning'),
-  triggerRunId: text('trigger_run_id').notNull(),
-  status: suggestionStatusEnum('status').notNull().default('pending'),
-  reviewedBy: text('reviewed_by'),
-  reviewedAt: timestamp('reviewed_at'),
-  createdAt: timestamp('created_at').notNull(),
-  updatedAt: timestamp('updated_at').notNull(),
-})
+export const suggestion = pgTable(
+  'suggestion',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organization.id),
+    targetType: suggestionTargetTypeEnum('target_type').notNull(),
+    targetId: uuid('target_id'),
+    action: suggestionActionEnum('action').notNull(),
+    field: text('field'),
+    label: text('label').notNull(),
+    currentValue: jsonb('current_value'),
+    proposedValue: jsonb('proposed_value').notNull(),
+    confidence: text('confidence'),
+    source: text('source'),
+    reasoning: text('reasoning'),
+    triggerRunId: text('trigger_run_id').notNull(),
+    status: suggestionStatusEnum('status').notNull().default('pending'),
+    reviewedBy: text('reviewed_by'),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true, mode: 'date' }),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'date',
+    }).notNull(),
+  },
+  (table) => [index('suggestion_org_id_idx').on(table.organizationId)],
+)
