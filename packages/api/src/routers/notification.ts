@@ -1,41 +1,22 @@
-import { type DB, eq, schema, sql } from '@app/db'
-import { TRPCError } from '@trpc/server'
+import { eq, schema, sql } from '@app/db'
 import { and } from 'drizzle-orm'
 import { z } from 'zod'
 
+import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
 
 const NOTIFICATION_TYPES = schema.notificationTypeEnum.enumValues
-
-async function verifyMembership(
-  db: DB,
-  userId: string,
-  organizationId: string,
-) {
-  const [row] = await db
-    .select({ id: schema.membership.id })
-    .from(schema.membership)
-    .where(
-      and(
-        eq(schema.membership.userId, userId),
-        eq(schema.membership.organizationId, organizationId),
-      ),
-    )
-    .limit(1)
-
-  if (!row) {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'Not a member of this organization',
-    })
-  }
-}
 
 export const notificationRouter = router({
   getPreferences: protectedProcedure
     .input(z.object({ organizationId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      await verifyMembership(ctx.db, ctx.session.user.id, input.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       const rows = await ctx.db
         .select()
@@ -72,7 +53,12 @@ export const notificationRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await verifyMembership(ctx.db, ctx.session.user.id, input.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       const now = new Date()
       const columnMap = {

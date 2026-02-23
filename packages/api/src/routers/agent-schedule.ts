@@ -1,34 +1,11 @@
-import { and, type DB, eq, schema } from '@app/db'
+import { eq, schema } from '@app/db'
 import { type alignSourcesTask, type scheduledAgentTask } from '@app/trigger'
 import { schedules, tasks } from '@trigger.dev/sdk'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
-
-async function verifyMembership(
-  db: DB,
-  userId: string,
-  organizationId: string,
-) {
-  const [row] = await db
-    .select({ id: schema.membership.id })
-    .from(schema.membership)
-    .where(
-      and(
-        eq(schema.membership.userId, userId),
-        eq(schema.membership.organizationId, organizationId),
-      ),
-    )
-    .limit(1)
-
-  if (!row) {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'Not a member of this organization',
-    })
-  }
-}
 
 const scheduleTypeLabels: Record<string, string> = {
   org_information_update: 'Organization Information Update',
@@ -96,7 +73,12 @@ export const agentScheduleRouter = router({
   list: protectedProcedure
     .input(z.object({ organizationId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      await verifyMembership(ctx.db, ctx.session.user.id, input.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       const rows = await ctx.db
         .select()
@@ -133,7 +115,12 @@ export const agentScheduleRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await verifyMembership(ctx.db, ctx.session.user.id, input.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       // Validate per-type requirements
       const typesRequiringUrls = [
@@ -204,10 +191,11 @@ export const agentScheduleRouter = router({
         })
       }
 
-      await verifyMembership(
+      await verifyAccess(
         ctx.db,
         ctx.session.user.id,
         schedule.organizationId,
+        ctx.session.user.superAdmin,
       )
 
       // Delete the Trigger.dev schedule
@@ -242,10 +230,11 @@ export const agentScheduleRouter = router({
         })
       }
 
-      await verifyMembership(
+      await verifyAccess(
         ctx.db,
         ctx.session.user.id,
         schedule.organizationId,
+        ctx.session.user.superAdmin,
       )
 
       const { organizationId, scheduleType, urls } = schedule

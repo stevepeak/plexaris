@@ -1,32 +1,9 @@
-import { and, count, type DB, desc, eq, schema, sql } from '@app/db'
+import { and, count, desc, eq, schema, sql } from '@app/db'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
-
-async function verifyMembership(
-  db: DB,
-  userId: string,
-  organizationId: string,
-) {
-  const [row] = await db
-    .select({ id: schema.membership.id })
-    .from(schema.membership)
-    .where(
-      and(
-        eq(schema.membership.userId, userId),
-        eq(schema.membership.organizationId, organizationId),
-      ),
-    )
-    .limit(1)
-
-  if (!row) {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'Not a member of this organization',
-    })
-  }
-}
 
 export const suggestionRouter = router({
   list: protectedProcedure
@@ -41,7 +18,12 @@ export const suggestionRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      await verifyMembership(ctx.db, ctx.session.user.id, input.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       const conditions = [
         eq(schema.suggestion.organizationId, input.organizationId),
@@ -112,7 +94,12 @@ export const suggestionRouter = router({
         })
       }
 
-      await verifyMembership(ctx.db, ctx.session.user.id, s.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        s.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       return {
         id: s.id,
@@ -152,7 +139,12 @@ export const suggestionRouter = router({
         })
       }
 
-      await verifyMembership(ctx.db, ctx.session.user.id, s.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        s.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       if (s.status !== 'pending') {
         throw new TRPCError({
@@ -460,7 +452,12 @@ export const suggestionRouter = router({
         })
       }
 
-      await verifyMembership(ctx.db, ctx.session.user.id, s.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        s.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       const now = new Date()
       await ctx.db
@@ -504,7 +501,12 @@ export const suggestionRouter = router({
         })
       }
 
-      await verifyMembership(ctx.db, ctx.session.user.id, s.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        s.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       if (s.status === 'pending') {
         return { success: true }
@@ -527,7 +529,12 @@ export const suggestionRouter = router({
   pendingCount: protectedProcedure
     .input(z.object({ organizationId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      await verifyMembership(ctx.db, ctx.session.user.id, input.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       const [result] = await ctx.db
         .select({ count: count() })

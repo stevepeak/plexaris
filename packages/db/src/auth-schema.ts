@@ -8,6 +8,7 @@ export const user = pgTable('user', {
   image: text('image'),
   phone: text('phone'),
   contactPreference: text('contact_preference'),
+  superAdmin: boolean('super_admin').notNull().default(false),
   createdAt: timestamp('created_at').notNull(),
   updatedAt: timestamp('updated_at').notNull(),
   archivedAt: timestamp('archived_at'),

@@ -46,6 +46,7 @@ export default function DashboardPage() {
     activeOrg,
     switchOrg,
     isPending: orgsPending,
+    superAdmin,
   } = useActiveOrg()
 
   const handleSignOut = async () => {
@@ -67,6 +68,7 @@ export default function DashboardPage() {
               activeOrg={activeOrg}
               onSwitch={switchOrg}
               isPending={orgsPending}
+              superAdmin={superAdmin}
             />
           </div>
           {isPending ? (

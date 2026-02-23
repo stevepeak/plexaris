@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, ChevronsUpDown, Plus } from 'lucide-react'
+import { Check, ChevronsUpDown, Plus, Shield } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -50,6 +50,7 @@ function storeOrgId(id: string) {
 export function useActiveOrg(refreshKey?: number) {
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [activeOrg, setActiveOrg] = useState<Organization | null>(null)
+  const [superAdmin, setSuperAdmin] = useState(false)
   const [isPending, setIsPending] = useState(true)
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export function useActiveOrg(refreshKey?: number) {
         if (!res.ok) return
         const data = await res.json()
         const orgs: Organization[] = data.organizations ?? []
+        setSuperAdmin(data.superAdmin === true)
         setOrganizations(orgs)
 
         const storedId = getStoredOrgId()
@@ -78,7 +80,7 @@ export function useActiveOrg(refreshKey?: number) {
     storeOrgId(org.id)
   }, [])
 
-  return { organizations, activeOrg, switchOrg, isPending }
+  return { organizations, activeOrg, switchOrg, isPending, superAdmin }
 }
 
 export function OrgSwitcher({
@@ -86,11 +88,13 @@ export function OrgSwitcher({
   activeOrg,
   onSwitch,
   isPending,
+  superAdmin,
 }: {
   organizations: Organization[]
   activeOrg: Organization | null
   onSwitch: (org: Organization) => void
   isPending: boolean
+  superAdmin?: boolean
 }) {
   const router = useRouter()
 
@@ -157,6 +161,15 @@ export function OrgSwitcher({
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
+        {superAdmin && (
+          <DropdownMenuItem
+            onClick={() => router.push('/admin')}
+            className="text-amber-600 dark:text-amber-400"
+          >
+            <Shield className="h-4 w-4" />
+            Admin panel
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={() => router.push('/onboarding')}>
           <Plus className="h-4 w-4" />
           Create organization

@@ -14,6 +14,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const [userRow] = await db
+    .select({ superAdmin: schema.user.superAdmin })
+    .from(schema.user)
+    .where(eq(schema.user.id, session.user.id))
+    .limit(1)
+
+  const superAdmin = userRow?.superAdmin ?? false
+
   const rows = await db
     .select({
       id: schema.organization.id,
@@ -70,5 +78,5 @@ export async function GET(request: Request) {
     soleAdmin: r.isAdmin && (adminCounts.get(r.id) ?? 0) <= 1,
   }))
 
-  return NextResponse.json({ organizations })
+  return NextResponse.json({ organizations, superAdmin })
 }

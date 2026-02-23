@@ -3,33 +3,15 @@ import { TRPCError } from '@trpc/server'
 import { and } from 'drizzle-orm'
 import { z } from 'zod'
 
+import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
 
-async function verifyMembership(
+async function verifyOrderAccess(
   db: DB,
   userId: string,
-  organizationId: string,
+  orderId: string,
+  superAdmin: boolean,
 ) {
-  const [row] = await db
-    .select({ id: schema.membership.id })
-    .from(schema.membership)
-    .where(
-      and(
-        eq(schema.membership.userId, userId),
-        eq(schema.membership.organizationId, organizationId),
-      ),
-    )
-    .limit(1)
-
-  if (!row) {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'Not a member of this organization',
-    })
-  }
-}
-
-async function verifyOrderAccess(db: DB, userId: string, orderId: string) {
   const [row] = await db
     .select({
       id: schema.order.id,
@@ -43,7 +25,7 @@ async function verifyOrderAccess(db: DB, userId: string, orderId: string) {
     throw new TRPCError({ code: 'NOT_FOUND', message: 'Order not found' })
   }
 
-  await verifyMembership(db, userId, row.organizationId)
+  await verifyAccess(db, userId, row.organizationId, superAdmin)
   return row
 }
 
@@ -67,7 +49,12 @@ export const orderRouter = router({
   list: protectedProcedure
     .input(z.object({ organizationId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      await verifyMembership(ctx.db, ctx.session.user.id, input.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       const itemCount = ctx.db
         .select({
@@ -112,7 +99,12 @@ export const orderRouter = router({
   create: protectedProcedure
     .input(z.object({ organizationId: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      await verifyMembership(ctx.db, ctx.session.user.id, input.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       const now = new Date()
       const [row] = await ctx.db
@@ -138,6 +130,7 @@ export const orderRouter = router({
         ctx.db,
         ctx.session.user.id,
         input.orderId,
+        ctx.session.user.superAdmin,
       )
 
       const [orderData] = await ctx.db
@@ -197,7 +190,12 @@ export const orderRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await verifyOrderAccess(ctx.db, ctx.session.user.id, input.orderId)
+      await verifyOrderAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.orderId,
+        ctx.session.user.superAdmin,
+      )
 
       const now = new Date()
       const [item] = await ctx.db
@@ -233,7 +231,12 @@ export const orderRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await verifyOrderAccess(ctx.db, ctx.session.user.id, input.orderId)
+      await verifyOrderAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.orderId,
+        ctx.session.user.superAdmin,
+      )
 
       await ctx.db
         .update(schema.orderItem)
@@ -263,7 +266,12 @@ export const orderRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await verifyOrderAccess(ctx.db, ctx.session.user.id, input.orderId)
+      await verifyOrderAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.orderId,
+        ctx.session.user.superAdmin,
+      )
 
       const [prev] = await ctx.db
         .select({ quantity: schema.orderItem.quantity })
@@ -303,7 +311,12 @@ export const orderRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await verifyOrderAccess(ctx.db, ctx.session.user.id, input.orderId)
+      await verifyOrderAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.orderId,
+        ctx.session.user.superAdmin,
+      )
 
       const [prev] = await ctx.db
         .select({ supplierId: schema.orderItem.supplierId })
@@ -337,7 +350,12 @@ export const orderRouter = router({
   archive: protectedProcedure
     .input(z.object({ orderId: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      await verifyOrderAccess(ctx.db, ctx.session.user.id, input.orderId)
+      await verifyOrderAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.orderId,
+        ctx.session.user.superAdmin,
+      )
 
       const now = new Date()
       await ctx.db
@@ -362,6 +380,7 @@ export const orderRouter = router({
         ctx.db,
         ctx.session.user.id,
         input.orderId,
+        ctx.session.user.superAdmin,
       )
 
       const sourceItems = await ctx.db
@@ -418,7 +437,12 @@ export const orderRouter = router({
   getEvents: protectedProcedure
     .input(z.object({ orderId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      await verifyOrderAccess(ctx.db, ctx.session.user.id, input.orderId)
+      await verifyOrderAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.orderId,
+        ctx.session.user.superAdmin,
+      )
 
       const events = await ctx.db
         .select({

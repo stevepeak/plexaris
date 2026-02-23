@@ -7,6 +7,7 @@ export interface Context {
       id: string
       name: string
       email: string
+      superAdmin: boolean
     }
   } | null
 }

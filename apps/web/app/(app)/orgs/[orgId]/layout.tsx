@@ -7,7 +7,11 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { OrgProvider } from '@/components/org-context'
 import { OrgSidebar } from '@/components/org-sidebar'
-import { OrgSwitcher, useActiveOrg } from '@/components/org-switcher'
+import {
+  type Organization,
+  OrgSwitcher,
+  useActiveOrg,
+} from '@/components/org-switcher'
 import { ThemeSubmenu } from '@/components/theme-toggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -43,30 +47,53 @@ export default function OrgLayout({ children }: { children: React.ReactNode }) {
     activeOrg,
     switchOrg,
     isPending: orgsPending,
+    superAdmin,
   } = useActiveOrg(refreshKey)
+
+  const [superAdminOrg, setSuperAdminOrg] = useState<Organization | null>(null)
 
   const refreshOrg = useCallback(() => {
     setRefreshKey((k) => k + 1)
+    setSuperAdminOrg(null)
   }, [])
 
   // Sync URL orgId with active org state
   useEffect(() => {
-    if (orgsPending || !organizations.length) return
+    if (orgsPending) return
     const urlOrg = organizations.find((o) => o.id === orgId)
-    if (urlOrg && activeOrg?.id !== orgId) {
-      switchOrg(urlOrg)
+    if (urlOrg) {
+      if (activeOrg?.id !== orgId) switchOrg(urlOrg)
+      setSuperAdminOrg(null)
+    } else if (superAdmin) {
+      // Super-admin viewing an org they're not a member of
+      void fetch(`/api/organizations/${orgId}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!data?.organization) return
+          const org = data.organization
+          setSuperAdminOrg({
+            id: org.id,
+            name: org.name,
+            type: org.type,
+            claimed: org.claimed,
+            logoUrl: org.logoUrl,
+            roleId: 'super-admin',
+            roleName: 'Super Admin',
+            isAdmin: true,
+            permissions: data.role?.permissions ?? [],
+          })
+        })
     }
-  }, [orgId, organizations, activeOrg?.id, switchOrg, orgsPending])
+  }, [orgId, organizations, activeOrg?.id, switchOrg, orgsPending, superAdmin])
 
   const handleSignOut = async () => {
     await authClient.signOut()
     router.push('/login')
   }
 
+  const effectiveOrg = superAdminOrg ?? activeOrg
   const orgNotFound =
-    !orgsPending &&
-    organizations.length > 0 &&
-    !organizations.find((o) => o.id === orgId)
+    !orgsPending && !effectiveOrg && !superAdmin && organizations.length > 0
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,9 +106,10 @@ export default function OrgLayout({ children }: { children: React.ReactNode }) {
             <Separator orientation="vertical" className="h-6" />
             <OrgSwitcher
               organizations={organizations}
-              activeOrg={activeOrg}
+              activeOrg={effectiveOrg}
               onSwitch={switchOrg}
               isPending={orgsPending}
+              superAdmin={superAdmin}
             />
           </div>
           {isPending ? (
@@ -134,13 +162,13 @@ export default function OrgLayout({ children }: { children: React.ReactNode }) {
           <p className="text-sm text-muted-foreground">
             Organization not found.
           </p>
-        ) : !activeOrg ? (
+        ) : !effectiveOrg ? (
           <div className="space-y-4">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-64 w-full" />
           </div>
         ) : (
-          <OrgProvider org={activeOrg} refreshOrg={refreshOrg}>
+          <OrgProvider org={effectiveOrg} refreshOrg={refreshOrg}>
             <div className="flex items-start gap-8">
               <OrgSidebar />
               <div className="min-w-0 flex-1">{children}</div>

@@ -1,34 +1,11 @@
-import { type DB, eq, inArray, schema } from '@app/db'
+import { eq, inArray, schema } from '@app/db'
 import { auth, runs } from '@trigger.dev/sdk'
 import { TRPCError } from '@trpc/server'
 import { and, count, desc } from 'drizzle-orm'
 import { z } from 'zod'
 
+import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
-
-async function verifyMembership(
-  db: DB,
-  userId: string,
-  organizationId: string,
-) {
-  const [row] = await db
-    .select({ id: schema.membership.id })
-    .from(schema.membership)
-    .where(
-      and(
-        eq(schema.membership.userId, userId),
-        eq(schema.membership.organizationId, organizationId),
-      ),
-    )
-    .limit(1)
-
-  if (!row) {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'Not a member of this organization',
-    })
-  }
-}
 
 async function fetchPublicAccessToken(
   triggerRunId: string,
@@ -56,7 +33,12 @@ export const triggerRunRouter = router({
   list: protectedProcedure
     .input(z.object({ organizationId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      await verifyMembership(ctx.db, ctx.session.user.id, input.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       const runs = await ctx.db
         .select()
@@ -106,7 +88,12 @@ export const triggerRunRouter = router({
         })
       }
 
-      await verifyMembership(ctx.db, ctx.session.user.id, run.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        run.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       const token = await fetchPublicAccessToken(input.triggerRunId)
       return { publicAccessToken: token }
@@ -140,7 +127,12 @@ export const triggerRunRouter = router({
       }
 
       // Verify membership
-      await verifyMembership(ctx.db, ctx.session.user.id, task.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        task.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       // Fetch run details from Trigger.dev
       let triggerRunDetails: Awaited<ReturnType<typeof runs.retrieve>> | null =
@@ -220,7 +212,12 @@ export const triggerRunRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      await verifyMembership(ctx.db, ctx.session.user.id, input.organizationId)
+      await verifyAccess(
+        ctx.db,
+        ctx.session.user.id,
+        input.organizationId,
+        ctx.session.user.superAdmin,
+      )
 
       const where = eq(schema.triggerRun.organizationId, input.organizationId)
 

@@ -3,6 +3,7 @@ import { type alignSourcesTask, type exampleAgentTask } from '@app/trigger'
 import { tasks } from '@trigger.dev/sdk'
 import { z } from 'zod'
 
+import { adminRouter } from './routers/admin'
 import { agentScheduleRouter } from './routers/agent-schedule'
 import { notificationRouter } from './routers/notification'
 import { orderRouter } from './routers/order'
@@ -209,6 +210,7 @@ export const appRouter = router({
   suggestion: suggestionRouter,
   order: orderRouter,
   notification: notificationRouter,
+  admin: adminRouter,
 })
 
 // Export type router type signature,
