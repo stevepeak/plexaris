@@ -33,3 +33,12 @@
 - Created `apps/web/components/order/checkout/checkout-form.stories.tsx` with 3 stories: Default, NoPermission, Submitting
 - CI passes (typecheck, lint, knip, build)
 - Screenshot: `screenshots/step5-checkout-form.png`
+
+## 2026-02-23 — Step 6: OrderTracking Component (Right Panel — Post-Submit)
+
+- Created `apps/web/components/order/checkout/order-tracking.tsx` — post-submit tracking panel with vertical status timeline (Submitted → Confirmed → Delivered), delivery notes display, delivery updates placeholder, and action buttons
+- Timeline: 3-step vertical stepper with colored dots, connecting lines (solid for completed, dashed for future), and pulse animation on current step. Cancelled state shows red alert card with XCircle icon
+- Actions: "Request Modification" button (disabled with tooltip "Coming soon") and "Duplicate as New Order" button (functional, accepts onDuplicate callback)
+- Created `apps/web/components/order/checkout/order-tracking.stories.tsx` with 4 stories: Submitted, Confirmed, Delivered, Cancelled
+- CI passes (typecheck, lint, knip, build)
+- Screenshot: `screenshots/step6-order-tracking.png`

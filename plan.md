@@ -339,7 +339,7 @@ If `hasPlaceOrderPermission` is **false**:
 
 ## Step 6: `OrderTracking` Component (Right Panel — Post-Submit)
 
-> passes: false
+> passes: true
 
 **New file:** `apps/web/components/order/checkout/order-tracking.tsx`
 **Story:** `apps/web/components/order/checkout/order-tracking.stories.tsx`
