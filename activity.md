@@ -24,3 +24,12 @@
 - Created `apps/web/components/order/checkout/checkout-invoice.stories.tsx` with 4 stories: Default, Paid, SingleItem, ManyItems
 - CI passes (typecheck, lint, knip, build)
 - Screenshot: `screenshots/step4-checkout-invoice.png`
+
+## 2026-02-23 — Step 5: CheckoutForm Component (Right Panel — Pre-Submit)
+
+- Created `apps/web/components/order/checkout/checkout-form.tsx` — checkout form with delivery notes textarea, "Expected Delivery" and "Payment Method" coming-soon placeholder cards, order summary (item count + subtotal), and permission-gated "Place Order" button
+- When `hasPlaceOrderPermission` is false: shows amber warning card ("Requires team approval") and disables Place Order button
+- When `isSubmitting` is true: shows spinner on Place Order button and disables Back to Cart
+- Created `apps/web/components/order/checkout/checkout-form.stories.tsx` with 3 stories: Default, NoPermission, Submitting
+- CI passes (typecheck, lint, knip, build)
+- Screenshot: `screenshots/step5-checkout-form.png`

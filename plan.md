@@ -265,7 +265,7 @@ The left panel occupies roughly 60% of the checkout layout width (`flex-[3]`).
 
 ## Step 5: `CheckoutForm` Component (Right Panel — Pre-Submit)
 
-> passes: false
+> passes: true
 
 **New file:** `apps/web/components/order/checkout/checkout-form.tsx`
 **Story:** `apps/web/components/order/checkout/checkout-form.stories.tsx`
