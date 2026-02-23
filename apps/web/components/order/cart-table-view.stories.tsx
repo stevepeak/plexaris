@@ -18,6 +18,7 @@ const SAMPLE_ITEMS: CartItemData[] = [
     assignee: 'Alice',
     addedBy: {
       name: 'Sarah Chen',
+      avatarUrl: 'https://i.pravatar.cc/32?u=sarah',
       addedAt: new Date('2025-01-15T10:30:00'),
     },
   },
@@ -49,6 +50,7 @@ const SAMPLE_ITEMS: CartItemData[] = [
     assignee: 'Alice',
     addedBy: {
       name: 'Sarah Chen',
+      avatarUrl: 'https://i.pravatar.cc/32?u=sarah',
       addedAt: new Date('2025-01-15T09:00:00'),
     },
   },
@@ -64,6 +66,7 @@ const SAMPLE_ITEMS: CartItemData[] = [
     assignee: 'Bob',
     addedBy: {
       name: 'Jordan Kim',
+      avatarUrl: 'https://i.pravatar.cc/32?u=jordan',
       addedAt: new Date('2025-01-14T16:45:00'),
     },
   },
@@ -125,6 +128,7 @@ export const SingleItem: Story = {
           assignee: 'Alice',
           addedBy: {
             name: 'Sarah Chen',
+            avatarUrl: 'https://i.pravatar.cc/32?u=sarah',
             addedAt: new Date('2025-01-15T10:30:00'),
           },
         },

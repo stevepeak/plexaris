@@ -9,7 +9,7 @@ const SAMPLE_ENTRIES: ActivityEntry[] = [
     itemName: '',
     detail: '',
     timestamp: new Date('2025-01-15T10:00:00'),
-    user: { name: 'Sarah Chen' },
+    user: { name: 'Sarah Chen', avatarUrl: 'https://i.pravatar.cc/32?u=sarah' },
   },
   {
     id: '2',
@@ -17,7 +17,7 @@ const SAMPLE_ENTRIES: ActivityEntry[] = [
     itemName: 'Organic Oat Milk',
     detail: '5x Organic Oat Milk',
     timestamp: new Date('2025-01-15T10:30:00'),
-    user: { name: 'Sarah Chen' },
+    user: { name: 'Sarah Chen', avatarUrl: 'https://i.pravatar.cc/32?u=sarah' },
   },
   {
     id: '3',

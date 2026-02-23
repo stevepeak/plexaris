@@ -61,3 +61,15 @@
 - Updated `apps/web/components/order/order-cart.stories.tsx` to pass `onCheckout` in the story wrapper
 - CI passes (typecheck, lint, knip, build)
 - Screenshot: `screenshots/step9-order-cart-checkout-button.png`
+
+## 2026-02-23 — Step 10: Wire Up OrderPage — Conditional Rendering
+
+- Added `checkoutMode` state to `apps/web/app/(app)/order/[orderId]/page.tsx` — toggles between 3-panel shopping layout and 2-panel checkout layout
+- Exposed `orderData` from `useOrderCart` hook (`apps/web/hooks/use-order-cart.ts`) so the page can read `order.status`, `submittedAt`, `createdAt`, and `notes`
+- Auto-enters checkout mode for non-draft orders via `useEffect` on `orderStatus`
+- Wired `useOrderSubmit` hook and `order.duplicate` mutation for Place Order and Duplicate as New Order actions
+- Header conditionally shows "Back to Cart" (draft) or "Back to Orders" (submitted+) instead of `PanelToggleBar` when in checkout mode
+- Passed `onCheckout` callback to `OrderCart` to enter checkout mode from the cart sidebar
+- Fixed animation state machine bug in `CheckoutLayout` where `useEffect` cleanup was canceling pending timeouts — changed from a single effect with all timeouts to individual per-phase effects
+- CI passes (typecheck, lint, knip, build)
+- Screenshot: `screenshots/step10-order-page-wiring.png`

@@ -61,17 +61,17 @@ export function CheckoutLayout({
     }
   }, [isSuccess, phase])
 
-  // Animation sequence: slide-out → stamp → slide-in → tracking
+  // Animation sequence: each phase triggers the next
   useEffect(() => {
-    if (phase !== 'slide-out') return
-    const t1 = setTimeout(() => setPhase('stamp'), 300)
-    const t2 = setTimeout(() => setPhase('slide-in'), 1100)
-    const t3 = setTimeout(() => setPhase('tracking'), 1600)
-    return () => {
-      clearTimeout(t1)
-      clearTimeout(t2)
-      clearTimeout(t3)
+    let timeout: ReturnType<typeof setTimeout>
+    if (phase === 'slide-out') {
+      timeout = setTimeout(() => setPhase('stamp'), 300)
+    } else if (phase === 'stamp') {
+      timeout = setTimeout(() => setPhase('slide-in'), 800)
+    } else if (phase === 'slide-in') {
+      timeout = setTimeout(() => setPhase('tracking'), 500)
     }
+    return () => clearTimeout(timeout)
   }, [phase])
 
   const handleSubmit = (deliveryNotes: string) => {

@@ -17,6 +17,7 @@ function mapServerItems(
     unitPrice: string | null
     unit: string | null
     addedByName: string
+    addedByImage: string | null
     productName: string
     productCategory: string | null
     supplierName: string
@@ -34,6 +35,7 @@ function mapServerItems(
     category: item.productCategory ?? undefined,
     addedBy: {
       name: item.addedByName,
+      avatarUrl: item.addedByImage ?? undefined,
       addedAt: new Date(item.createdAt),
     },
   }))
@@ -47,6 +49,16 @@ export interface OrderItemMapping {
 export function useOrderCart(orderId: string): CartStateReturn & {
   isLoading: boolean
   isError: boolean
+  orderData:
+    | {
+        order: {
+          status: string
+          submittedAt: string | null
+          createdAt: string
+          notes: string | null
+        }
+      }
+    | undefined
   addItemToOrder: (item: {
     id: string
     name: string
@@ -237,5 +249,15 @@ export function useOrderCart(orderId: string): CartStateReturn & {
     addItemToOrder,
     isLoading: orderQuery.isLoading,
     isError: orderQuery.isError,
+    orderData: orderQuery.data
+      ? {
+          order: {
+            status: orderQuery.data.order.status,
+            submittedAt: orderQuery.data.order.submittedAt,
+            createdAt: orderQuery.data.order.createdAt,
+            notes: orderQuery.data.order.notes,
+          },
+        }
+      : undefined,
   }
 }

@@ -168,6 +168,7 @@ export const orderRouter = router({
           productCategory: schema.product.category,
           supplierName: schema.organization.name,
           addedByName: schema.user.name,
+          addedByImage: schema.user.image,
         })
         .from(schema.orderItem)
         .innerJoin(
@@ -606,6 +607,7 @@ export const orderRouter = router({
           type: schema.orderEvent.type,
           actorId: schema.orderEvent.actorId,
           actorName: schema.user.name,
+          actorImage: schema.user.image,
           payload: schema.orderEvent.payload,
           createdAt: schema.orderEvent.createdAt,
         })

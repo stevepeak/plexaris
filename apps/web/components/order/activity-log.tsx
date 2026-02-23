@@ -1,5 +1,6 @@
 'use client'
 
+import { RelativeTime } from '@/components/relative-time'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
@@ -41,15 +42,6 @@ function getInitials(name: string) {
     .join('')
     .toUpperCase()
     .slice(0, 2)
-}
-
-function formatTimestamp(date: Date) {
-  return date.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
 }
 
 const ACTION_LABELS: Record<ActivityEntry['action'], string> = {
@@ -96,9 +88,10 @@ export function ActivityLog({ entries }: ActivityLogProps) {
             {entries.map((entry) => (
               <TableRow key={entry.id}>
                 <TableCell>
-                  <span className="text-xs text-muted-foreground">
-                    {formatTimestamp(entry.timestamp)}
-                  </span>
+                  <RelativeTime
+                    date={entry.timestamp}
+                    className="text-xs text-muted-foreground"
+                  />
                 </TableCell>
                 <TableCell>
                   {entry.user ? (

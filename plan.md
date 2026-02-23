@@ -596,7 +596,7 @@ interface OrderCartProps {
 
 ## Step 10: Wire Up `OrderPage` — Conditional Rendering
 
-> passes: false
+> passes: true
 
 **File:** `apps/web/app/(app)/order/[orderId]/page.tsx`
 

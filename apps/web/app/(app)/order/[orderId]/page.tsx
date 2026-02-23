@@ -1,8 +1,10 @@
 'use client'
 
+import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { notFound, useParams } from 'next/navigation'
+import { notFound, useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import { type ActivityEntry } from '@/components/order/activity-log'
 import { type BrowseSection } from '@/components/order/browse-home'
@@ -11,6 +13,7 @@ import {
   type BrowseSupplier,
   CategorySidebar,
 } from '@/components/order/category-sidebar'
+import { CheckoutLayout } from '@/components/order/checkout/checkout-layout'
 import { ContentViewer } from '@/components/order/content-viewer'
 import { KeyboardShortcutsDialog } from '@/components/order/keyboard-shortcuts-dialog'
 import { OrderCart, type OrderCartHandle } from '@/components/order/order-cart'
@@ -33,6 +36,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useOrderCart } from '@/hooks/use-order-cart'
+import { useOrderSubmit } from '@/hooks/use-order-submit'
 import { authClient } from '@/lib/auth-client'
 import { trpc } from '@/lib/trpc'
 
@@ -48,6 +52,7 @@ function getInitials(name: string | undefined): string {
 
 export default function OrderPage() {
   const { orderId } = useParams<{ orderId: string }>()
+  const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
   const {
     organizations,
@@ -55,6 +60,7 @@ export default function OrderPage() {
     switchOrg,
     isPending: orgsPending,
   } = useActiveOrg()
+  const [checkoutMode, setCheckoutMode] = useState(false)
   const [activeSection, setActiveSection] = useState<BrowseSection | null>(null)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -77,6 +83,25 @@ export default function OrderPage() {
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   const cart = useOrderCart(orderId)
+  const orderSubmit = useOrderSubmit(orderId)
+
+  const duplicateMutation = trpc.order.duplicate.useMutation({
+    onSuccess: (data) => {
+      router.push(`/order/${data.orderId}`)
+    },
+    onError: () => {
+      toast.error('Failed to duplicate order')
+    },
+  })
+
+  // Auto-enter checkout mode for non-draft orders
+  const orderStatus = cart.orderData?.order?.status
+  useEffect(() => {
+    if (cart.isLoading) return
+    if (orderStatus && orderStatus !== 'draft') {
+      setCheckoutMode(true)
+    }
+  }, [cart.isLoading, orderStatus])
 
   const eventsQuery = trpc.order.getEvents.useQuery({ orderId })
 
@@ -122,7 +147,10 @@ export default function OrderPage() {
         itemName: e.itemName ?? '',
         detail,
         timestamp: new Date(e.createdAt),
-        user: { name: e.actorName },
+        user: {
+          name: e.actorName,
+          avatarUrl: e.actorImage ?? undefined,
+        },
       }
     })
   }, [eventsQuery.data])
@@ -406,7 +434,27 @@ export default function OrderPage() {
             <Skeleton className="h-8 w-8 rounded-full" />
           ) : (
             <div className="flex items-center gap-3">
-              <PanelToggleBar panels={panels} onToggle={handleTogglePanel} />
+              {checkoutMode ? (
+                cart.orderData?.order.status === 'draft' ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCheckoutMode(false)}
+                  >
+                    <ArrowLeft className="mr-1 h-4 w-4" />
+                    Back to Cart
+                  </Button>
+                ) : (
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/dashboard">
+                      <ArrowLeft className="mr-1 h-4 w-4" />
+                      Back to Orders
+                    </Link>
+                  </Button>
+                )
+              ) : (
+                <PanelToggleBar panels={panels} onToggle={handleTogglePanel} />
+              )}
               <KeyboardShortcutsDialog
                 open={shortcutsOpen}
                 onOpenChange={setShortcutsOpen}
@@ -429,73 +477,104 @@ export default function OrderPage() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-        {panels.search && (
-          <div className="w-full shrink-0 border-b md:w-[280px] md:border-b-0 md:border-r">
-            <CategorySidebar
-              searchInputRef={searchInputRef}
-              activeSection={activeSection}
-              onSectionChange={handleSectionChange}
-              activeCategory={activeCategory}
-              onNavigate={handleNavigate}
-              search={search}
-              onSearchChange={setSearch}
-              products={products}
-              suppliers={suppliers}
-              isLoading={isLoading}
-              onProductClick={handleProductClick}
-              onSupplierClick={handleSupplierClick}
-            />
-          </div>
-        )}
+      {checkoutMode ? (
+        <CheckoutLayout
+          orderId={orderId}
+          items={cart.allItems}
+          subtotal={cart.subtotal}
+          itemCount={cart.itemCount}
+          orderStatus={cart.orderData?.order.status ?? 'draft'}
+          submittedAt={
+            cart.orderData?.order.submittedAt
+              ? new Date(cart.orderData.order.submittedAt)
+              : null
+          }
+          createdAt={
+            cart.orderData?.order.createdAt
+              ? new Date(cart.orderData.order.createdAt)
+              : undefined
+          }
+          notes={cart.orderData?.order.notes ?? null}
+          hasPlaceOrderPermission={
+            activeOrg?.permissions?.includes('place_order') ?? false
+          }
+          onSubmit={orderSubmit.submit}
+          isSubmitting={orderSubmit.isSubmitting}
+          isSuccess={orderSubmit.isSuccess}
+          onBack={() => setCheckoutMode(false)}
+          onDuplicate={() => duplicateMutation.mutate({ orderId })}
+          isDuplicating={duplicateMutation.isPending}
+        />
+      ) : (
+        <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+          {panels.search && (
+            <div className="w-full shrink-0 border-b md:w-[280px] md:border-b-0 md:border-r">
+              <CategorySidebar
+                searchInputRef={searchInputRef}
+                activeSection={activeSection}
+                onSectionChange={handleSectionChange}
+                activeCategory={activeCategory}
+                onNavigate={handleNavigate}
+                search={search}
+                onSearchChange={setSearch}
+                products={products}
+                suppliers={suppliers}
+                isLoading={isLoading}
+                onProductClick={handleProductClick}
+                onSupplierClick={handleSupplierClick}
+              />
+            </div>
+          )}
 
-        <div className="min-w-0 flex-1">
-          <ContentViewer
-            tabs={tabs}
-            activeTabKey={activeTabKey}
-            onSelectTab={setActiveTabKey}
-            onCloseTab={closeTab}
-            onOpenSupplier={handleOpenSupplier}
-            onOpenProduct={handleOpenProduct}
-            organizationId={activeOrg?.id ?? null}
-            onFavoriteToggled={handleFavoriteToggled}
-            onAddToCart={handleAddToCart}
-            cart={cart}
-            activityEntries={activityEntries}
-            onFocusSearch={() => {
-              if (!panels.search) {
-                setPanels((prev) => ({ ...prev, search: true }))
-              }
-              setTimeout(() => searchInputRef.current?.focus(), 0)
-            }}
-            onOpenChat={() => {
-              setPanels((prev) => ({ ...prev, chat: true }))
-            }}
-            orderId={orderId}
-            onOrderArchived={handleOrderArchived}
-          />
-        </div>
-
-        {panels.order && (
-          <div className="w-full shrink-0 border-t md:w-[320px] md:border-t-0 md:border-l">
-            <OrderCart
-              ref={cartRef}
-              cart={cart}
-              onOpenProduct={handleOpenProduct}
+          <div className="min-w-0 flex-1">
+            <ContentViewer
+              tabs={tabs}
+              activeTabKey={activeTabKey}
+              onSelectTab={setActiveTabKey}
+              onCloseTab={closeTab}
               onOpenSupplier={handleOpenSupplier}
-              onOpenCartTab={handleOpenCartTab}
-              onOpenActivityTab={handleOpenActivityTab}
-              onOpenAdvancedTab={handleOpenAdvancedTab}
+              onOpenProduct={handleOpenProduct}
+              organizationId={activeOrg?.id ?? null}
+              onFavoriteToggled={handleFavoriteToggled}
+              onAddToCart={handleAddToCart}
+              cart={cart}
+              activityEntries={activityEntries}
+              onFocusSearch={() => {
+                if (!panels.search) {
+                  setPanels((prev) => ({ ...prev, search: true }))
+                }
+                setTimeout(() => searchInputRef.current?.focus(), 0)
+              }}
+              onOpenChat={() => {
+                setPanels((prev) => ({ ...prev, chat: true }))
+              }}
+              orderId={orderId}
+              onOrderArchived={handleOrderArchived}
             />
           </div>
-        )}
 
-        {panels.chat && (
-          <div className="w-full shrink-0 border-t md:w-[320px] md:border-t-0 md:border-l">
-            <OrderChat />
-          </div>
-        )}
-      </div>
+          {panels.order && (
+            <div className="w-full shrink-0 border-t md:w-[320px] md:border-t-0 md:border-l">
+              <OrderCart
+                ref={cartRef}
+                cart={cart}
+                onCheckout={() => setCheckoutMode(true)}
+                onOpenProduct={handleOpenProduct}
+                onOpenSupplier={handleOpenSupplier}
+                onOpenCartTab={handleOpenCartTab}
+                onOpenActivityTab={handleOpenActivityTab}
+                onOpenAdvancedTab={handleOpenAdvancedTab}
+              />
+            </div>
+          )}
+
+          {panels.chat && (
+            <div className="w-full shrink-0 border-t md:w-[320px] md:border-t-0 md:border-l">
+              <OrderChat />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

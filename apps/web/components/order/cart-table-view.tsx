@@ -3,6 +3,7 @@
 import { ArrowDown, ArrowUp, Check, ListFilter, Search } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { RelativeTime } from '@/components/relative-time'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -64,13 +65,6 @@ function getInitials(name: string) {
     .join('')
     .toUpperCase()
     .slice(0, 2)
-}
-
-function formatDate(date: Date) {
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  })
 }
 
 export function CartTableView({
@@ -723,9 +717,14 @@ export function CartTableView({
                   )}
                 </TableCell>
                 <TableCell>
-                  <span className="text-xs text-muted-foreground">
-                    {item.addedBy ? formatDate(item.addedBy.addedAt) : '-'}
-                  </span>
+                  {item.addedBy ? (
+                    <RelativeTime
+                      date={item.addedBy.addedAt}
+                      className="text-xs text-muted-foreground"
+                    />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
                 </TableCell>
                 <TableCell
                   className={cellClassName(row, 1)}
