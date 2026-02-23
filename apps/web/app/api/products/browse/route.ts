@@ -22,6 +22,7 @@ export async function GET(request: Request) {
 
   const conditions = [
     isNull(schema.product.archivedAt),
+    isNull(schema.organization.archivedAt),
     eq(schema.organization.type, 'supplier'),
   ]
 

@@ -1,4 +1,4 @@
-import { createDb, eq, schema } from '@app/db'
+import { and, createDb, eq, isNull, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
@@ -38,6 +38,21 @@ export async function POST(
       updatedAt: new Date(),
     })
     .where(eq(schema.organization.id, id))
+
+  // Cascade: archive all non-archived products belonging to this org
+  await db
+    .update(schema.product)
+    .set({
+      status: 'archived',
+      archivedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(schema.product.organizationId, id),
+        isNull(schema.product.archivedAt),
+      ),
+    )
 
   return NextResponse.json({ success: true })
 }
