@@ -41,7 +41,13 @@ type NavItem =
       permission?: string
     }
   | { kind: 'separator' }
-  | { kind: 'label'; label: string; icon: LucideIcon; iconColor: string }
+  | {
+      kind: 'label'
+      label: string
+      icon: LucideIcon
+      iconColor: string
+      orgType?: 'supplier' | 'horeca'
+    }
 
 const NAV_CONFIG: NavItem[] = [
   {
@@ -88,6 +94,7 @@ const NAV_CONFIG: NavItem[] = [
     label: 'Align',
     icon: FlaskConical,
     iconColor: 'text-orange-500',
+    orgType: 'supplier',
   },
   { kind: 'separator' },
   {
@@ -104,7 +111,13 @@ const NAV_CONFIG: NavItem[] = [
     icon: Cable,
     iconColor: 'text-teal-500',
   },
-  { kind: 'label', label: 'Agents', icon: Zap, iconColor: 'text-violet-500' },
+  {
+    kind: 'label',
+    label: 'Agents',
+    icon: Zap,
+    iconColor: 'text-violet-500',
+    orgType: 'supplier',
+  },
   {
     kind: 'link',
     path: '/agents/schedules',
@@ -112,6 +125,7 @@ const NAV_CONFIG: NavItem[] = [
     icon: Calendar,
     iconColor: 'text-violet-400',
     parent: true,
+    orgType: 'supplier',
   },
   {
     kind: 'link',
@@ -120,6 +134,7 @@ const NAV_CONFIG: NavItem[] = [
     icon: Activity,
     iconColor: 'text-violet-400',
     parent: true,
+    orgType: 'supplier',
   },
   { kind: 'separator' },
   {
@@ -180,7 +195,10 @@ export function OrgSidebar() {
   )
 
   const visibleItems = NAV_CONFIG.filter((item) => {
-    if (item.kind !== 'link') return true
+    if (item.kind === 'separator') return true
+    if (item.kind === 'label') {
+      return !item.orgType || item.orgType === orgType
+    }
     if (item.orgType && item.orgType !== orgType) return false
     if (
       item.permission &&
