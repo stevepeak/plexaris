@@ -3,7 +3,7 @@ import { TRPCError } from '@trpc/server'
 import { and } from 'drizzle-orm'
 import { z } from 'zod'
 
-import { logAudit } from '../lib/audit'
+import { trackEvent } from '../lib/audit'
 import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
 
@@ -127,7 +127,7 @@ export const orderRouter = router({
       }
 
       await logEvent(ctx.db, row.id, 'order_created', ctx.session.user.id)
-      await logAudit(ctx.db, {
+      await trackEvent(ctx.db, {
         organizationId: input.organizationId,
         actorId: ctx.session.user.id,
         action: 'order.created',
@@ -249,7 +249,7 @@ export const orderRouter = router({
         quantity: input.quantity,
       })
 
-      await logAudit(ctx.db, {
+      await trackEvent(ctx.db, {
         organizationId: orderRow.organizationId,
         actorId: ctx.session.user.id,
         action: 'order.item_added',
@@ -294,7 +294,7 @@ export const orderRouter = router({
         { orderItemId: input.orderItemId },
       )
 
-      await logAudit(ctx.db, {
+      await trackEvent(ctx.db, {
         organizationId: orderRow.organizationId,
         actorId: ctx.session.user.id,
         action: 'order.item_removed',
@@ -417,7 +417,7 @@ export const orderRouter = router({
         ctx.session.user.id,
       )
 
-      await logAudit(ctx.db, {
+      await trackEvent(ctx.db, {
         organizationId: orderRow.organizationId,
         actorId: ctx.session.user.id,
         action: 'order.archived',
@@ -493,7 +493,7 @@ export const orderRouter = router({
         { newOrderId: newOrder.id },
       )
 
-      await logAudit(ctx.db, {
+      await trackEvent(ctx.db, {
         organizationId: sourceOrder.organizationId,
         actorId: ctx.session.user.id,
         action: 'order.duplicated',

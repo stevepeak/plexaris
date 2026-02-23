@@ -2,7 +2,7 @@ import { and, count, desc, eq, schema, sql } from '@app/db'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
-import { logAudit } from '../lib/audit'
+import { trackEvent } from '../lib/audit'
 import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
 
@@ -481,7 +481,7 @@ export const suggestionRouter = router({
         })
         .where(eq(schema.suggestion.id, input.id))
 
-      await logAudit(ctx.db, {
+      await trackEvent(ctx.db, {
         organizationId: s.organizationId,
         actorId: ctx.session.user.id,
         action: 'suggestion.accepted',
@@ -539,7 +539,7 @@ export const suggestionRouter = router({
           .where(eq(schema.product.id, s.targetId))
       }
 
-      await logAudit(ctx.db, {
+      await trackEvent(ctx.db, {
         organizationId: s.organizationId,
         actorId: ctx.session.user.id,
         action: 'suggestion.dismissed',
@@ -588,7 +588,7 @@ export const suggestionRouter = router({
         })
         .where(eq(schema.suggestion.id, input.id))
 
-      await logAudit(ctx.db, {
+      await trackEvent(ctx.db, {
         organizationId: s.organizationId,
         actorId: ctx.session.user.id,
         action: 'suggestion.reverted',

@@ -1,4 +1,4 @@
-import { logAudit } from '@app/api'
+import { trackEvent } from '@app/api'
 import { and, createDb, eq, schema } from '@app/db'
 import { ADMIN_ROLE_NAME, ALL_PERMISSIONS } from '@app/db/schema'
 import { NextResponse } from 'next/server'
@@ -104,7 +104,7 @@ export async function PATCH(
     .where(eq(schema.role.id, roleId))
     .returning()
 
-  await logAudit(db, {
+  await trackEvent(db, {
     organizationId: id,
     actorId: session.user.id,
     action: 'role.updated',
@@ -185,7 +185,7 @@ export async function DELETE(
 
   await db.delete(schema.role).where(eq(schema.role.id, roleId))
 
-  await logAudit(db, {
+  await trackEvent(db, {
     organizationId: id,
     actorId: session.user.id,
     action: 'role.deleted',

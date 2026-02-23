@@ -1,4 +1,4 @@
-import { logAudit } from '@app/api'
+import { trackEvent } from '@app/api'
 import { getConfig } from '@app/config'
 import { and, createDb, eq, isNull, schema } from '@app/db'
 import { UserInviteEmail } from '@app/email'
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
     console.error('Failed to send invitation email:', e)
   }
 
-  await logAudit(db, {
+  await trackEvent(db, {
     organizationId,
     actorId: session.user.id,
     action: 'member.invited',

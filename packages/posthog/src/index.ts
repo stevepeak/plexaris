@@ -17,10 +17,10 @@ function getPostHogClient(): PostHogClient | null {
   }
 
   const env = getConfig()
-  if (env.POSTHOG_API_KEY) {
+  if (env.NEXT_PUBLIC_POSTHOG_KEY) {
     try {
-      posthogClient = new PostHogClient(env.POSTHOG_API_KEY, {
-        host: env.POSTHOG_HOST,
+      posthogClient = new PostHogClient(env.NEXT_PUBLIC_POSTHOG_KEY, {
+        host: env.NEXT_PUBLIC_POSTHOG_HOST,
       })
       return posthogClient
     } catch (error) {
@@ -32,14 +32,6 @@ function getPostHogClient(): PostHogClient | null {
   }
   return null
 }
-
-/**
- * PostHog event names enum
- * Following the naming convention: event names should be lowercase with underscores
- */
-export const POSTHOG_EVENTS = {
-  // ... add your event names here
-} as const
 
 /**
  * Capture a PostHog event on the server side

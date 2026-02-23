@@ -1,4 +1,4 @@
-import { logAudit } from '@app/api'
+import { trackEvent } from '@app/api'
 import { createDb, eq, schema } from '@app/db'
 import { ADMIN_ROLE_NAME, ALL_PERMISSIONS } from '@app/db/schema'
 import { NextResponse } from 'next/server'
@@ -109,7 +109,7 @@ export async function POST(
     })
     .returning()
 
-  await logAudit(db, {
+  await trackEvent(db, {
     organizationId: id,
     actorId: session.user.id,
     action: 'role.created',

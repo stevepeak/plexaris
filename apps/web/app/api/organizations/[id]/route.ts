@@ -1,4 +1,4 @@
-import { logAudit } from '@app/api'
+import { trackEvent } from '@app/api'
 import { and, createDb, eq, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
@@ -140,7 +140,7 @@ export async function PATCH(
     })
     .where(eq(schema.organization.id, id))
 
-  await logAudit(db, {
+  await trackEvent(db, {
     organizationId: id,
     actorId: session.user.id,
     action: 'organization.updated',

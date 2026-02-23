@@ -1,4 +1,5 @@
 import { type DB, schema } from '@app/db'
+import { capturePostHogEvent } from '@app/posthog'
 
 type AuditAction =
   | 'order.created'
@@ -28,7 +29,7 @@ type AuditEntityType =
   | 'membership'
   | 'invitation'
 
-export function logAudit(
+export function trackEvent(
   db: DB,
   params: {
     organizationId: string
@@ -39,6 +40,24 @@ export function logAudit(
     payload?: Record<string, unknown>
   },
 ) {
+  // eslint-disable-next-line no-console
+  console.log('[event]', params.action, {
+    organizationId: params.organizationId,
+    entityType: params.entityType,
+    entityId: params.entityId ?? null,
+  })
+
+  capturePostHogEvent(
+    params.action,
+    {
+      organizationId: params.organizationId,
+      entityType: params.entityType,
+      entityId: params.entityId ?? null,
+      ...params.payload,
+    },
+    params.actorId,
+  )
+
   return db.insert(schema.auditLog).values({
     organizationId: params.organizationId,
     actorId: params.actorId,

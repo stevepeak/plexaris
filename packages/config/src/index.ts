@@ -40,8 +40,8 @@ const envSchema = z.object({
   CLOUDINARY_URL: z.string().startsWith('cloudinary://'),
 
   // PostHog
-  POSTHOG_API_KEY: z.string().nullable(),
-  POSTHOG_HOST: z.string().url().default('https://us.i.posthog.com'),
+  NEXT_PUBLIC_POSTHOG_KEY: z.string().nullable(),
+  NEXT_PUBLIC_POSTHOG_HOST: z.string().url(),
 })
 
 export type ParsedEnv = z.infer<typeof envSchema>
@@ -68,7 +68,6 @@ export function getConfig(
   // Normalize public env vars to secret env vars
   const normalizedEnv = {
     ...env,
-    POSTHOG_API_KEY: env.POSTHOG_API_KEY ?? env.NEXT_PUBLIC_POSTHOG_API_KEY,
     SENTRY_DSN: env.SENTRY_DSN ?? env.NEXT_PUBLIC_SENTRY_DSN,
   }
 

@@ -14,7 +14,7 @@ import { triggerRunRouter } from './routers/trigger-run'
 import { protectedProcedure, publicProcedure, router } from './trpc'
 
 export type { Context } from './context'
-export { logAudit } from './lib/audit'
+export { trackEvent } from './lib/audit'
 
 const helloRouter = router({
   world: publicProcedure

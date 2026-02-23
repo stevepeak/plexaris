@@ -4,7 +4,7 @@ import { schedules, tasks } from '@trigger.dev/sdk'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
-import { logAudit } from '../lib/audit'
+import { trackEvent } from '../lib/audit'
 import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
 
@@ -173,7 +173,7 @@ export const agentScheduleRouter = router({
         updatedAt: now,
       })
 
-      await logAudit(ctx.db, {
+      await trackEvent(ctx.db, {
         organizationId: input.organizationId,
         actorId: ctx.session.user.id,
         action: 'agent_schedule.created',
@@ -224,7 +224,7 @@ export const agentScheduleRouter = router({
         .delete(schema.agentSchedule)
         .where(eq(schema.agentSchedule.id, input.id))
 
-      await logAudit(ctx.db, {
+      await trackEvent(ctx.db, {
         organizationId: schedule.organizationId,
         actorId: ctx.session.user.id,
         action: 'agent_schedule.deleted',
@@ -286,7 +286,7 @@ export const agentScheduleRouter = router({
         updatedAt: now,
       })
 
-      await logAudit(ctx.db, {
+      await trackEvent(ctx.db, {
         organizationId,
         actorId: ctx.session.user.id,
         action: 'agent_schedule.run_now',
