@@ -175,6 +175,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@app/db": "workspace:*",
+        "@app/posthog": "workspace:*",
         "@app/trigger": "workspace:*",
         "@trigger.dev/sdk": "catalog:",
         "@trpc/server": "catalog:",
