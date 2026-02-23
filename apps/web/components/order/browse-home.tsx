@@ -16,6 +16,7 @@ const SECTIONS = [
     icon: Star,
     borderColor: 'border-amber-400',
     iconColor: 'text-amber-500',
+    bgColor: 'bg-amber-50 hover:bg-amber-100',
   },
   {
     key: 'products' as const,
@@ -24,6 +25,7 @@ const SECTIONS = [
     icon: Package,
     borderColor: 'border-blue-400',
     iconColor: 'text-blue-500',
+    bgColor: 'bg-blue-50 hover:bg-blue-100',
   },
   {
     key: 'suppliers' as const,
@@ -32,6 +34,7 @@ const SECTIONS = [
     icon: Store,
     borderColor: 'border-green-400',
     iconColor: 'text-green-500',
+    bgColor: 'bg-green-50 hover:bg-green-100',
   },
   {
     key: 'recipes' as const,
@@ -40,6 +43,7 @@ const SECTIONS = [
     icon: ChefHat,
     borderColor: 'border-purple-400',
     iconColor: 'text-purple-500',
+    bgColor: 'bg-purple-50 hover:bg-purple-100',
   },
 ] satisfies {
   key: BrowseSection
@@ -48,6 +52,7 @@ const SECTIONS = [
   icon: React.ComponentType<{ className?: string }>
   borderColor: string
   iconColor: string
+  bgColor: string
 }[]
 
 export function BrowseHome({ onSelect }: BrowseHomeProps) {
@@ -56,7 +61,7 @@ export function BrowseHome({ onSelect }: BrowseHomeProps) {
       {SECTIONS.map((section) => (
         <Card
           key={section.key}
-          className={`cursor-pointer p-3 transition-colors hover:bg-accent ${section.borderColor}`}
+          className={`cursor-pointer p-3 ${section.bgColor} transition-colors ${section.borderColor}`}
           onClick={() => onSelect(section.key)}
         >
           <section.icon className={`h-5 w-5 ${section.iconColor}`} />
