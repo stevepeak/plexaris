@@ -32,15 +32,21 @@ export const scrapeProductTask = task({
 
     // 1. Insert trigger_run row
     const now = new Date()
-    await db.insert(schema.triggerRun).values({
-      organizationId,
-      triggerRunId,
-      taskType: 'scrape-product',
-      label: `Processing product: ${productHint}`,
-      status: 'running',
-      createdAt: now,
-      updatedAt: now,
-    })
+    await db
+      .insert(schema.triggerRun)
+      .values({
+        organizationId,
+        triggerRunId,
+        taskType: 'scrape-product',
+        label: `Processing product: ${productHint}`,
+        status: 'running',
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: schema.triggerRun.triggerRunId,
+        set: { status: 'running', updatedAt: now },
+      })
 
     void streams.append('progress', `Starting product scrape: ${productHint}`)
 

@@ -49,14 +49,20 @@ export const scheduledAgentTask = schedules.task({
       { organizationId, urls, fileIds },
     )
 
-    await db.insert(schema.triggerRun).values({
-      organizationId,
-      triggerRunId: handle.id,
-      taskType: 'align-sources',
-      label: `Scheduled: ${scheduleType.replace(/_/g, ' ')}`,
-      status: 'running',
-      createdAt: now,
-      updatedAt: now,
-    })
+    await db
+      .insert(schema.triggerRun)
+      .values({
+        organizationId,
+        triggerRunId: handle.id,
+        taskType: 'align-sources',
+        label: `Scheduled: ${scheduleType.replace(/_/g, ' ')}`,
+        status: 'running',
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: schema.triggerRun.triggerRunId,
+        set: { status: 'running', updatedAt: now },
+      })
   },
 })

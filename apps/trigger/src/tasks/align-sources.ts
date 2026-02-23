@@ -47,17 +47,23 @@ export const alignSourcesTask = task({
       }
     }
 
-    // Insert orchestrator trigger_run row
+    // Upsert orchestrator trigger_run row (handles retries gracefully)
     const now = new Date()
-    await db.insert(schema.triggerRun).values({
-      organizationId,
-      triggerRunId: parentRunId,
-      taskType: 'align-sources',
-      label: `Processing ${urls.length + fileIds.length} sources`,
-      status: 'running',
-      createdAt: now,
-      updatedAt: now,
-    })
+    await db
+      .insert(schema.triggerRun)
+      .values({
+        organizationId,
+        triggerRunId: parentRunId,
+        taskType: 'align-sources',
+        label: `Processing ${urls.length + fileIds.length} sources`,
+        status: 'running',
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: schema.triggerRun.triggerRunId,
+        set: { status: 'running', updatedAt: now },
+      })
 
     void streams.append('progress', 'Dispatching agents for each source...')
 

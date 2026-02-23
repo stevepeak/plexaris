@@ -39,16 +39,11 @@ export const scrapeOrganizationTask = task({
       throw new Error(`Organization not found: ${organizationId}`)
     }
 
-    // 2. Ensure trigger_run row exists (may already be inserted by the tRPC mutation)
+    // 2. Upsert trigger_run row (handles retries + pre-inserted rows)
     const now = new Date()
-    const [existing] = await db
-      .select({ id: schema.triggerRun.id })
-      .from(schema.triggerRun)
-      .where(eq(schema.triggerRun.triggerRunId, triggerRunId))
-      .limit(1)
-
-    if (!existing) {
-      await db.insert(schema.triggerRun).values({
+    await db
+      .insert(schema.triggerRun)
+      .values({
         organizationId,
         triggerRunId,
         taskType: 'scrape-organization',
@@ -58,7 +53,10 @@ export const scrapeOrganizationTask = task({
         createdAt: now,
         updatedAt: now,
       })
-    }
+      .onConflictDoUpdate({
+        target: schema.triggerRun.triggerRunId,
+        set: { status: 'running', updatedAt: now },
+      })
 
     void streams.append('progress', 'Starting organization scrape...')
 
