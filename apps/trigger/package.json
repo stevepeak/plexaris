@@ -31,8 +31,8 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf node_modules dist",
-    "deploy": "bunx trigger.dev deploy --skip-update-check",
-    "dev": "bunx trigger.dev dev --env-file ../../.env --skip-update-check",
+    "deploy": "trigger deploy --skip-update-check",
+    "dev": "trigger dev --env-file ../../.env --skip-update-check",
     "fix": "eslint --fix --quiet --ignore-pattern='.trigger' . && prettier --ignore-path='../../.prettierignore' --log-level=silent --write .",
     "lint": "eslint --ignore-pattern='.trigger' . && prettier --ignore-path='../../.prettierignore' --check .",
     "typecheck": "tsc --noEmit"
