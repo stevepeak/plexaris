@@ -1,6 +1,7 @@
 import { eq, schema } from '@app/db'
 import { type alignSourcesTask, type exampleAgentTask } from '@app/trigger'
 import { tasks } from '@trigger.dev/sdk'
+import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
 import { adminRouter } from './routers/admin'
@@ -60,7 +61,10 @@ const triggerRouter = router({
         .limit(1)
 
       if (!org) {
-        throw new Error('Organization not found')
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Organization not found',
+        })
       }
 
       const orgData = org.data as { urls?: string[] } | null
@@ -118,7 +122,10 @@ const triggerRouter = router({
         .limit(1)
 
       if (!org) {
-        throw new Error('Organization not found')
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Organization not found',
+        })
       }
 
       const orgData = org.data as { urls?: string[] } | null
@@ -167,7 +174,10 @@ const triggerRouter = router({
         .limit(1)
 
       if (!org) {
-        throw new Error('Organization not found')
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Organization not found',
+        })
       }
 
       const orgData = org.data as { urls?: string[] } | null
