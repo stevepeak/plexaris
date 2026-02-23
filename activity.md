@@ -42,3 +42,14 @@
 - Created `apps/web/components/order/checkout/order-tracking.stories.tsx` with 4 stories: Submitted, Confirmed, Delivered, Cancelled
 - CI passes (typecheck, lint, knip, build)
 - Screenshot: `screenshots/step6-order-tracking.png`
+
+## 2026-02-23 — Steps 7 & 8: CheckoutLayout Orchestrator + useOrderSubmit Hook
+
+- Created `apps/web/hooks/use-order-submit.ts` — thin wrapper around `trpc.order.submit.useMutation` that invalidates order queries on success and shows toast on error
+- Created `apps/web/components/order/checkout/checkout-layout.tsx` — orchestrator component with a 6-phase state machine (`form` → `submitting` → `slide-out` → `stamp` → `slide-in` → `tracking`) that coordinates the checkout animation sequence
+- Left panel: `CheckoutInvoice` with `isPaid` driven by phase (stamp/slide-in/tracking)
+- Right panel: conditionally renders `CheckoutForm` (draft) or `OrderTracking` (submitted+), with CSS transitions for slide-out (300ms ease-in) and slide-in (500ms ease-out)
+- Non-draft orders initialize directly to `tracking` phase with PAID stamp visible
+- Created `apps/web/components/order/checkout/checkout-layout.stories.tsx` with 4 stories: DraftWithPermission, DraftNoPermission, Submitted, Delivered
+- CI passes (typecheck, lint, knip, build)
+- Screenshot: `screenshots/step7-checkout-layout.png`

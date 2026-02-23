@@ -401,7 +401,7 @@ All built with Tailwind — divs with `rounded-full` dots, `border-l-2` connecti
 
 ## Step 7: `CheckoutLayout` Orchestrator Component
 
-> passes: false
+> passes: true
 
 **New file:** `apps/web/components/order/checkout/checkout-layout.tsx`
 **Story:** `apps/web/components/order/checkout/checkout-layout.stories.tsx`
@@ -523,7 +523,7 @@ Calls the hook from Step 8 to handle the mutation. On `isSuccess`, triggers the 
 
 ## Step 8: `useOrderSubmit` Hook
 
-> passes: false
+> passes: true
 
 **New file:** `apps/web/hooks/use-order-submit.ts`
 
