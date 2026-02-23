@@ -15,3 +15,12 @@
 - Registered `--animate-stamp` CSS variable for Tailwind usage (`animate-stamp`)
 - CI passes (typecheck, lint, knip, build)
 - Screenshot: `screenshots/step3-stamp-animation-keyframe.png`
+
+## 2026-02-23 — Step 4: CheckoutInvoice Component (Left Panel)
+
+- Created `apps/web/components/order/checkout/checkout-invoice.tsx` — invoice display with header (INVOICE title, short order ID, date), line items table (item name, qty, unit price, line total), subtotal footer, and PAID stamp overlay with `animate-stamp` animation
+- Background: subtle gradient with grid pattern overlay for a paper feel
+- PAID stamp: absolutely positioned, red border/text, -12deg rotation, animated via the `stamp` keyframe from Step 3, shown when `isPaid` is true
+- Created `apps/web/components/order/checkout/checkout-invoice.stories.tsx` with 4 stories: Default, Paid, SingleItem, ManyItems
+- CI passes (typecheck, lint, knip, build)
+- Screenshot: `screenshots/step4-checkout-invoice.png`

@@ -202,7 +202,7 @@ Starts large and invisible, slams down to slightly small (0.9), bounces back (1.
 
 ## Step 4: `CheckoutInvoice` Component (Left Panel)
 
-> passes: false
+> passes: true
 
 **New file:** `apps/web/components/order/checkout/checkout-invoice.tsx`
 **Story:** `apps/web/components/order/checkout/checkout-invoice.stories.tsx`
