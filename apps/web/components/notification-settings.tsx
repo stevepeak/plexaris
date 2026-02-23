@@ -13,6 +13,7 @@ import {
   UserPlus,
   XCircle,
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
@@ -316,6 +317,7 @@ export function NotificationSettings({
       return { previous }
     },
     onError: (_err, _variables, context) => {
+      toast.error('Failed to update notification preference')
       if (context?.previous) {
         utils.notification.getPreferences.setData(
           { organizationId },

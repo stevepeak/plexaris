@@ -3,6 +3,7 @@ import { type Metadata } from 'next'
 import Script from 'next/script'
 import { type ReactNode } from 'react'
 
+import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 import './globals.css'
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </PostHogProvider>
           </TRPCProvider>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   )

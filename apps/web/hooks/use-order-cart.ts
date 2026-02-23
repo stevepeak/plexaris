@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { toast } from 'sonner'
 
 import { type CartItemData } from '@/components/order/cart-item'
 import { trpc } from '@/lib/trpc'
@@ -65,12 +66,15 @@ export function useOrderCart(orderId: string): CartStateReturn & {
   const addItemMutation = trpc.order.addItem.useMutation()
   const removeItemMutation = trpc.order.removeItem.useMutation({
     onSuccess: invalidateEvents,
+    onError: () => toast.error('Failed to remove item'),
   })
   const updateQuantityMutation = trpc.order.updateQuantity.useMutation({
     onSuccess: invalidateEvents,
+    onError: () => toast.error('Failed to update quantity'),
   })
   const updateSupplierMutation = trpc.order.updateSupplier.useMutation({
     onSuccess: invalidateEvents,
+    onError: () => toast.error('Failed to update supplier'),
   })
 
   // Map server items to CartItemData once loaded
@@ -148,7 +152,7 @@ export function useOrderCart(orderId: string): CartStateReturn & {
             void invalidateEvents()
           },
           onError: () => {
-            // Rollback on failure
+            toast.error('Failed to add item')
             cart.removeItem(item.id)
           },
         },

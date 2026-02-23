@@ -156,12 +156,20 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
   }
 
   const acceptMutation = trpc.suggestion.accept.useMutation({
+    onSuccess: () => {
+      invalidate()
+      toast.success('Suggestion accepted')
+    },
     onError: (error) => {
       toast.error(error.message || 'Failed to accept suggestion')
     },
   })
 
   const dismissMutation = trpc.suggestion.dismiss.useMutation({
+    onSuccess: () => {
+      invalidate()
+      toast.success('Suggestion dismissed')
+    },
     onError: (error) => {
       toast.error(error.message || 'Failed to dismiss suggestion')
     },

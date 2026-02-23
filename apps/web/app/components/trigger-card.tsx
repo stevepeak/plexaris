@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 import { useTriggerRun } from '@/app/hooks/use-trigger-run'
 import { trpc } from '@/lib/trpc'
@@ -17,6 +18,9 @@ export function TriggerCard() {
       setRunId(data.runId)
       setPublicAccessToken(data.publicAccessToken)
       setStreamOutput([])
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to start agent')
     },
   })
 

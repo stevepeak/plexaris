@@ -2,6 +2,7 @@
 
 import { Archive, Copy } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 import {
   AlertDialog,
@@ -29,16 +30,24 @@ export function AdvancedTab({ orderId, onOrderArchived }: AdvancedTabProps) {
 
   const archiveMutation = trpc.order.archive.useMutation({
     onSuccess() {
+      toast.success('Order archived')
       void utils.order.list.invalidate()
       onOrderArchived?.()
       router.push('/dashboard')
+    },
+    onError(error) {
+      toast.error(error.message || 'Failed to archive order')
     },
   })
 
   const duplicateMutation = trpc.order.duplicate.useMutation({
     onSuccess(data) {
+      toast.success('Order duplicated')
       void utils.order.list.invalidate()
       router.push(`/order/${data.orderId}`)
+    },
+    onError(error) {
+      toast.error(error.message || 'Failed to duplicate order')
     },
   })
 

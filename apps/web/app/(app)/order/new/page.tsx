@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 
 import { useActiveOrg } from '@/components/org-switcher'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -22,6 +23,9 @@ export default function NewOrderPage() {
       {
         onSuccess: (data) => {
           router.replace(`/order/${data.orderId}`)
+        },
+        onError: (error) => {
+          toast.error(error.message || 'Failed to create order')
         },
       },
     )
