@@ -12,6 +12,7 @@ import {
   type LucideIcon,
   Package,
   Plug,
+  ScrollText,
   Settings,
   Shield,
   ShoppingCart,
@@ -120,6 +121,7 @@ const NAV_CONFIG: NavItem[] = [
     iconColor: 'text-violet-400',
     parent: true,
   },
+  { kind: 'separator' },
   {
     kind: 'link',
     path: '/roles',
@@ -135,6 +137,14 @@ const NAV_CONFIG: NavItem[] = [
     icon: Users,
     iconColor: 'text-cyan-500',
   },
+  {
+    kind: 'link',
+    path: '/audit',
+    label: 'Audit',
+    icon: ScrollText,
+    iconColor: 'text-slate-500',
+  },
+  { kind: 'separator' },
   {
     kind: 'link',
     path: '/notifications',

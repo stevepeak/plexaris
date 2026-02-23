@@ -1,3 +1,4 @@
+import { logAudit } from '@app/api'
 import { and, createDb, eq, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
@@ -92,20 +93,61 @@ export async function PATCH(
     )
   }
 
+  // Fetch current values before update for diff
+  const [before] = await db
+    .select({
+      name: schema.organization.name,
+      description: schema.organization.description,
+      phone: schema.organization.phone,
+      email: schema.organization.email,
+      address: schema.organization.address,
+      deliveryAddress: schema.organization.deliveryAddress,
+      logoUrl: schema.organization.logoUrl,
+      deliveryAreas: schema.organization.deliveryAreas,
+    })
+    .from(schema.organization)
+    .where(eq(schema.organization.id, id))
+    .limit(1)
+
+  const updates = {
+    name: name.trim() as string | null,
+    description: (description || null) as string | null,
+    phone: (phone || null) as string | null,
+    email: (email || null) as string | null,
+    address: (address || null) as string | null,
+    deliveryAddress: (deliveryAddress || null) as string | null,
+    logoUrl: (logoUrl || null) as string | null,
+    deliveryAreas: (deliveryAreas || null) as string | null,
+  }
+
+  // Build changes object: only fields that actually changed
+  const changes: Record<string, { from: string | null; to: string | null }> = {}
+  if (before) {
+    for (const key of Object.keys(updates) as (keyof typeof updates)[]) {
+      const oldVal = before[key] ?? null
+      const newVal = updates[key] ?? null
+      if (oldVal !== newVal) {
+        changes[key] = { from: oldVal, to: newVal }
+      }
+    }
+  }
+
   await db
     .update(schema.organization)
     .set({
-      name: name.trim(),
-      description: description || null,
-      phone: phone || null,
-      email: email || null,
-      address: address || null,
-      deliveryAddress: deliveryAddress || null,
-      logoUrl: logoUrl || null,
-      deliveryAreas: deliveryAreas || null,
+      ...updates,
       updatedAt: new Date(),
     })
     .where(eq(schema.organization.id, id))
+
+  await logAudit(db, {
+    organizationId: id,
+    actorId: session.user.id,
+    action: 'organization.updated',
+    entityType: 'organization',
+    entityId: id,
+    payload: { changes },
+  })
 
   const org = await db.query.organization.findFirst({
     where: eq(schema.organization.id, id),

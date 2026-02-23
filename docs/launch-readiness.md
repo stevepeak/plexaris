@@ -53,44 +53,6 @@ Zero rate limiting on any endpoint. Auth brute-force, data scraping, and abuse a
 
 ---
 
-### 3. Production Errors Are Invisible
-
-Sentry is installed and configured in `trigger.config.ts` but never initialized in the Next.js web app. Production errors vanish into `console.error()`.
-
-**Current state:**
-
-- `trigger.config.ts:1-2` — Sentry works for background jobs
-- `apps/web/app/error.tsx:15` — Only does `console.error(error)`
-- No `instrumentation.ts` exists in `apps/web/`
-- No `Sentry.captureException()` calls anywhere in the web app
-- `.github/workflows/ci.yml:57-62` — Source maps are uploaded to Sentry (for an app that never reports errors)
-
-**What needs to happen:**
-
-- Create `apps/web/instrumentation.ts` with `Sentry.init()` for server-side
-- Create `apps/web/app/sentry-provider.tsx` or use `@sentry/nextjs` client initialization
-- Update `apps/web/app/error.tsx` to call `Sentry.captureException(error)`
-- Verify Sentry DSN is configured in production environment variables
-
----
-
-### 4. No Security Headers
-
-`apps/web/next.config.js` is 12 lines with no security configuration. The middleware only handles auth.
-
-**Missing headers:**
-
-- `Content-Security-Policy` — Prevents XSS and data injection
-- `X-Frame-Options: DENY` — Prevents clickjacking
-- `X-Content-Type-Options: nosniff` — Prevents MIME-type sniffing
-- `Strict-Transport-Security` — Enforces HTTPS
-- `Referrer-Policy: strict-origin-when-cross-origin` — Limits referrer leakage
-
-**What needs to happen:**
-
-- Add a `headers()` function in `apps/web/next.config.js` that returns security headers for all routes
-- Or add security headers in `apps/web/middleware.ts` alongside the auth logic
-
 ---
 
 ### 5. No Database Transactions
@@ -194,23 +156,6 @@ No indexes exist on commonly queried foreign key columns. This will cause full t
 
 ---
 
-### 9. File Storage in Database
-
-Binary file content is stored as `bytea` in the `file` table (`packages/db/src/file-schema.ts:18-28`). This bloats the database, slows backups, and hurts query performance.
-
-**Current behavior:**
-
-- `apps/web/app/api/organizations/[id]/files/route.ts:47` — Stores raw `buffer` in database column
-- No MIME type whitelist on this endpoint (accepts any file type)
-- Size limit is 5MB per file but content goes directly into Postgres
-
-**What needs to happen:**
-
-- Store files in cloud storage (Cloudinary is already used for product images, or use S3/R2)
-- Store only metadata (name, type, size, URL) in the database
-- Add MIME type whitelist (PDF, images, common document types)
-- Migrate existing file data out of the database
-
 ---
 
 ### 10. Input Validation Gaps
@@ -231,6 +176,9 @@ Several REST API endpoints accept request bodies without Zod schema validation.
 - Define Zod schemas for every POST/PATCH request body
 - Parse request bodies through schemas before processing
 - Return 400 with clear validation error messages
+
+ALL endpoints must use ZOD. make sure this is a rule updated in the .claude/rules too.
+find all the endpionts and apply ZOD schema to them
 
 ---
 
@@ -274,29 +222,6 @@ Several REST API endpoints accept request bodies without Zod schema validation.
 
 ## P2 — Medium Priority (Post-Launch Improvements)
 
-### 13. Inconsistent User Feedback
-
-Only 2 components use toast notifications. Most CRUD operations give no visible success/error feedback.
-
-**Components WITH toast:**
-
-- `apps/web/components/org-page/agents-schedules-tab.tsx` — Delete, run, create
-- `apps/web/components/org-page/suggestions-tab.tsx` — Accept, dismiss
-
-**Missing toast feedback:**
-
-- Product create/update/delete/archive
-- Member invitation sent/failed
-- Settings changes saved
-- Organization archived
-- Order item add/remove/update
-- Profile updates
-
-**What needs to happen:**
-
-- Add `toast.success()` / `toast.error()` to all mutation `onSuccess` / `onError` callbacks
-- Pick one feedback pattern (toast vs inline message) and use it consistently
-
 ---
 
 ### 14. Background Job Error Visibility
@@ -316,19 +241,6 @@ Trigger.dev tasks store `status: 'failed'` but not the error message. Users cann
 
 ---
 
-### 15. Products Not Cascaded on Org Archive
-
-When a supplier organization is archived, their products remain active and visible in browse/search APIs.
-
-**File:** `apps/web/app/api/organizations/[id]/archive/route.ts`
-
-**What needs to happen:**
-
-- When archiving an org, also soft-delete all products belonging to that org
-- Add `archivedAt` filter to product browse endpoints if not already present
-
----
-
 ### 16. Missing Cascading Deletes
 
 All foreign keys use `ON DELETE no action`. Deleting records leaves orphaned data.
@@ -340,21 +252,6 @@ All foreign keys use `ON DELETE no action`. Deleting records leaves orphaned dat
 - Or implement application-level cleanup in delete/archive operations
 
 ---
-
-### 17. No Audit Trail
-
-Only `orderEvent` tracks changes. No audit logging exists for:
-
-- Product updates (versions exist but no diff tracking)
-- Organization changes (name, settings, contact info)
-- User and membership changes (role assignments, removals)
-- Role changes (permission modifications)
-
-**What needs to happen:**
-
-- Add an `audit_log` table with: `id`, `organizationId`, `actorId`, `action`, `entityType`, `entityId`, `payload` (JSONB with before/after), `createdAt`
-- Log writes to this table in critical mutation paths
-- Add a UI to view audit history (referenced in `docs/todo.md` as "auditing page of user actions")
 
 ---
 

@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 import { adminRouter } from './routers/admin'
 import { agentScheduleRouter } from './routers/agent-schedule'
+import { auditRouter } from './routers/audit'
 import { notificationRouter } from './routers/notification'
 import { orderRouter } from './routers/order'
 import { suggestionRouter } from './routers/suggestion'
@@ -12,6 +13,7 @@ import { triggerRunRouter } from './routers/trigger-run'
 import { protectedProcedure, publicProcedure, router } from './trpc'
 
 export type { Context } from './context'
+export { logAudit } from './lib/audit'
 
 const helloRouter = router({
   world: publicProcedure
@@ -210,6 +212,7 @@ export const appRouter = router({
   suggestion: suggestionRouter,
   order: orderRouter,
   notification: notificationRouter,
+  audit: auditRouter,
   admin: adminRouter,
 })
 

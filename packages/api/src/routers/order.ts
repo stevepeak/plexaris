@@ -3,6 +3,7 @@ import { TRPCError } from '@trpc/server'
 import { and } from 'drizzle-orm'
 import { z } from 'zod'
 
+import { logAudit } from '../lib/audit'
 import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
 
@@ -119,6 +120,13 @@ export const orderRouter = router({
         .returning({ id: schema.order.id })
 
       await logEvent(ctx.db, row!.id, 'order_created', ctx.session.user.id)
+      await logAudit(ctx.db, {
+        organizationId: input.organizationId,
+        actorId: ctx.session.user.id,
+        action: 'order.created',
+        entityType: 'order',
+        entityId: row!.id,
+      })
 
       return { orderId: row!.id }
     }),
@@ -190,7 +198,7 @@ export const orderRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await verifyOrderAccess(
+      const orderRow = await verifyOrderAccess(
         ctx.db,
         ctx.session.user.id,
         input.orderId,
@@ -220,6 +228,15 @@ export const orderRouter = router({
         quantity: input.quantity,
       })
 
+      await logAudit(ctx.db, {
+        organizationId: orderRow.organizationId,
+        actorId: ctx.session.user.id,
+        action: 'order.item_added',
+        entityType: 'order',
+        entityId: input.orderId,
+        payload: { orderItemId: item!.id, productId: input.productId },
+      })
+
       return { orderItemId: item!.id }
     }),
 
@@ -231,7 +248,7 @@ export const orderRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await verifyOrderAccess(
+      const orderRow = await verifyOrderAccess(
         ctx.db,
         ctx.session.user.id,
         input.orderId,
@@ -255,6 +272,15 @@ export const orderRouter = router({
         ctx.session.user.id,
         { orderItemId: input.orderItemId },
       )
+
+      await logAudit(ctx.db, {
+        organizationId: orderRow.organizationId,
+        actorId: ctx.session.user.id,
+        action: 'order.item_removed',
+        entityType: 'order',
+        entityId: input.orderId,
+        payload: { orderItemId: input.orderItemId },
+      })
     }),
 
   updateQuantity: protectedProcedure
@@ -350,7 +376,7 @@ export const orderRouter = router({
   archive: protectedProcedure
     .input(z.object({ orderId: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      await verifyOrderAccess(
+      const orderRow = await verifyOrderAccess(
         ctx.db,
         ctx.session.user.id,
         input.orderId,
@@ -369,6 +395,14 @@ export const orderRouter = router({
         'order_archived',
         ctx.session.user.id,
       )
+
+      await logAudit(ctx.db, {
+        organizationId: orderRow.organizationId,
+        actorId: ctx.session.user.id,
+        action: 'order.archived',
+        entityType: 'order',
+        entityId: input.orderId,
+      })
 
       return { success: true }
     }),
@@ -430,6 +464,15 @@ export const orderRouter = router({
         ctx.session.user.id,
         { newOrderId: newOrder!.id },
       )
+
+      await logAudit(ctx.db, {
+        organizationId: sourceOrder.organizationId,
+        actorId: ctx.session.user.id,
+        action: 'order.duplicated',
+        entityType: 'order',
+        entityId: newOrder!.id,
+        payload: { sourceOrderId: input.orderId },
+      })
 
       return { orderId: newOrder!.id }
     }),

@@ -4,6 +4,7 @@ import { schedules, tasks } from '@trigger.dev/sdk'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { logAudit } from '../lib/audit'
 import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
 
@@ -172,6 +173,18 @@ export const agentScheduleRouter = router({
         updatedAt: now,
       })
 
+      await logAudit(ctx.db, {
+        organizationId: input.organizationId,
+        actorId: ctx.session.user.id,
+        action: 'agent_schedule.created',
+        entityType: 'agent_schedule',
+        entityId: id,
+        payload: {
+          scheduleType: input.scheduleType,
+          frequency: input.frequency,
+        },
+      })
+
       return { id }
     }),
 
@@ -210,6 +223,15 @@ export const agentScheduleRouter = router({
       await ctx.db
         .delete(schema.agentSchedule)
         .where(eq(schema.agentSchedule.id, input.id))
+
+      await logAudit(ctx.db, {
+        organizationId: schedule.organizationId,
+        actorId: ctx.session.user.id,
+        action: 'agent_schedule.deleted',
+        entityType: 'agent_schedule',
+        entityId: input.id,
+        payload: { scheduleType: schedule.scheduleType },
+      })
 
       return { success: true }
     }),
@@ -262,6 +284,15 @@ export const agentScheduleRouter = router({
         createdBy: ctx.session.user.id,
         createdAt: now,
         updatedAt: now,
+      })
+
+      await logAudit(ctx.db, {
+        organizationId,
+        actorId: ctx.session.user.id,
+        action: 'agent_schedule.run_now',
+        entityType: 'agent_schedule',
+        entityId: input.id,
+        payload: { scheduleType, runId: handle.id },
       })
 
       return { runId: handle.id }

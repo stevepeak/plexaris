@@ -1,3 +1,4 @@
+import { logAudit } from '@app/api'
 import { getConfig } from '@app/config'
 import { and, createDb, eq, isNull, schema } from '@app/db'
 import { UserInviteEmail } from '@app/email'
@@ -133,6 +134,15 @@ export async function POST(request: Request) {
     // eslint-disable-next-line no-console
     console.error('Failed to send invitation email:', e)
   }
+
+  await logAudit(db, {
+    organizationId,
+    actorId: session.user.id,
+    action: 'member.invited',
+    entityType: 'invitation',
+    entityId: invitation!.id,
+    payload: { email, roleName: targetRole.name },
+  })
 
   return NextResponse.json({ invitation }, { status: 201 })
 }

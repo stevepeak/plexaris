@@ -28,5 +28,8 @@ export * from './suggestion-schema'
 // Agent schedule schema
 export * from './agent-schedule-schema'
 
+// Audit schema
+export * from './audit-schema'
+
 // Data schemas (Zod validation schemas for organization and product data)
 export * from './data-schemas'

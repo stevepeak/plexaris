@@ -1,3 +1,4 @@
+import { logAudit } from '@app/api'
 import { and, createDb, eq, schema } from '@app/db'
 import { ADMIN_ROLE_NAME, ALL_PERMISSIONS } from '@app/db/schema'
 import { NextResponse } from 'next/server'
@@ -82,6 +83,17 @@ export async function PATCH(
     }
   }
 
+  const changes: Record<string, { from: unknown; to: unknown }> = {}
+  if (name !== undefined && name.trim() !== existing.name) {
+    changes.name = { from: existing.name, to: name.trim() }
+  }
+  if (
+    permissions !== undefined &&
+    JSON.stringify(permissions) !== JSON.stringify(existing.permissions)
+  ) {
+    changes.permissions = { from: existing.permissions, to: permissions }
+  }
+
   const [updated] = await db
     .update(schema.role)
     .set({
@@ -91,6 +103,15 @@ export async function PATCH(
     })
     .where(eq(schema.role.id, roleId))
     .returning()
+
+  await logAudit(db, {
+    organizationId: id,
+    actorId: session.user.id,
+    action: 'role.updated',
+    entityType: 'role',
+    entityId: roleId,
+    payload: { changes },
+  })
 
   return NextResponse.json({ role: updated })
 }
@@ -163,6 +184,15 @@ export async function DELETE(
   }
 
   await db.delete(schema.role).where(eq(schema.role.id, roleId))
+
+  await logAudit(db, {
+    organizationId: id,
+    actorId: session.user.id,
+    action: 'role.deleted',
+    entityType: 'role',
+    entityId: roleId,
+    payload: { name: existing.name },
+  })
 
   return NextResponse.json({ success: true })
 }

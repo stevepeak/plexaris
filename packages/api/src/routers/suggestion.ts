@@ -2,6 +2,7 @@ import { and, count, desc, eq, schema, sql } from '@app/db'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { logAudit } from '../lib/audit'
 import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
 
@@ -433,6 +434,15 @@ export const suggestionRouter = router({
         })
         .where(eq(schema.suggestion.id, input.id))
 
+      await logAudit(ctx.db, {
+        organizationId: s.organizationId,
+        actorId: ctx.session.user.id,
+        action: 'suggestion.accepted',
+        entityType: 'suggestion',
+        entityId: s.id,
+        payload: { targetType: s.targetType, action: s.action },
+      })
+
       return { success: true }
     }),
 
@@ -482,6 +492,14 @@ export const suggestionRouter = router({
           .where(eq(schema.product.id, s.targetId))
       }
 
+      await logAudit(ctx.db, {
+        organizationId: s.organizationId,
+        actorId: ctx.session.user.id,
+        action: 'suggestion.dismissed',
+        entityType: 'suggestion',
+        entityId: s.id,
+      })
+
       return { success: true }
     }),
 
@@ -522,6 +540,14 @@ export const suggestionRouter = router({
           updatedAt: now,
         })
         .where(eq(schema.suggestion.id, input.id))
+
+      await logAudit(ctx.db, {
+        organizationId: s.organizationId,
+        actorId: ctx.session.user.id,
+        action: 'suggestion.reverted',
+        entityType: 'suggestion',
+        entityId: s.id,
+      })
 
       return { success: true }
     }),

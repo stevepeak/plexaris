@@ -1,3 +1,4 @@
+import { logAudit } from '@app/api'
 import { and, count, createDb, eq, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
@@ -90,6 +91,22 @@ export async function PATCH(
     .update(schema.membership)
     .set({ roleId, updatedAt: new Date() })
     .where(eq(schema.membership.id, membershipId))
+
+  await logAudit(db, {
+    organizationId: id,
+    actorId: session.user.id,
+    action: 'member.role_changed',
+    entityType: 'membership',
+    entityId: membershipId,
+    payload: {
+      changes: {
+        role: {
+          from: currentRole?.name ?? targetMembership.roleId,
+          to: targetRole.name,
+        },
+      },
+    },
+  })
 
   return NextResponse.json({ success: true })
 }
