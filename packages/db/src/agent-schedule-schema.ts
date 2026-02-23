@@ -1,4 +1,5 @@
 import {
+  index,
   pgEnum,
   pgTable,
   text,
@@ -45,5 +46,8 @@ export const agentSchedule = pgTable(
       mode: 'date',
     }).notNull(),
   },
-  (table) => [unique().on(table.organizationId, table.scheduleType)],
+  (table) => [
+    unique().on(table.organizationId, table.scheduleType),
+    index('agent_schedule_org_id_idx').on(table.organizationId),
+  ],
 )

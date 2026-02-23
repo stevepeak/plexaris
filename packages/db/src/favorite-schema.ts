@@ -1,4 +1,11 @@
-import { pgEnum, pgTable, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
+import {
+  index,
+  pgEnum,
+  pgTable,
+  timestamp,
+  unique,
+  uuid,
+} from 'drizzle-orm/pg-core'
 
 import { organization } from './org-schema'
 
@@ -24,5 +31,6 @@ export const favorite = pgTable(
   },
   (table) => [
     unique().on(table.organizationId, table.targetType, table.targetId),
+    index('favorite_target_id_idx').on(table.targetId),
   ],
 )

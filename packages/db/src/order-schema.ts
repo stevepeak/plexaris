@@ -102,7 +102,11 @@ export const orderItem = pgTable(
     }).notNull(),
     removedAt: timestamp('removed_at', { withTimezone: true, mode: 'date' }),
   },
-  (table) => [index('order_item_order_id_idx').on(table.orderId)],
+  (table) => [
+    index('order_item_order_id_idx').on(table.orderId),
+    index('order_item_product_id_idx').on(table.productId),
+    index('order_item_supplier_id_idx').on(table.supplierId),
+  ],
 )
 
 export const orderEvent = pgTable('order_event', {

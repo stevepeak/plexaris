@@ -204,6 +204,13 @@
       "when": 1771863705800,
       "tag": "0028_sparkling_marten_broadcloak",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1771864468366,
+      "tag": "0029_grey_nekra",
+      "breakpoints": true
     }
   ]
 }

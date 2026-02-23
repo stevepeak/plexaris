@@ -58,5 +58,8 @@ export const suggestion = pgTable(
       mode: 'date',
     }).notNull(),
   },
-  (table) => [index('suggestion_org_id_idx').on(table.organizationId)],
+  (table) => [
+    index('suggestion_org_id_idx').on(table.organizationId),
+    index('suggestion_target_id_idx').on(table.targetId),
+  ],
 )
