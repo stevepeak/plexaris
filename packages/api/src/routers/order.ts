@@ -70,12 +70,14 @@ export const orderRouter = router({
       const rows = await ctx.db
         .select({
           id: schema.order.id,
+          orderNumber: schema.order.orderNumber,
           status: schema.order.status,
           notes: schema.order.notes,
           createdAt: schema.order.createdAt,
           updatedAt: schema.order.updatedAt,
           submittedAt: schema.order.submittedAt,
           createdByName: schema.user.name,
+          createdByImage: schema.user.image,
           itemCount: itemCount.count,
         })
         .from(schema.order)
@@ -108,16 +110,21 @@ export const orderRouter = router({
       )
 
       const now = new Date()
+      const nextNumber = sql<number>`(SELECT COALESCE(MAX(order_number), 0) + 1 FROM "order" WHERE organization_id = ${input.organizationId})`
       const [row] = await ctx.db
         .insert(schema.order)
         .values({
           organizationId: input.organizationId,
+          orderNumber: nextNumber,
           createdBy: ctx.session.user.id,
           status: 'draft',
           createdAt: now,
           updatedAt: now,
         })
-        .returning({ id: schema.order.id })
+        .returning({
+          id: schema.order.id,
+          orderNumber: schema.order.orderNumber,
+        })
 
       if (!row) {
         throw new TRPCError({
@@ -135,7 +142,7 @@ export const orderRouter = router({
         entityId: row.id,
       })
 
-      return { orderId: row.id }
+      return { orderId: row.id, orderNumber: row.orderNumber }
     }),
 
   get: protectedProcedure
@@ -535,16 +542,21 @@ export const orderRouter = router({
         )
 
       const now = new Date()
+      const nextNumber = sql<number>`(SELECT COALESCE(MAX(order_number), 0) + 1 FROM "order" WHERE organization_id = ${sourceOrder.organizationId})`
       const [newOrder] = await ctx.db
         .insert(schema.order)
         .values({
           organizationId: sourceOrder.organizationId,
+          orderNumber: nextNumber,
           createdBy: ctx.session.user.id,
           status: 'draft',
           createdAt: now,
           updatedAt: now,
         })
-        .returning({ id: schema.order.id })
+        .returning({
+          id: schema.order.id,
+          orderNumber: schema.order.orderNumber,
+        })
 
       if (!newOrder) {
         throw new TRPCError({
@@ -576,7 +588,7 @@ export const orderRouter = router({
         input.orderId,
         'order_duplicated',
         ctx.session.user.id,
-        { newOrderId: newOrder.id },
+        { newOrderId: newOrder.id, newOrderNumber: newOrder.orderNumber },
       )
 
       await trackEvent(ctx.db, {
@@ -588,7 +600,7 @@ export const orderRouter = router({
         payload: { sourceOrderId: input.orderId },
       })
 
-      return { orderId: newOrder.id }
+      return { orderId: newOrder.id, orderNumber: newOrder.orderNumber }
     }),
 
   getEvents: protectedProcedure

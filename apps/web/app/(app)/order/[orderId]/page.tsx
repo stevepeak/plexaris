@@ -134,8 +134,8 @@ export default function OrderPage() {
           detail = 'Order archived'
           break
         case 'order_duplicated':
-          detail = payload.newOrderId
-            ? `Duplicated to ${(payload.newOrderId as string).slice(0, 8)}...`
+          detail = payload.newOrderNumber
+            ? `Duplicated to #${payload.newOrderNumber}`
             : 'Order duplicated'
           break
         default:
@@ -479,7 +479,7 @@ export default function OrderPage() {
 
       {checkoutMode ? (
         <CheckoutLayout
-          orderId={orderId}
+          orderNumber={cart.orderData?.order.orderNumber ?? 0}
           items={cart.allItems}
           subtotal={cart.subtotal}
           itemCount={cart.itemCount}

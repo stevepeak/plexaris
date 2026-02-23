@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils'
 import { type CartItemData } from '../cart-item'
 
 interface CheckoutInvoiceProps {
-  orderId: string
+  orderNumber: number
   items: CartItemData[]
   subtotal: number
   isPaid: boolean
@@ -30,7 +30,7 @@ function formatDate(date: Date) {
 }
 
 export function CheckoutInvoice({
-  orderId,
+  orderNumber,
   items,
   subtotal,
   isPaid,
@@ -42,8 +42,6 @@ export function CheckoutInvoice({
     : createdAt
       ? formatDate(createdAt)
       : formatDate(new Date())
-
-  const shortId = orderId.slice(0, 8)
 
   return (
     <div className="flex h-full items-center justify-center bg-gradient-to-br from-muted/30 to-muted/10 p-8">
@@ -66,7 +64,7 @@ export function CheckoutInvoice({
               <div>
                 <h2 className="text-3xl font-bold tracking-tight">INVOICE</h2>
                 <p className="text-muted-foreground mt-1 font-mono text-sm">
-                  #{shortId}
+                  #{orderNumber}
                 </p>
               </div>
               <div className="text-right">
@@ -127,7 +125,7 @@ export function CheckoutInvoice({
         >
           <div
             className={cn(
-              'rounded-lg border-4 border-red-500 px-8 py-3 text-5xl font-bold uppercase text-red-500 opacity-80',
+              'rounded-lg border-4 border-green-500 px-8 py-3 text-5xl font-bold uppercase text-green-500 opacity-80',
               isPaid && 'animate-stamp',
             )}
           >

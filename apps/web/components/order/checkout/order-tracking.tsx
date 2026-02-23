@@ -13,7 +13,7 @@ import {
 import { cn } from '@/lib/utils'
 
 interface OrderTrackingProps {
-  orderId: string
+  orderNumber: number
   status: 'submitted' | 'confirmed' | 'delivered' | 'cancelled'
   submittedAt: Date | null
   deliveryNotes?: string | null
@@ -54,7 +54,7 @@ function getStepState(
 }
 
 export function OrderTracking({
-  orderId,
+  orderNumber,
   status,
   submittedAt,
   deliveryNotes,
@@ -187,12 +187,12 @@ export function OrderTracking({
         <Separator />
 
         {/* Section 4 — Actions */}
-        <div className="space-y-2">
+        <div className="flex gap-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="w-full">
-                  <Button variant="outline" className="w-full" disabled>
+                <span className="flex-1">
+                  <Button variant="ghost" className="w-full" disabled>
                     Request Modification
                   </Button>
                 </span>
@@ -202,8 +202,8 @@ export function OrderTracking({
           </TooltipProvider>
 
           <Button
-            variant="outline"
-            className="w-full"
+            variant="ghost"
+            className="flex-1"
             onClick={onDuplicate}
             disabled={isDuplicating}
           >
@@ -214,7 +214,7 @@ export function OrderTracking({
 
         {/* Order ID reference */}
         <p className="text-muted-foreground text-center font-mono text-xs">
-          Order #{orderId.slice(0, 8)}
+          Order #{orderNumber}
         </p>
       </div>
     </ScrollArea>

@@ -52,6 +52,7 @@ export function useOrderCart(orderId: string): CartStateReturn & {
   orderData:
     | {
         order: {
+          orderNumber: number
           status: string
           submittedAt: string | null
           createdAt: string
@@ -252,6 +253,7 @@ export function useOrderCart(orderId: string): CartStateReturn & {
     orderData: orderQuery.data
       ? {
           order: {
+            orderNumber: orderQuery.data.order.orderNumber,
             status: orderQuery.data.order.status,
             submittedAt: orderQuery.data.order.submittedAt,
             createdAt: orderQuery.data.order.createdAt,

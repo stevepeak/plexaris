@@ -134,7 +134,7 @@ export const Default: Story = {
   render: () => (
     <div className="h-[600px] w-[700px]">
       <CheckoutInvoice
-        orderId="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        orderNumber={1}
         items={SAMPLE_ITEMS}
         subtotal={SUBTOTAL}
         isPaid={false}
@@ -148,7 +148,7 @@ export const Paid: Story = {
   render: () => (
     <div className="h-[600px] w-[700px]">
       <CheckoutInvoice
-        orderId="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        orderNumber={1}
         items={SAMPLE_ITEMS}
         subtotal={SUBTOTAL}
         isPaid={true}
@@ -163,7 +163,7 @@ export const SingleItem: Story = {
   render: () => (
     <div className="h-[600px] w-[700px]">
       <CheckoutInvoice
-        orderId="f9e8d7c6-b5a4-3210-fedc-ba9876543210"
+        orderNumber={2}
         items={[SAMPLE_ITEMS[0]]}
         subtotal={SAMPLE_ITEMS[0].price * SAMPLE_ITEMS[0].quantity}
         isPaid={false}
@@ -177,7 +177,7 @@ export const ManyItems: Story = {
   render: () => (
     <div className="h-[600px] w-[700px]">
       <CheckoutInvoice
-        orderId="11223344-5566-7788-99aa-bbccddeeff00"
+        orderNumber={3}
         items={MANY_ITEMS}
         subtotal={MANY_SUBTOTAL}
         isPaid={false}

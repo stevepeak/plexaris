@@ -74,7 +74,7 @@ export const DraftWithPermission: Story = {
   render: () => (
     <div className="flex h-[600px] w-[1100px]">
       <CheckoutLayout
-        orderId="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        orderNumber={1}
         items={SAMPLE_ITEMS}
         subtotal={SUBTOTAL}
         itemCount={SAMPLE_ITEMS.length}
@@ -97,7 +97,7 @@ export const DraftNoPermission: Story = {
   render: () => (
     <div className="flex h-[600px] w-[1100px]">
       <CheckoutLayout
-        orderId="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        orderNumber={1}
         items={SAMPLE_ITEMS}
         subtotal={SUBTOTAL}
         itemCount={SAMPLE_ITEMS.length}
@@ -120,7 +120,7 @@ export const Submitted: Story = {
   render: () => (
     <div className="flex h-[600px] w-[1100px]">
       <CheckoutLayout
-        orderId="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        orderNumber={1}
         items={SAMPLE_ITEMS}
         subtotal={SUBTOTAL}
         itemCount={SAMPLE_ITEMS.length}
@@ -143,7 +143,7 @@ export const Delivered: Story = {
   render: () => (
     <div className="flex h-[600px] w-[1100px]">
       <CheckoutLayout
-        orderId="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        orderNumber={1}
         items={SAMPLE_ITEMS}
         subtotal={SUBTOTAL}
         itemCount={SAMPLE_ITEMS.length}

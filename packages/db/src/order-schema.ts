@@ -7,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core'
 
@@ -48,6 +49,7 @@ export const order = pgTable(
   'order',
   {
     id: uuid('id').primaryKey().defaultRandom(),
+    orderNumber: integer('order_number').notNull(),
     organizationId: uuid('organization_id')
       .notNull()
       .references(() => organization.id),
@@ -70,7 +72,10 @@ export const order = pgTable(
     }),
     archivedAt: timestamp('archived_at', { withTimezone: true, mode: 'date' }),
   },
-  (table) => [index('order_organization_id_idx').on(table.organizationId)],
+  (table) => [
+    index('order_organization_id_idx').on(table.organizationId),
+    unique('order_org_number_uniq').on(table.organizationId, table.orderNumber),
+  ],
 )
 
 export const orderItem = pgTable(

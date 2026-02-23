@@ -16,7 +16,7 @@ type CheckoutPhase =
   | 'tracking'
 
 interface CheckoutLayoutProps {
-  orderId: string
+  orderNumber: number
   items: CartItemData[]
   subtotal: number
   itemCount: number
@@ -34,7 +34,7 @@ interface CheckoutLayoutProps {
 }
 
 export function CheckoutLayout({
-  orderId,
+  orderNumber,
   items,
   subtotal,
   itemCount,
@@ -91,7 +91,7 @@ export function CheckoutLayout({
       {/* Left panel — Invoice */}
       <div className="relative flex-[3] border-r">
         <CheckoutInvoice
-          orderId={orderId}
+          orderNumber={orderNumber}
           items={items}
           subtotal={subtotal}
           isPaid={isPaid}
@@ -129,7 +129,7 @@ export function CheckoutLayout({
             }`}
           >
             <OrderTracking
-              orderId={orderId}
+              orderNumber={orderNumber}
               status={
                 (orderStatus === 'draft' ? 'submitted' : orderStatus) as
                   | 'submitted'

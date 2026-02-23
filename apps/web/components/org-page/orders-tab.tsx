@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,6 +22,23 @@ const statusConfig: Record<
   confirmed: { label: 'Confirmed', variant: 'outline' },
   delivered: { label: 'Delivered', variant: 'outline' },
   cancelled: { label: 'Cancelled', variant: 'destructive' },
+}
+
+const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+
+function formatRelativeTime(date: Date) {
+  const now = Date.now()
+  const diffMs = date.getTime() - now
+  const diffSec = Math.round(diffMs / 1000)
+  const diffMin = Math.round(diffSec / 60)
+  const diffHr = Math.round(diffMin / 60)
+  const diffDay = Math.round(diffHr / 24)
+
+  if (Math.abs(diffSec) < 60) return rtf.format(diffSec, 'second')
+  if (Math.abs(diffMin) < 60) return rtf.format(diffMin, 'minute')
+  if (Math.abs(diffHr) < 24) return rtf.format(diffHr, 'hour')
+  if (Math.abs(diffDay) < 30) return rtf.format(diffDay, 'day')
+  return date.toLocaleDateString()
 }
 
 const PLACEHOLDER_ORDERS = [
@@ -189,16 +207,31 @@ function HorecaOrders({ organizationId }: { organizationId: string }) {
                 className="flex items-center justify-between px-6 py-3 transition-colors hover:bg-muted/50"
               >
                 <div className="flex items-center gap-3">
+                  <span className="font-mono text-sm font-medium">
+                    #{order.orderNumber}
+                  </span>
                   <Badge variant={config.variant}>{config.label}</Badge>
                   <span className="text-sm">
                     {order.itemCount} {order.itemCount === 1 ? 'item' : 'items'}
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    by {order.createdByName}
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    by
+                    <Avatar className="h-4 w-4">
+                      <AvatarImage src={order.createdByImage ?? undefined} />
+                      <AvatarFallback className="text-[8px]">
+                        {order.createdByName
+                          ?.split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .slice(0, 2)
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    {order.createdByName}
                   </span>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  {new Date(order.updatedAt).toLocaleDateString()}
+                  {formatRelativeTime(new Date(order.updatedAt))}
                 </span>
               </Link>
             )

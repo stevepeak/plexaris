@@ -15,7 +15,7 @@ export const Submitted: Story = {
   render: () => (
     <div className="h-[600px] w-[400px] border-l">
       <OrderTracking
-        orderId="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        orderNumber={1}
         status="submitted"
         submittedAt={new Date('2025-01-15T14:00:00')}
         deliveryNotes="Please deliver to the back entrance. Gate code: 4521."
@@ -29,7 +29,7 @@ export const Confirmed: Story = {
   render: () => (
     <div className="h-[600px] w-[400px] border-l">
       <OrderTracking
-        orderId="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        orderNumber={1}
         status="confirmed"
         submittedAt={new Date('2025-01-15T14:00:00')}
         onDuplicate={noop}
@@ -42,7 +42,7 @@ export const Delivered: Story = {
   render: () => (
     <div className="h-[600px] w-[400px] border-l">
       <OrderTracking
-        orderId="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        orderNumber={1}
         status="delivered"
         submittedAt={new Date('2025-01-15T14:00:00')}
         deliveryNotes="Leave at the loading dock."
@@ -56,7 +56,7 @@ export const Cancelled: Story = {
   render: () => (
     <div className="h-[600px] w-[400px] border-l">
       <OrderTracking
-        orderId="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        orderNumber={1}
         status="cancelled"
         submittedAt={new Date('2025-01-15T14:00:00')}
         deliveryNotes="Was supposed to arrive Monday."
