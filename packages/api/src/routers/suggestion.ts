@@ -6,6 +6,28 @@ import { logAudit } from '../lib/audit'
 import { verifyAccess } from '../lib/verify-access'
 import { protectedProcedure, router } from '../trpc'
 
+const PRODUCT_UPDATABLE_FIELDS = new Set([
+  'name',
+  'description',
+  'price',
+  'unit',
+  'category',
+  'images',
+  'data',
+])
+
+const ORGANIZATION_UPDATABLE_FIELDS = new Set([
+  'name',
+  'description',
+  'logoUrl',
+  'phone',
+  'email',
+  'address',
+  'deliveryAddress',
+  'deliveryAreas',
+  'data',
+])
+
 export const suggestionRouter = router({
   list: protectedProcedure
     .input(
@@ -155,6 +177,17 @@ export const suggestionRouter = router({
       }
 
       const now = new Date()
+
+      if (
+        typeof s.proposedValue !== 'object' ||
+        s.proposedValue === null ||
+        Array.isArray(s.proposedValue)
+      ) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'proposedValue must be an object',
+        })
+      }
       const proposed = s.proposedValue as Record<string, unknown>
 
       // Apply the change based on targetType and action
@@ -340,10 +373,17 @@ export const suggestionRouter = router({
           })
         }
 
+        if (!s.field || !PRODUCT_UPDATABLE_FIELDS.has(s.field)) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: `'${s.field ?? '(empty)'}' is not a valid updatable product field`,
+          })
+        }
+
         await ctx.db
           .update(schema.product)
           .set({
-            [s.field!]: s.proposedValue,
+            [s.field]: s.proposedValue,
             updatedAt: now,
           })
           .where(eq(schema.product.id, s.targetId))
@@ -396,10 +436,17 @@ export const suggestionRouter = router({
           })
         }
 
+        if (!s.field || !ORGANIZATION_UPDATABLE_FIELDS.has(s.field)) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: `'${s.field ?? '(empty)'}' is not a valid updatable organization field`,
+          })
+        }
+
         await ctx.db
           .update(schema.organization)
           .set({
-            [s.field!]: s.proposedValue,
+            [s.field]: s.proposedValue,
             updatedAt: now,
           })
           .where(eq(schema.organization.id, s.targetId))

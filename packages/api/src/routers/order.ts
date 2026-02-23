@@ -119,16 +119,23 @@ export const orderRouter = router({
         })
         .returning({ id: schema.order.id })
 
-      await logEvent(ctx.db, row!.id, 'order_created', ctx.session.user.id)
+      if (!row) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create order',
+        })
+      }
+
+      await logEvent(ctx.db, row.id, 'order_created', ctx.session.user.id)
       await logAudit(ctx.db, {
         organizationId: input.organizationId,
         actorId: ctx.session.user.id,
         action: 'order.created',
         entityType: 'order',
-        entityId: row!.id,
+        entityId: row.id,
       })
 
-      return { orderId: row!.id }
+      return { orderId: row.id }
     }),
 
   get: protectedProcedure
@@ -179,8 +186,15 @@ export const orderRouter = router({
           ),
         )
 
+      if (!orderData) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Order not found',
+        })
+      }
+
       return {
-        order: orderData!,
+        order: orderData,
         organizationId: orderRow.organizationId,
         items,
       }
@@ -221,8 +235,15 @@ export const orderRouter = router({
         })
         .returning({ id: schema.orderItem.id })
 
+      if (!item) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to add order item',
+        })
+      }
+
       await logEvent(ctx.db, input.orderId, 'item_added', ctx.session.user.id, {
-        orderItemId: item!.id,
+        orderItemId: item.id,
         productId: input.productId,
         supplierId: input.supplierId,
         quantity: input.quantity,
@@ -234,10 +255,10 @@ export const orderRouter = router({
         action: 'order.item_added',
         entityType: 'order',
         entityId: input.orderId,
-        payload: { orderItemId: item!.id, productId: input.productId },
+        payload: { orderItemId: item.id, productId: input.productId },
       })
 
-      return { orderItemId: item!.id }
+      return { orderItemId: item.id }
     }),
 
   removeItem: protectedProcedure
@@ -439,12 +460,19 @@ export const orderRouter = router({
         })
         .returning({ id: schema.order.id })
 
-      await logEvent(ctx.db, newOrder!.id, 'order_created', ctx.session.user.id)
+      if (!newOrder) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create order',
+        })
+      }
+
+      await logEvent(ctx.db, newOrder.id, 'order_created', ctx.session.user.id)
 
       if (sourceItems.length > 0) {
         await ctx.db.insert(schema.orderItem).values(
           sourceItems.map((item) => ({
-            orderId: newOrder!.id,
+            orderId: newOrder.id,
             productId: item.productId,
             supplierId: item.supplierId,
             quantity: item.quantity,
@@ -462,7 +490,7 @@ export const orderRouter = router({
         input.orderId,
         'order_duplicated',
         ctx.session.user.id,
-        { newOrderId: newOrder!.id },
+        { newOrderId: newOrder.id },
       )
 
       await logAudit(ctx.db, {
@@ -470,11 +498,11 @@ export const orderRouter = router({
         actorId: ctx.session.user.id,
         action: 'order.duplicated',
         entityType: 'order',
-        entityId: newOrder!.id,
+        entityId: newOrder.id,
         payload: { sourceOrderId: input.orderId },
       })
 
-      return { orderId: newOrder!.id }
+      return { orderId: newOrder.id }
     }),
 
   getEvents: protectedProcedure
