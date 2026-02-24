@@ -116,7 +116,7 @@ export function DashboardTab({
                   in{' '}
                   <Link
                     href={`/orgs/${organizationId}/settings`}
-                    className="inline-flex items-center gap-1 font-medium text-foreground underline underline-offset-4 hover:text-foreground/80"
+                    className="inline-flex items-center gap-1 font-medium text-foreground underline decoration-muted-foreground/60 decoration-wavy underline-offset-4 transition-all hover:underline-offset-2"
                   >
                     <Settings className="h-3.5 w-3.5" />
                     Settings
