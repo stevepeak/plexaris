@@ -239,19 +239,20 @@ export function SupplierProfileCard({
           </div>
         )}
 
-        {hasProducts ? (
-          <ProductsSection products={products} />
-        ) : (
-          <div className="grid gap-3">
-            <h3 className="text-sm font-medium">Products</h3>
-            <div className="flex flex-col items-center py-6 text-center">
-              <Package className="h-8 w-8 text-muted-foreground/50" />
-              <p className="mt-2 text-sm text-muted-foreground">
-                No products listed yet.
-              </p>
+        {products !== undefined &&
+          (hasProducts ? (
+            <ProductsSection products={products} />
+          ) : (
+            <div className="grid gap-3">
+              <h3 className="text-sm font-medium">Products</h3>
+              <div className="flex flex-col items-center py-6 text-center">
+                <Package className="h-8 w-8 text-muted-foreground/50" />
+                <p className="mt-2 text-sm text-muted-foreground">
+                  No products listed yet.
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          ))}
       </CardContent>
     </Card>
   )

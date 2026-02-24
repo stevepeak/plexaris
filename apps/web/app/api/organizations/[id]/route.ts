@@ -1,5 +1,5 @@
 import { trackEvent } from '@app/api'
-import { and, createDb, eq, schema } from '@app/db'
+import { and, count, createDb, eq, isNull, schema } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
@@ -39,8 +39,48 @@ export async function GET(
     )
   }
 
+  const [productCount, memberCount, orderCount, agentRunCount] =
+    await Promise.all([
+      db
+        .select({ value: count() })
+        .from(schema.product)
+        .where(
+          and(
+            eq(schema.product.organizationId, id),
+            isNull(schema.product.archivedAt),
+          ),
+        )
+        .then((r) => r[0]?.value ?? 0),
+      db
+        .select({ value: count() })
+        .from(schema.membership)
+        .where(eq(schema.membership.organizationId, id))
+        .then((r) => r[0]?.value ?? 0),
+      db
+        .select({ value: count() })
+        .from(schema.order)
+        .where(
+          and(
+            eq(schema.order.organizationId, id),
+            isNull(schema.order.archivedAt),
+          ),
+        )
+        .then((r) => r[0]?.value ?? 0),
+      db
+        .select({ value: count() })
+        .from(schema.triggerRun)
+        .where(eq(schema.triggerRun.organizationId, id))
+        .then((r) => r[0]?.value ?? 0),
+    ])
+
   return NextResponse.json({
     organization: org,
+    counts: {
+      products: productCount,
+      members: memberCount,
+      orders: orderCount,
+      agentRuns: agentRunCount,
+    },
     role: {
       id: member.roleId,
       name: member.roleName,
