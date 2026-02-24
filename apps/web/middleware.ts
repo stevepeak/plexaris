@@ -43,13 +43,13 @@ export async function middleware(request: NextRequest) {
 
   const isAuthenticated = !!session?.session
 
+  const hasOrgs = request.cookies.get('has_orgs')?.value === '1'
+
   // Home page redirects based on auth state
   if (isHomePage) {
     if (!isAuthenticated) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
-    // Authenticated: check if user has orgs
-    const hasOrgs = await userHasOrganizations(request)
     return NextResponse.redirect(
       new URL(hasOrgs ? '/dashboard' : '/onboarding', request.url),
     )
@@ -66,7 +66,6 @@ export async function middleware(request: NextRequest) {
     if (redirect?.startsWith('/claim/')) {
       return NextResponse.redirect(new URL(redirect, request.url))
     }
-    const hasOrgs = await userHasOrganizations(request)
     return NextResponse.redirect(
       new URL(hasOrgs ? '/dashboard' : '/onboarding', request.url),
     )
@@ -74,29 +73,12 @@ export async function middleware(request: NextRequest) {
 
   // Authenticated users on non-onboarding protected routes without orgs go to onboarding
   if (isProtectedRoute && !isOnboarding && isAuthenticated) {
-    const hasOrgs = await userHasOrganizations(request)
     if (!hasOrgs) {
       return NextResponse.redirect(new URL('/onboarding', request.url))
     }
   }
 
   return NextResponse.next()
-}
-
-async function userHasOrganizations(request: NextRequest): Promise<boolean> {
-  const response = await fetch(
-    `${request.nextUrl.origin}/api/organizations/mine`,
-    {
-      headers: {
-        cookie: request.headers.get('cookie') || '',
-      },
-    },
-  )
-
-  if (!response.ok) return false
-
-  const data = await response.json()
-  return Array.isArray(data.organizations) && data.organizations.length > 0
 }
 
 export const config = {

@@ -9,24 +9,25 @@ import { OrgProvider } from '@/components/org-context'
 import { OrgSidebar } from '@/components/org-sidebar'
 import { type Organization, useActiveOrg } from '@/components/org-switcher'
 import { Skeleton } from '@/components/ui/skeleton'
+import { trpc } from '@/lib/trpc'
 
 export default function OrgLayout({ children }: { children: React.ReactNode }) {
   const { orgId } = useParams<{ orgId: string }>()
-  const [refreshKey, setRefreshKey] = useState(0)
+  const utils = trpc.useUtils()
   const {
     organizations,
     activeOrg,
     switchOrg,
     isPending: orgsPending,
     superAdmin,
-  } = useActiveOrg(refreshKey)
+  } = useActiveOrg()
 
   const [superAdminOrg, setSuperAdminOrg] = useState<Organization | null>(null)
 
   const refreshOrg = useCallback(() => {
-    setRefreshKey((k) => k + 1)
+    void utils.organization.mine.invalidate()
     setSuperAdminOrg(null)
-  }, [])
+  }, [utils])
 
   // Sync URL orgId with active org state
   useEffect(() => {

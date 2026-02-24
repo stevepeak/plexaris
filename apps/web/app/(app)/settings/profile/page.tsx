@@ -13,11 +13,13 @@ import {
   ProfileFormFields,
 } from '@/components/profile-form/profile-form'
 import { authClient } from '@/lib/auth-client'
+import { trpc } from '@/lib/trpc'
 import { uploadFiles } from '@/lib/upload'
 
 export default function ProfileSettingsPage() {
   const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
+  const utils = trpc.useUtils()
   const {
     organizations,
     activeOrg,
@@ -61,38 +63,16 @@ export default function ProfileSettingsPage() {
     [fetchPasskeys],
   )
 
-  const [userOrgs, setUserOrgs] = useState<OrgMembership[]>([])
-  const [userOrgsLoading, setUserOrgsLoading] = useState(true)
+  const { data: orgData, isLoading: userOrgsLoading } =
+    trpc.organization.mine.useQuery(undefined, { staleTime: 30_000 })
 
-  const fetchUserOrgs = useCallback(async () => {
-    setUserOrgsLoading(true)
-    const res = await fetch('/api/organizations/mine')
-    if (res.ok) {
-      const json = await res.json()
-      setUserOrgs(
-        (json.organizations ?? []).map(
-          (o: {
-            id: string
-            name: string
-            roleName: string
-            isAdmin: boolean
-            soleAdmin: boolean
-          }) => ({
-            id: o.id,
-            name: o.name,
-            roleName: o.roleName,
-            isAdmin: o.isAdmin,
-            soleAdmin: o.soleAdmin,
-          }),
-        ),
-      )
-    }
-    setUserOrgsLoading(false)
-  }, [])
-
-  useEffect(() => {
-    void fetchUserOrgs()
-  }, [fetchUserOrgs])
+  const userOrgs: OrgMembership[] = (orgData?.organizations ?? []).map((o) => ({
+    id: o.id,
+    name: o.name,
+    roleName: o.roleName,
+    isAdmin: o.isAdmin,
+    soleAdmin: o.soleAdmin,
+  }))
 
   const handleLeaveOrg = useCallback(
     async (orgId: string): Promise<{ error?: string }> => {
@@ -103,10 +83,10 @@ export default function ProfileSettingsPage() {
         const json = await res.json()
         return { error: json.error ?? 'Failed to leave organization' }
       }
-      void fetchUserOrgs()
+      void utils.organization.mine.invalidate()
       return {}
     },
-    [fetchUserOrgs],
+    [utils],
   )
 
   const handleArchiveOrg = useCallback(
@@ -118,10 +98,10 @@ export default function ProfileSettingsPage() {
         const json = await res.json()
         return { error: json.error ?? 'Failed to archive organization' }
       }
-      void fetchUserOrgs()
+      void utils.organization.mine.invalidate()
       return {}
     },
-    [fetchUserOrgs],
+    [utils],
   )
 
   const handleUpdateImage = useCallback(
