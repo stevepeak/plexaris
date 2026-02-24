@@ -53,7 +53,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background">
       <AppHeader
         organizations={organizations}
-        activeOrg={activeOrg}
+        activeOrg={null}
         onSwitchOrg={switchOrg}
         orgsPending={orgsPending}
         superAdmin={superAdmin}

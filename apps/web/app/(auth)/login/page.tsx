@@ -100,6 +100,7 @@ function LoginForm() {
               <Label htmlFor="password">Password</Label>
               <Link
                 href="/forgot-password"
+                tabIndex={-1}
                 className="text-sm text-muted-foreground underline-offset-4 hover:underline"
               >
                 Forgot password?
@@ -157,12 +158,12 @@ function LoginForm() {
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
-          <Link
+          <a
             href={signupHref}
             className="text-primary underline-offset-4 hover:underline"
           >
             Sign up
-          </Link>
+          </a>
         </p>
       </CardFooter>
     </Card>

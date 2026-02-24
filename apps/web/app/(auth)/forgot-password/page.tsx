@@ -1,7 +1,6 @@
 'use i18n'
 'use client'
 
-import Link from 'next/link'
 import { useState } from 'react'
 
 import { LanguageSwitcher } from '@/components/language-switcher'
@@ -143,12 +142,12 @@ export default function ForgotPasswordPage() {
           <CardFooter className="justify-center">
             <p className="text-sm text-muted-foreground">
               Remember your password?{' '}
-              <Link
+              <a
                 href="/login"
                 className="text-primary underline-offset-4 hover:underline"
               >
                 Sign in
-              </Link>
+              </a>
             </p>
           </CardFooter>
         </Card>

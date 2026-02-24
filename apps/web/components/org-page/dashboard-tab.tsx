@@ -1,7 +1,7 @@
 'use i18n'
 'use client'
 
-import { Bot, Eye, Package, Settings, ShoppingCart, Users } from 'lucide-react'
+import { Bot, Eye, Package, ShoppingCart, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
@@ -156,19 +156,18 @@ export function DashboardTab({
           state={profileState}
           header={
             orgType === 'supplier' ? (
-              <div className="flex items-center gap-2 border-b bg-muted px-6 py-3 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1.5 border-b bg-muted px-6 py-3 text-sm text-muted-foreground">
                 <Eye className="h-4 w-4 shrink-0" />
                 <span>
                   This is how horeca customers see your profile. Update details
-                  in{' '}
-                  <Link
-                    href={`/orgs/${organizationId}/settings`}
-                    className="inline-flex items-center gap-1 font-medium text-foreground underline decoration-muted-foreground/60 decoration-wavy underline-offset-4 transition-all hover:underline-offset-2"
-                  >
-                    <Settings className="h-3.5 w-3.5" />
-                    Settings
-                  </Link>
+                  in
                 </span>
+                <Link
+                  href={`/orgs/${organizationId}/settings`}
+                  className="font-medium text-foreground underline decoration-muted-foreground/60 decoration-wavy underline-offset-4 transition-all hover:underline-offset-2"
+                >
+                  Settings
+                </Link>
               </div>
             ) : undefined
           }

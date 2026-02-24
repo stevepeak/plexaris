@@ -43,21 +43,18 @@ const nextConfig = {
 }
 
 export default async function config() {
-  // lingo.dev's lmdb native module crashes turbopack build workers (SIGABRT),
-  // so we only enable it during development.
   // eslint-disable-next-line no-process-env
   const isDev = process.env.NODE_ENV !== 'production'
 
-  const baseConfig = isDev
-    ? await withLingo(nextConfig, {
-        sourceRoot: './app',
-        sourceLocale: 'en',
-        targetLocales: ['nl'],
-        models: { '*:*': 'openrouter:anthropic/claude-sonnet-4-6' },
-        localePersistence: 'cookie',
-        useDirective: true,
-      })
-    : nextConfig
+  const baseConfig = await withLingo(nextConfig, {
+    sourceRoot: './app',
+    sourceLocale: 'en',
+    targetLocales: ['nl'],
+    models: { '*:*': 'openrouter:anthropic/claude-sonnet-4-6' },
+    localePersistence: 'cookie',
+    useDirective: true,
+    buildMode: isDev ? 'translate' : 'cache-only',
+  })
 
   return withSentryConfig(baseConfig, {
     // eslint-disable-next-line no-process-env

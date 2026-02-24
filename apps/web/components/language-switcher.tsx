@@ -2,7 +2,7 @@
 'use client'
 
 import { Languages } from 'lucide-react'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import {
   DropdownMenuPortal,
@@ -30,7 +30,8 @@ function setLocale(locale: string) {
 }
 
 export function LanguageSwitcher() {
-  const current = getLocale()
+  const [current, setCurrent] = useState('en')
+  useEffect(() => setCurrent(getLocale()), [])
 
   return (
     <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -58,7 +59,8 @@ export function LanguageSwitcher() {
 }
 
 export function LanguageSubmenu() {
-  const current = getLocale()
+  const [current, setCurrent] = useState('en')
+  useEffect(() => setCurrent(getLocale()), [])
 
   const handleChange = useCallback((value: string) => {
     if (value !== getLocale()) {
