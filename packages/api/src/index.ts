@@ -10,6 +10,7 @@ import { auditRouter } from './routers/audit'
 import { notificationRouter } from './routers/notification'
 import { orderRouter } from './routers/order'
 import { organizationRouter } from './routers/organization'
+import { productRouter } from './routers/product'
 import { suggestionRouter } from './routers/suggestion'
 import { triggerRunRouter } from './routers/trigger-run'
 import { protectedProcedure, publicProcedure, router } from './trpc'
@@ -222,6 +223,7 @@ export const appRouter = router({
   agentSchedule: agentScheduleRouter,
   suggestion: suggestionRouter,
   order: orderRouter,
+  product: productRouter,
   notification: notificationRouter,
   audit: auditRouter,
   admin: adminRouter,

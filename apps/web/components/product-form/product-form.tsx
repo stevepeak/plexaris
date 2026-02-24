@@ -8,7 +8,7 @@ import {
   productSectionKeys,
 } from '@app/db/data-schemas'
 import { ArrowLeft, Eye, History, Loader2, Pencil } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { CategoryPicker } from '@/components/category-picker'
 import { ProductSections } from '@/components/order/product-detail'
@@ -63,9 +63,25 @@ export function ProductForm({
     return [...productSectionKeys.filter((key) => s[key] !== false)]
   })
 
-  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
+  const [viewMode, setViewMode] = useState<'edit' | 'preview'>(() => {
+    if (typeof window === 'undefined') return 'edit'
+    return new URLSearchParams(window.location.search).get('mode') === 'preview'
+      ? 'preview'
+      : 'edit'
+  })
+
+  useEffect(() => {
+    const onPopState = () => {
+      const mode = new URLSearchParams(window.location.search).get('mode')
+      setViewMode(mode === 'preview' ? 'preview' : 'edit')
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showDiscardWarning, setShowDiscardWarning] = useState(false)
+  const discardTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Snapshot of original values for change tracking
   const originalNameRef = useRef(product?.name ?? '')
@@ -95,6 +111,27 @@ export function ProductForm({
     currentCategory: category,
     currentData: data,
   })
+
+  const handleBack = useCallback(() => {
+    // Preview mode → back to edit
+    if (viewMode === 'preview') {
+      window.history.back()
+      return
+    }
+    // Edit mode with changes → warn first, second click discards
+    if (changeCount > 0 && !showDiscardWarning) {
+      setShowDiscardWarning(true)
+      if (discardTimerRef.current) clearTimeout(discardTimerRef.current)
+      discardTimerRef.current = setTimeout(
+        () => setShowDiscardWarning(false),
+        3000,
+      )
+      return
+    }
+    // Edit mode with no changes, or already warned → navigate away
+    setShowDiscardWarning(false)
+    onCancel?.()
+  }, [viewMode, changeCount, showDiscardWarning, onCancel])
 
   if (isPending) {
     return (
@@ -213,9 +250,21 @@ export function ProductForm({
       {/* Header */}
       <div className="flex items-center gap-3">
         {onCancel && (
-          <Button variant="ghost" size="icon" onClick={onCancel} type="button">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+          <div className="flex flex-col items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              type="button"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            {showDiscardWarning && (
+              <span className="text-[10px] text-destructive">
+                Click to discard
+              </span>
+            )}
+          </div>
         )}
         <div className="flex-1">
           <h2 className="text-lg font-semibold">
@@ -398,9 +447,16 @@ export function ProductForm({
               variant="outline"
               size="sm"
               type="button"
-              onClick={() =>
-                setViewMode((m) => (m === 'edit' ? 'preview' : 'edit'))
-              }
+              onClick={() => {
+                if (viewMode === 'edit') {
+                  const url = new URL(window.location.href)
+                  url.searchParams.set('mode', 'preview')
+                  window.history.pushState(null, '', url.toString())
+                  setViewMode('preview')
+                } else {
+                  window.history.back()
+                }
+              }}
             >
               {viewMode === 'edit' ? (
                 <>

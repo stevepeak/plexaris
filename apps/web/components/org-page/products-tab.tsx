@@ -2,9 +2,9 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
 
-import { type Product, ProductList } from '@/components/product-list'
+import { ProductList } from '@/components/product-list'
+import { trpc } from '@/lib/trpc'
 
 export function ProductsTab({
   organizationId,
@@ -14,24 +14,15 @@ export function ProductsTab({
   permissions: string[]
 }) {
   const router = useRouter()
-  const [products, setProducts] = useState<Product[]>([])
-  const [isPending, setIsPending] = useState(false)
-
-  const refreshProducts = useCallback(() => {
-    setIsPending(true)
-    void fetch(`/api/products?organizationId=${organizationId}`)
-      .then((res) => (res.ok ? res.json() : { products: [] }))
-      .then((data) => setProducts(data.products ?? []))
-      .finally(() => setIsPending(false))
-  }, [organizationId])
-
-  useEffect(() => {
-    refreshProducts()
-  }, [refreshProducts])
+  const { data, isPending } = trpc.product.list.useQuery({ organizationId })
 
   return (
     <ProductList
-      products={products}
+      products={(data ?? []).map((p) => ({
+        ...p,
+        images: p.images ?? [],
+        data: p.data as Record<string, unknown> | null | undefined,
+      }))}
       isPending={isPending}
       permissions={permissions}
       onAddProduct={() => router.push(`/orgs/${organizationId}/products/new`)}
