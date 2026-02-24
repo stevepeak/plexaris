@@ -17,14 +17,13 @@ const authRoutes = ['/login', '/signup']
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  const isHomePage = pathname === '/'
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route),
   )
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
   const isOnboarding = pathname.startsWith('/onboarding')
 
-  if (!isHomePage && !isProtectedRoute && !isAuthRoute) {
+  if (!isProtectedRoute && !isAuthRoute) {
     return NextResponse.next()
   }
 
@@ -42,18 +41,6 @@ export async function middleware(request: NextRequest) {
     : { session: null }
 
   const isAuthenticated = !!session?.session
-
-  // Home page redirects based on auth state
-  if (isHomePage) {
-    if (!isAuthenticated) {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-    // Authenticated: check if user has orgs
-    const hasOrgs = await userHasOrganizations(request)
-    return NextResponse.redirect(
-      new URL(hasOrgs ? '/dashboard' : '/onboarding', request.url),
-    )
-  }
 
   // Unauthenticated users on protected routes go to /login
   if (isProtectedRoute && !isAuthenticated) {

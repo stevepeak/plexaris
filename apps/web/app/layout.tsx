@@ -14,15 +14,17 @@ import { TRPCProvider } from './providers/trpc-provider'
 export const metadata: Metadata = {
   title: {
     template: '%s | Plexaris',
-    default: 'Plexaris',
+    default: 'Plexaris — AI-Powered Ordering for Food Service',
   },
-  description: 'A modern Next.js application template',
+  description:
+    'Plexaris connects HoReCa buyers with food suppliers through AI-powered voice and text ordering. Free for restaurants, transparent pricing for suppliers.',
   icons: {
     icon: '/icon.svg',
   },
   openGraph: {
-    title: 'Plexaris',
-    description: 'A modern Next.js application template',
+    title: 'Plexaris — AI-Powered Ordering for Food Service',
+    description:
+      'Plexaris connects HoReCa buyers with food suppliers through AI-powered voice and text ordering. Free for restaurants, transparent pricing for suppliers.',
     type: 'website',
   },
 }
@@ -38,7 +40,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
         {isDev() && (
