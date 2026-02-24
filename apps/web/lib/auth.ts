@@ -1,10 +1,17 @@
 import { createDb, schema } from '@app/db'
-import { PasswordResetEmail, WelcomeEmail } from '@app/email'
+import { type Locale, PasswordResetEmail, WelcomeEmail } from '@app/email'
 import { sendEmail } from '@app/resend'
 import { passkey } from '@better-auth/passkey'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { cookies } from 'next/headers'
 import { createElement } from 'react'
+
+async function getLocale(): Promise<Locale> {
+  const cookieStore = await cookies()
+  const value = cookieStore.get('locale')?.value
+  return value === 'nl' ? 'nl' : 'en'
+}
 
 const db = createDb()
 
@@ -35,12 +42,14 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user) => {
+          const locale = await getLocale()
           await sendEmail(
             user.email,
             'Welcome to Plexaris',
             createElement(WelcomeEmail, {
               userName: user.name,
               loginLink: `${baseURL}/login`,
+              locale,
             }),
           )
         },
@@ -50,12 +59,14 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url }) => {
+      const locale = await getLocale()
       await sendEmail(
         user.email,
         'Reset your password',
         createElement(PasswordResetEmail, {
           userName: user.name,
           resetLink: url,
+          locale,
         }),
       )
     },

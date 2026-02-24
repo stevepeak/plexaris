@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import {
@@ -74,6 +75,180 @@ const SECTION_ICONS: Record<BrowseSection, LucideIcon> = {
   products: Package,
   suppliers: Store,
   recipes: ChefHat,
+}
+
+function SectionLabel({ text }: { text: string }) {
+  switch (text) {
+    case 'Favorites':
+      return <span>Favorites</span>
+    case 'Products':
+      return <span>Products</span>
+    case 'Suppliers':
+      return <span>Suppliers</span>
+    case 'Recipes':
+      return <span>Recipes</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
+function CategoryLabel({ text }: { text: string }) {
+  switch (text) {
+    case 'All products':
+      return <span>All products</span>
+    case 'All suppliers':
+      return <span>All suppliers</span>
+    case 'Local farms':
+      return <span>Local farms</span>
+    case 'Wholesale':
+      return <span>Wholesale</span>
+    case 'Specialty':
+      return <span>Specialty</span>
+    case 'All favorites':
+      return <span>All favorites</span>
+    case 'Most ordered':
+      return <span>Most ordered</span>
+    case 'Recently added':
+      return <span>Recently added</span>
+    case 'All recipes':
+      return <span>All recipes</span>
+    case 'Breakfast':
+      return <span>Breakfast</span>
+    case 'Lunch':
+      return <span>Lunch</span>
+    case 'Dinner':
+      return <span>Dinner</span>
+    case 'Guides':
+      return <span>Guides</span>
+    case 'Bread':
+      return <span>Bread</span>
+    case 'Pastry':
+      return <span>Pastry</span>
+    case 'Dairy':
+      return <span>Dairy</span>
+    case 'Meat':
+      return <span>Meat</span>
+    case 'Fish':
+      return <span>Fish</span>
+    case 'Produce':
+      return <span>Produce</span>
+    case 'Beverages':
+      return <span>Beverages</span>
+    case 'Ingredients':
+      return <span>Ingredients</span>
+    case 'Other':
+      return <span>Other</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
+function AllCategoryLabel({ text }: { text: string }) {
+  switch (text) {
+    case 'Bread':
+      return <span>All Bread</span>
+    case 'Pastry':
+      return <span>All Pastry</span>
+    case 'Dairy':
+      return <span>All Dairy</span>
+    case 'Meat':
+      return <span>All Meat</span>
+    case 'Fish':
+      return <span>All Fish</span>
+    case 'Produce':
+      return <span>All Produce</span>
+    case 'Beverages':
+      return <span>All Beverages</span>
+    case 'Ingredients':
+      return <span>All Ingredients</span>
+    case 'Other':
+      return <span>All Other</span>
+    default:
+      return <span>All {text}</span>
+  }
+}
+
+function SubcategoryLabel({ text }: { text: string }) {
+  switch (text) {
+    case 'Sourdough':
+      return <span>Sourdough</span>
+    case 'White bread':
+      return <span>White bread</span>
+    case 'Whole wheat':
+      return <span>Whole wheat</span>
+    case 'Rye':
+      return <span>Rye</span>
+    case 'Rolls':
+      return <span>Rolls</span>
+    case 'Croissants':
+      return <span>Croissants</span>
+    case 'Danish':
+      return <span>Danish</span>
+    case 'Pies':
+      return <span>Pies</span>
+    case 'Cakes':
+      return <span>Cakes</span>
+    case 'Cookies':
+      return <span>Cookies</span>
+    case 'Milk':
+      return <span>Milk</span>
+    case 'Cheese':
+      return <span>Cheese</span>
+    case 'Yogurt':
+      return <span>Yogurt</span>
+    case 'Butter':
+      return <span>Butter</span>
+    case 'Cream':
+      return <span>Cream</span>
+    case 'Beef':
+      return <span>Beef</span>
+    case 'Pork':
+      return <span>Pork</span>
+    case 'Poultry':
+      return <span>Poultry</span>
+    case 'Lamb':
+      return <span>Lamb</span>
+    case 'Charcuterie':
+      return <span>Charcuterie</span>
+    case 'Fresh fish':
+      return <span>Fresh fish</span>
+    case 'Frozen fish':
+      return <span>Frozen fish</span>
+    case 'Smoked fish':
+      return <span>Smoked fish</span>
+    case 'Shellfish':
+      return <span>Shellfish</span>
+    case 'Vegetables':
+      return <span>Vegetables</span>
+    case 'Fruit':
+      return <span>Fruit</span>
+    case 'Herbs':
+      return <span>Herbs</span>
+    case 'Salads':
+      return <span>Salads</span>
+    case 'Juices':
+      return <span>Juices</span>
+    case 'Soft drinks':
+      return <span>Soft drinks</span>
+    case 'Water':
+      return <span>Water</span>
+    case 'Coffee':
+      return <span>Coffee</span>
+    case 'Tea':
+      return <span>Tea</span>
+    case 'Eggs':
+      return <span>Eggs</span>
+    case 'Flour':
+      return <span>Flour</span>
+    case 'Sugar':
+      return <span>Sugar</span>
+    case 'Oils':
+      return <span>Oils</span>
+    case 'Spices':
+      return <span>Spices</span>
+    default:
+      return <span>{text}</span>
+  }
 }
 
 export interface BrowseProduct {
@@ -271,7 +446,7 @@ export function CategorySidebar({
                   onClick={() => onNavigate(cat.label)}
                 >
                   <cat.icon className="h-4 w-4" />
-                  {cat.label}
+                  <CategoryLabel text={cat.label} />
                 </Button>
               )
             })}
@@ -362,23 +537,25 @@ function Breadcrumbs({
                 className="min-w-0 truncate text-muted-foreground hover:text-foreground"
                 onClick={() => onNavigate(parsed.primary)}
               >
-                {parsed.primary}
+                <CategoryLabel text={parsed.primary} />
               </button>
               <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
-              <span className="min-w-0 truncate font-medium">{parsed.sub}</span>
+              <span className="min-w-0 truncate font-medium">
+                <SubcategoryLabel text={parsed.sub} />
+              </span>
             </>
           ) : (
             <>
               <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
               <span className="min-w-0 truncate font-medium">
-                {activeCategory}
+                <CategoryLabel text={activeCategory} />
               </span>
             </>
           )}
         </>
       ) : (
         <span className="min-w-0 truncate font-medium">
-          {SECTION_LABELS[activeSection]}
+          <SectionLabel text={SECTION_LABELS[activeSection]} />
         </span>
       )}
     </div>
@@ -405,7 +582,7 @@ function SubCategoryGroup({
         onClick={() => setExpanded((e) => !e)}
       >
         <IconComp className="h-4 w-4" />
-        {category.label}
+        <CategoryLabel text={category.label} />
         <ChevronRight
           className={`ml-auto h-3.5 w-3.5 text-muted-foreground transition-transform ${expanded ? 'rotate-90' : ''}`}
         />
@@ -418,7 +595,7 @@ function SubCategoryGroup({
             className="justify-start text-xs"
             onClick={() => onNavigate(category.label)}
           >
-            All {category.label}
+            <AllCategoryLabel text={category.label} />
           </Button>
           {category.subcategories?.map((sub) => (
             <Button
@@ -430,7 +607,7 @@ function SubCategoryGroup({
                 onNavigate(buildCategoryValue(category.label, sub))
               }
             >
-              {sub}
+              <SubcategoryLabel text={sub} />
             </Button>
           ))}
         </div>

@@ -1,3 +1,4 @@
+'use i18n'
 import { Fingerprint, Loader2, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 

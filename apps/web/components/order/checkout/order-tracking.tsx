@@ -1,3 +1,4 @@
+'use i18n'
 import { CheckCircle2, Copy, PackageCheck, Truck, XCircle } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'

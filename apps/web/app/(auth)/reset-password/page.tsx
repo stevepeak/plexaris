@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import Link from 'next/link'
@@ -95,7 +96,11 @@ function ResetPasswordForm() {
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? 'Resetting...' : 'Reset password'}
+            {isLoading ? (
+              <span>Resetting...</span>
+            ) : (
+              <span>Reset password</span>
+            )}
           </Button>
         </form>
       </CardContent>

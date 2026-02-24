@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Mail, MapPin, Package, Phone, Star, Store } from 'lucide-react'

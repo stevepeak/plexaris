@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Fingerprint, Loader2 } from 'lucide-react'

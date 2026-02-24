@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { MessageSquare } from 'lucide-react'

@@ -1,3 +1,4 @@
+'use i18n'
 import { ChevronRight } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'

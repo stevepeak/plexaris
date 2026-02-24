@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import {
@@ -218,7 +219,7 @@ export function ProductForm({
         )}
         <div className="flex-1">
           <h2 className="text-lg font-semibold">
-            {isEditing ? 'Edit product' : 'Add product'}
+            {isEditing ? <span>Edit product</span> : <span>Add product</span>}
           </h2>
           <p className="text-sm text-muted-foreground">
             {isEditing
@@ -333,7 +334,11 @@ export function ProductForm({
                           </div>
                         </TooltipTrigger>
                         <TooltipContent side="left">
-                          {enabled ? 'Disable section' : 'Enable section'}
+                          {enabled ? (
+                            <span>Disable section</span>
+                          ) : (
+                            <span>Enable section</span>
+                          )}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>

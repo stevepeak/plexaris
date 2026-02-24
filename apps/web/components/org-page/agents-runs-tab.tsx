@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { CheckCircle2, Loader2 } from 'lucide-react'
@@ -67,6 +68,43 @@ function getPageNumbers(
   return pages
 }
 
+function PlaceholderLabel({ text }: { text: string }) {
+  switch (text) {
+    case 'Weekly Supplier Update':
+      return <span>Weekly Supplier Update</span>
+    case 'Competitive Analysis':
+      return <span>Competitive Analysis</span>
+    case 'Product Catalog Refresh':
+      return <span>Product Catalog Refresh</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
+function PlaceholderStatus({ text }: { text: string }) {
+  switch (text) {
+    case 'completed':
+      return <span>completed</span>
+    case 'running':
+      return <span>running</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
+function PlaceholderTime({ text }: { text: string }) {
+  switch (text) {
+    case '2 hours ago':
+      return <span>2 hours ago</span>
+    case '5 minutes ago':
+      return <span>5 minutes ago</span>
+    case '3 days ago':
+      return <span>3 days ago</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
 export function AgentsRunsTab({ organizationId }: { organizationId: string }) {
   const [page, setPage] = useState(1)
 
@@ -106,13 +144,17 @@ export function AgentsRunsTab({ organizationId }: { organizationId: string }) {
                 ) : (
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
                 )}
-                <span className="text-sm font-medium">{p.label}</span>
+                <span className="text-sm font-medium">
+                  <PlaceholderLabel text={p.label} />
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
-                  {p.status}
+                  <PlaceholderStatus text={p.status} />
                 </Badge>
-                <span className="text-xs text-muted-foreground">{p.time}</span>
+                <span className="text-xs text-muted-foreground">
+                  <PlaceholderTime text={p.time} />
+                </span>
               </div>
             </div>
           ))}

@@ -1,8 +1,9 @@
 import { trackEvent } from '@app/api'
 import { getConfig } from '@app/config'
 import { and, createDb, eq, isNull, schema } from '@app/db'
-import { UserInviteEmail } from '@app/email'
+import { type Locale, UserInviteEmail } from '@app/email'
 import { sendEmail } from '@app/resend'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { createElement } from 'react'
 
@@ -120,6 +121,9 @@ export async function POST(request: Request) {
     })
 
     const baseURL = getConfig().BETTER_AUTH_BASE_URL
+    const cookieStore = await cookies()
+    const locale: Locale =
+      cookieStore.get('locale')?.value === 'nl' ? 'nl' : 'en'
     await sendEmail(
       email,
       `You've been invited to join ${org?.name ?? 'an organization'}`,
@@ -128,6 +132,7 @@ export async function POST(request: Request) {
         organizationName: org?.name ?? 'an organization',
         inviteLink: `${baseURL}/dashboard`,
         roleName: targetRole.name,
+        locale,
       }),
     )
   } catch (e) {

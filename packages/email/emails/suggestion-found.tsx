@@ -1,6 +1,7 @@
 import { Button, Heading, Section, Text } from '@react-email/components'
 
 import { Layout } from '../src/components/layout'
+import { type Locale, t } from '../src/i18n'
 
 export type SuggestionFoundEmailProps = {
   userName: string
@@ -11,15 +12,7 @@ export type SuggestionFoundEmailProps = {
   confidence: string | null
   source: string | null
   reviewLink: string
-}
-
-const actionLabels: Record<
-  SuggestionFoundEmailProps['suggestionAction'],
-  string
-> = {
-  create: 'Create',
-  update: 'Update',
-  update_field: 'Update field',
+  locale?: Locale
 }
 
 export default function SuggestionFoundEmail({
@@ -31,42 +24,45 @@ export default function SuggestionFoundEmail({
   confidence,
   source,
   reviewLink,
+  locale = 'en',
 }: SuggestionFoundEmailProps) {
   return (
     <Layout
-      preview={`New suggestion for ${organizationName}: ${suggestionLabel}`}
+      preview={t('suggestion.preview', locale, {
+        organizationName,
+        suggestionLabel,
+      })}
+      locale={locale}
     >
-      <Heading style={heading}>New Suggestion Found</Heading>
-      <Text style={text}>Hi {userName},</Text>
+      <Heading style={heading}>{t('suggestion.heading', locale)}</Heading>
+      <Text style={text}>{t('suggestion.greeting', locale, { userName })}</Text>
       <Text style={text}>
-        A new suggestion has been found for <strong>{organizationName}</strong>.
+        {t('suggestion.body', locale, { organizationName })}
       </Text>
       <Section style={card}>
         <Text style={cardTitle}>{suggestionLabel}</Text>
         <Text style={cardDetail}>
-          <strong>Action:</strong> {actionLabels[suggestionAction]}
+          <strong>{t('suggestion.action', locale)}</strong>{' '}
+          {t(`suggestion.action.${suggestionAction}`, locale)}
         </Text>
         <Text style={cardDetail}>
-          <strong>Target:</strong> {targetType}
+          <strong>{t('suggestion.target', locale)}</strong> {targetType}
         </Text>
         {confidence && (
           <Text style={cardDetail}>
-            <strong>Confidence:</strong> {confidence}
+            <strong>{t('suggestion.confidence', locale)}</strong> {confidence}
           </Text>
         )}
         {source && (
           <Text style={cardDetail}>
-            <strong>Source:</strong> {source}
+            <strong>{t('suggestion.source', locale)}</strong> {source}
           </Text>
         )}
       </Section>
       <Button style={button} href={reviewLink}>
-        Review Suggestion
+        {t('suggestion.button', locale)}
       </Button>
-      <Text style={muted}>
-        You&apos;re receiving this because you have email notifications enabled
-        for suggestions.
-      </Text>
+      <Text style={muted}>{t('suggestion.disclaimer', locale)}</Text>
     </Layout>
   )
 }

@@ -1,3 +1,4 @@
+'use i18n'
 import { ChefHat, Package, Star, Store } from 'lucide-react'
 
 import { Card } from '@/components/ui/card'

@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Fingerprint } from 'lucide-react'
@@ -5,6 +6,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -117,7 +119,7 @@ function LoginForm() {
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? 'Signing in...' : 'Sign in'}
+            {isLoading ? <span>Signing in...</span> : <span>Sign in</span>}
           </Button>
         </form>
 
@@ -142,7 +144,11 @@ function LoginForm() {
                 <Fingerprint className="size-4 text-primary" />
               </span>
               <span>
-                {passkeyLoading ? 'Verifying...' : 'Sign in with passkey'}
+                {passkeyLoading ? (
+                  <span>Verifying...</span>
+                ) : (
+                  <span>Sign in with passkey</span>
+                )}
               </span>
             </button>
           </>
@@ -235,12 +241,16 @@ export default function LoginPage() {
       </div>
 
       <div className="relative flex flex-col items-center gap-6">
-        <h1 className="font-bruno text-4xl tracking-wide text-foreground">
+        <h1
+          className="font-bruno text-4xl tracking-wide text-foreground"
+          data-lingo-override={{ nl: 'Plexaris' }}
+        >
           Plexaris
         </h1>
         <Suspense fallback={<LoginFallback />}>
           <LoginForm />
         </Suspense>
+        <LanguageSwitcher />
       </div>
     </div>
   )

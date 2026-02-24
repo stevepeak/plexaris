@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import {
@@ -437,7 +438,9 @@ export function ProductList({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                Switch to {viewMode === 'grid' ? 'table' : 'grid'} view
+                Switch to{' '}
+                {viewMode === 'grid' ? <span>table</span> : <span>grid</span>}{' '}
+                view
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

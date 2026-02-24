@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { useState } from 'react'
@@ -83,7 +84,7 @@ export function AuthCard() {
   return (
     <div className="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
       <h2 className="mb-4 text-xl font-semibold text-gray-900">
-        {mode === 'signin' ? 'Sign In' : 'Sign Up'}
+        {mode === 'signin' ? <span>Sign In</span> : <span>Sign Up</span>}
       </h2>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -166,7 +167,13 @@ export function AuthCard() {
           disabled={isLoading}
           className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-gray-400"
         >
-          {isLoading ? 'Loading...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
+          {isLoading ? (
+            <span>Loading...</span>
+          ) : mode === 'signin' ? (
+            <span>Sign In</span>
+          ) : (
+            <span>Sign Up</span>
+          )}
         </button>
       </form>
 

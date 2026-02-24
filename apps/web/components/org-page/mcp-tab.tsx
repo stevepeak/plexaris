@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Check, Copy, Keyboard } from 'lucide-react'
@@ -59,45 +60,12 @@ function GeminiIcon({ className }: { className?: string }) {
   )
 }
 
-const CHAT_PROMPTS = [
-  {
-    text: 'What is my top selling product this month?',
-    emoji: '🐢',
-    position: 'top-[18%] left-[15%] -rotate-3',
-  },
-  {
-    text: 'Update the price of our bakery items +10%',
-    emoji: '🐙',
-    position: 'top-[22%] right-[12%] rotate-2',
-  },
-  {
-    text: 'What is the status of my open orders?',
-    emoji: '🐕',
-    position: 'bottom-[22%] left-[12%] rotate-1',
-  },
-  {
-    text: 'When was the last time we ordered beverages?',
-    emoji: '🐈',
-    position: 'bottom-[18%] right-[15%] -rotate-2',
-  },
-  {
-    text: 'Show me revenue trends for the last 3 months',
-    emoji: '🐟',
-    position: 'top-[42%] left-[8%] -rotate-1',
-  },
-  {
-    text: 'Which suppliers have late deliveries this week?',
-    emoji: '🦊',
-    position: 'top-[45%] right-[8%] rotate-1',
-  },
-]
-
 function ChatBubble({
-  text,
+  children,
   emoji,
   position,
 }: {
-  text: string
+  children: ReactNode
   emoji: string
   position: string
 }) {
@@ -109,7 +77,26 @@ function ChatBubble({
         {emoji}
       </div>
       <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-card/70 px-3.5 py-2.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
-        {text}
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function MobileChatBubble({
+  children,
+  emoji,
+}: {
+  children: ReactNode
+  emoji: string
+}) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border/40 bg-muted/60 text-base">
+        {emoji}
+      </div>
+      <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-card/70 px-3.5 py-2.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
+        {children}
       </div>
     </div>
   )
@@ -210,27 +197,45 @@ export function McpTab(_props: McpTabProps) {
       </div>
 
       {/* Chat bubbles around the card */}
-      {CHAT_PROMPTS.map((prompt) => (
-        <ChatBubble
-          key={prompt.text}
-          text={prompt.text}
-          emoji={prompt.emoji}
-          position={prompt.position}
-        />
-      ))}
+      <ChatBubble emoji="🐢" position="top-[18%] left-[15%] -rotate-3">
+        What is my top selling product this month?
+      </ChatBubble>
+      <ChatBubble emoji="🐙" position="top-[22%] right-[12%] rotate-2">
+        Update the price of our bakery items +10%
+      </ChatBubble>
+      <ChatBubble emoji="🐕" position="bottom-[22%] left-[12%] rotate-1">
+        What is the status of my open orders?
+      </ChatBubble>
+      <ChatBubble emoji="🐈" position="bottom-[18%] right-[15%] -rotate-2">
+        When was the last time we ordered beverages?
+      </ChatBubble>
+      <ChatBubble emoji="🐟" position="top-[42%] left-[8%] -rotate-1">
+        Show me revenue trends for the last 3 months
+      </ChatBubble>
+      <ChatBubble emoji="🦊" position="top-[45%] right-[8%] rotate-1">
+        Which suppliers have late deliveries this week?
+      </ChatBubble>
 
       {/* Mobile chat bubbles */}
       <div className="relative z-10 flex w-full max-w-lg flex-col gap-3 px-4 md:hidden">
-        {CHAT_PROMPTS.map((prompt) => (
-          <div key={prompt.text} className="flex items-start gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border/40 bg-muted/60 text-base">
-              {prompt.emoji}
-            </div>
-            <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-card/70 px-3.5 py-2.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
-              {prompt.text}
-            </div>
-          </div>
-        ))}
+        <MobileChatBubble emoji="🐢">
+          What is my top selling product this month?
+        </MobileChatBubble>
+        <MobileChatBubble emoji="🐙">
+          Update the price of our bakery items +10%
+        </MobileChatBubble>
+        <MobileChatBubble emoji="🐕">
+          What is the status of my open orders?
+        </MobileChatBubble>
+        <MobileChatBubble emoji="🐈">
+          When was the last time we ordered beverages?
+        </MobileChatBubble>
+        <MobileChatBubble emoji="🐟">
+          Show me revenue trends for the last 3 months
+        </MobileChatBubble>
+        <MobileChatBubble emoji="🦊">
+          Which suppliers have late deliveries this week?
+        </MobileChatBubble>
       </div>
 
       {/* Coming soon pill + blurred card */}
@@ -266,7 +271,7 @@ export function McpTab(_props: McpTabProps) {
                       ) : (
                         <Copy className="h-3.5 w-3.5" />
                       )}
-                      {copied ? 'Copied' : 'Copy'}
+                      {copied ? <span>Copied</span> : <span>Copy</span>}
                     </Button>
                   </div>
                   <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed">

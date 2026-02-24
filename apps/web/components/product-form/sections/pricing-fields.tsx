@@ -1,3 +1,4 @@
+'use i18n'
 import { FieldNumber } from '../field-primitives'
 import { ci, type FCProp } from '../types'
 

@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Building2, Loader2 } from 'lucide-react'

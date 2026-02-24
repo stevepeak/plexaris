@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Bot } from 'lucide-react'
@@ -97,7 +98,11 @@ export default function ProductEditPage() {
               activate it when ready.
             </span>
             <Button size="sm" onClick={handleActivate} disabled={isActivating}>
-              {isActivating ? 'Activating...' : 'Activate product'}
+              {isActivating ? (
+                <span>Activating...</span>
+              ) : (
+                <span>Activate product</span>
+              )}
             </Button>
           </AlertDescription>
         </Alert>

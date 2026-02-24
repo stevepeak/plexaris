@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { AlertTriangle } from 'lucide-react'
@@ -42,7 +43,12 @@ export function ScrapeIssuesTable({ issues }: { issues: ScrapeIssue[] }) {
             Scrape Issues
           </CardTitle>
           <CardDescription>
-            {validIssues.length} {validIssues.length === 1 ? 'issue' : 'issues'}{' '}
+            {validIssues.length}{' '}
+            {validIssues.length === 1 ? (
+              <span>issue</span>
+            ) : (
+              <span>issues</span>
+            )}{' '}
             found during data scraping
           </CardDescription>
         </div>

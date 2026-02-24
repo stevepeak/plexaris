@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { LogOut, Settings } from 'lucide-react'
@@ -187,7 +188,11 @@ export default function OnboardingPage() {
       <header className="border-b">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="font-bruno text-lg">
+            <Link
+              href="/dashboard"
+              className="font-bruno text-lg"
+              data-lingo-override={{ nl: 'Plexaris' }}
+            >
               Plexaris
             </Link>
             <Separator orientation="vertical" className="h-6" />

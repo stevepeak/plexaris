@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import {
@@ -25,6 +26,69 @@ import {
 } from '@/components/ui/tooltip'
 import { trpc } from '@/lib/trpc'
 import { cn } from '@/lib/utils'
+
+function NotificationText({ text }: { text: string }) {
+  switch (text) {
+    // Group labels
+    case 'Orders':
+      return <span>Orders</span>
+    case 'Team':
+      return <span>Team</span>
+    case 'Agents':
+      return <span>Agents</span>
+    // Group descriptions
+    case 'Activity on orders you manage':
+      return <span>Activity on orders you manage</span>
+    case 'Members joining your organization':
+      return <span>Members joining your organization</span>
+    case 'Updates from your AI agents':
+      return <span>Updates from your AI agents</span>
+    // Item labels
+    case 'Order placed':
+      return <span>Order placed</span>
+    case 'Order cancelled':
+      return <span>Order cancelled</span>
+    case 'Order returned':
+      return <span>Order returned</span>
+    case 'Order issues':
+      return <span>Order issues</span>
+    case 'User invited':
+      return <span>User invited</span>
+    case 'User accepted invite':
+      return <span>User accepted invite</span>
+    case 'Suggestion found':
+      return <span>Suggestion found</span>
+    case 'Agent completed':
+      return <span>Agent completed</span>
+    // Item descriptions
+    case 'When a new order is submitted':
+      return <span>When a new order is submitted</span>
+    case 'When an order is cancelled':
+      return <span>When an order is cancelled</span>
+    case 'When an order is returned':
+      return <span>When an order is returned</span>
+    case 'When there are problems with an order':
+      return <span>When there are problems with an order</span>
+    case 'When a new member is invited':
+      return <span>When a new member is invited</span>
+    case 'When an invited member joins':
+      return <span>When an invited member joins</span>
+    case 'When an agent finds a new suggestion':
+      return <span>When an agent finds a new suggestion</span>
+    case 'When an agent finishes its task':
+      return <span>When an agent finishes its task</span>
+    // Channel labels
+    case 'Email':
+      return <span>Email</span>
+    case 'SMS':
+      return <span>SMS</span>
+    // Tooltip
+    case 'Coming soon':
+      return <span>Coming soon</span>
+    default:
+      return <span>{text}</span>
+  }
+}
 
 type NotificationType =
   | 'order_placed'
@@ -153,7 +217,9 @@ function ChannelToggle({
       )}
     >
       <IconComponent className="h-3.5 w-3.5 text-muted-foreground" />
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <span className="text-xs font-medium text-muted-foreground">
+        <NotificationText text={label} />
+      </span>
       <Switch
         checked={checked}
         disabled={disabled}
@@ -169,7 +235,9 @@ function ChannelToggle({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>{content}</TooltipTrigger>
-          <TooltipContent>{tooltip}</TooltipContent>
+          <TooltipContent>
+            <NotificationText text={tooltip} />
+          </TooltipContent>
         </Tooltip>
       </TooltipProvider>
     )
@@ -229,9 +297,11 @@ export function NotificationSettingsFormFields({
         {NOTIFICATION_GROUPS.map((group) => (
           <div key={group.label} className="rounded-xl border">
             <div className="flex items-center gap-3 border-b px-5 py-3.5">
-              <h3 className="text-sm font-semibold">{group.label}</h3>
+              <h3 className="text-sm font-semibold">
+                <NotificationText text={group.label} />
+              </h3>
               <span className="text-xs text-muted-foreground">
-                {group.description}
+                <NotificationText text={group.description} />
               </span>
             </div>
             <div className="divide-y">
@@ -251,9 +321,11 @@ export function NotificationSettingsFormFields({
                       <Icon className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium">{item.label}</p>
+                      <p className="text-sm font-medium">
+                        <NotificationText text={item.label} />
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        {item.description}
+                        <NotificationText text={item.description} />
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">

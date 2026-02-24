@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { ArrowLeft } from 'lucide-react'
@@ -419,7 +420,11 @@ export default function OrderPage() {
       <header className="border-b">
         <div className="flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="font-bruno text-lg">
+            <Link
+              href="/dashboard"
+              className="font-bruno text-lg"
+              data-lingo-override={{ nl: 'Plexaris' }}
+            >
               Plexaris
             </Link>
             <Separator orientation="vertical" className="h-6" />

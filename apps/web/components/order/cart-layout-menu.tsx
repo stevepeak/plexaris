@@ -1,3 +1,4 @@
+'use i18n'
 import { Group, List, type LucideIcon, Store, Tag, Users } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -38,6 +39,21 @@ const groupByOptions: LayoutOption[] = [
   { value: 'by-team-member', label: 'Team Member', icon: Users },
 ]
 
+function OptionLabel({ text }: { text: string }) {
+  switch (text) {
+    case 'Flat':
+      return <span>Flat</span>
+    case 'Supplier':
+      return <span>Supplier</span>
+    case 'Category':
+      return <span>Category</span>
+    case 'Team Member':
+      return <span>Team Member</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
 interface CartLayoutMenuProps {
   value: CartLayoutMode
   onValueChange: (mode: CartLayoutMode) => void
@@ -64,7 +80,7 @@ export function CartLayoutMenu({ value, onValueChange }: CartLayoutMenuProps) {
             {organizeOptions.map((option) => (
               <DropdownMenuRadioItem key={option.value} value={option.value}>
                 <option.icon className="mr-2 h-4 w-4" />
-                {option.label}
+                <OptionLabel text={option.label} />
               </DropdownMenuRadioItem>
             ))}
             <DropdownMenuSeparator />
@@ -72,7 +88,7 @@ export function CartLayoutMenu({ value, onValueChange }: CartLayoutMenuProps) {
             {groupByOptions.map((option) => (
               <DropdownMenuRadioItem key={option.value} value={option.value}>
                 <option.icon className="mr-2 h-4 w-4" />
-                {option.label}
+                <OptionLabel text={option.label} />
               </DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>

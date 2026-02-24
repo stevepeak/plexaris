@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import {
@@ -94,6 +95,98 @@ const PLACEHOLDER_SUGGESTIONS = [
   },
 ] as const
 
+function SourceTitle({ text }: { text: string }) {
+  switch (text) {
+    case 'AI Agents':
+      return <span>AI Agents</span>
+    case 'Team Members':
+      return <span>Team Members</span>
+    case 'Customers':
+      return <span>Customers</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
+function SourceDescription({ text }: { text: string }) {
+  switch (text) {
+    case 'Agents analyze your data and suggest improvements to products, pricing, and strategy.':
+      return (
+        <span>
+          Agents analyze your data and suggest improvements to products,
+          pricing, and strategy.
+        </span>
+      )
+    case 'Your team can submit suggestions for changes based on their expertise and observations.':
+      return (
+        <span>
+          Your team can submit suggestions for changes based on their expertise
+          and observations.
+        </span>
+      )
+    case 'Customer feedback and requests are captured as actionable suggestions.':
+      return (
+        <span>
+          Customer feedback and requests are captured as actionable suggestions.
+        </span>
+      )
+    default:
+      return <span>{text}</span>
+  }
+}
+
+function PlaceholderLabel({ text }: { text: string }) {
+  switch (text) {
+    case 'Update product pricing for Premium Plan':
+      return <span>Update product pricing for Premium Plan</span>
+    case 'Add new product category: Enterprise Tools':
+      return <span>Add new product category: Enterprise Tools</span>
+    case 'Update description for Starter Kit':
+      return <span>Update description for Starter Kit</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
+function PlaceholderAction({ text }: { text: string }) {
+  switch (text) {
+    case 'update_field':
+      return <span>update_field</span>
+    case 'create':
+      return <span>create</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
+function PlaceholderReasoning({ text }: { text: string }) {
+  switch (text) {
+    case 'Market analysis suggests a 15% price increase would align with competitor pricing while maintaining value proposition.':
+      return (
+        <span>
+          Market analysis suggests a 15% price increase would align with
+          competitor pricing while maintaining value proposition.
+        </span>
+      )
+    case 'Customer feedback indicates demand for enterprise-tier tooling with dedicated support and SLA guarantees.':
+      return (
+        <span>
+          Customer feedback indicates demand for enterprise-tier tooling with
+          dedicated support and SLA guarantees.
+        </span>
+      )
+    case 'Current description lacks key differentiators. Proposed copy highlights onboarding speed and integration options.':
+      return (
+        <span>
+          Current description lacks key differentiators. Proposed copy
+          highlights onboarding speed and integration options.
+        </span>
+      )
+    default:
+      return <span>{text}</span>
+  }
+}
+
 function SuggestionSourceCards({ compact }: { compact?: boolean }) {
   const { orgId } = useParams<{ orgId: string }>()
 
@@ -111,12 +204,12 @@ function SuggestionSourceCards({ compact }: { compact?: boolean }) {
             />
             <div>
               <p className={`font-medium ${compact ? 'text-xs' : 'text-sm'}`}>
-                {source.title}
+                <SourceTitle text={source.title} />
               </p>
               <p
                 className={`text-muted-foreground ${compact ? 'text-xs' : 'mt-1 text-xs'}`}
               >
-                {source.description}
+                <SourceDescription text={source.description} />
               </p>
             </div>
           </>
@@ -324,12 +417,12 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
                     <div className="flex items-center gap-2">
                       <p.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
                       <CardTitle className="text-sm font-medium">
-                        {p.label}
+                        <PlaceholderLabel text={p.label} />
                       </CardTitle>
                     </div>
                     <div className="flex shrink-0 items-center gap-1.5">
                       <Badge variant="outline" className="text-xs">
-                        {p.action}
+                        <PlaceholderAction text={p.action} />
                       </Badge>
                       <Badge
                         variant="outline"
@@ -341,7 +434,9 @@ export function SuggestionsTab({ organizationId }: { organizationId: string }) {
                   </div>
                 </CardHeader>
                 <CardContent className="pb-3">
-                  <p className="text-xs text-muted-foreground">{p.reasoning}</p>
+                  <p className="text-xs text-muted-foreground">
+                    <PlaceholderReasoning text={p.reasoning} />
+                  </p>
                 </CardContent>
                 <CardFooter className="gap-2 pt-0">
                   <Button size="sm" variant="default" disabled>

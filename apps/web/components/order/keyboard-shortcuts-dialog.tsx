@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Keyboard } from 'lucide-react'
@@ -22,6 +23,53 @@ import {
 interface KeyboardShortcutsDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+}
+
+function ShortcutText({ text }: { text: string }) {
+  switch (text) {
+    case 'Panels':
+      return <span>Panels</span>
+    case 'Tabs':
+      return <span>Tabs</span>
+    case 'Cart items':
+      return <span>Cart items</span>
+    case 'General':
+      return <span>General</span>
+    case 'Toggle search':
+      return <span>Toggle search</span>
+    case 'Toggle cart':
+      return <span>Toggle cart</span>
+    case 'Toggle chat':
+      return <span>Toggle chat</span>
+    case 'Switch to tab 1':
+      return <span>Switch to tab 1</span>
+    case 'Switch to tab 2–9':
+      return <span>Switch to tab 2–9</span>
+    case 'Close current tab':
+      return <span>Close current tab</span>
+    case 'View activity':
+      return <span>View activity</span>
+    case 'Edit cart':
+      return <span>Edit cart</span>
+    case 'Advanced options':
+      return <span>Advanced options</span>
+    case 'Previous item':
+      return <span>Previous item</span>
+    case 'Next item':
+      return <span>Next item</span>
+    case 'Increment quantity':
+      return <span>Increment quantity</span>
+    case 'Decrement quantity':
+      return <span>Decrement quantity</span>
+    case 'Remove item':
+      return <span>Remove item</span>
+    case 'Keyboard shortcuts':
+      return <span>Keyboard shortcuts</span>
+    case 'Clear search & blur':
+      return <span>Clear search & blur</span>
+    default:
+      return <span>{text}</span>
+  }
 }
 
 const SHORTCUT_GROUPS = [
@@ -94,7 +142,7 @@ export function KeyboardShortcutsDialog({
           {SHORTCUT_GROUPS.map((group) => (
             <div key={group.label}>
               <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {group.label}
+                <ShortcutText text={group.label} />
               </h4>
               <div className="space-y-1">
                 {group.shortcuts.map((shortcut) => (
@@ -102,7 +150,9 @@ export function KeyboardShortcutsDialog({
                     key={shortcut.description}
                     className="flex items-center justify-between py-1"
                   >
-                    <span className="text-sm">{shortcut.description}</span>
+                    <span className="text-sm">
+                      <ShortcutText text={shortcut.description} />
+                    </span>
                     <div className="flex gap-1">
                       {shortcut.keys.map((key) => (
                         <Kbd

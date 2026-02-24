@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import {
@@ -184,6 +185,48 @@ const NAV_CONFIG: NavItem[] = [
   },
 ]
 
+/** Render nav labels as static JSX text nodes so lingo.dev can translate them. */
+function NavLabel({ label }: { label: string }) {
+  switch (label) {
+    case 'Dashboard':
+      return <span>Dashboard</span>
+    case 'Orders':
+      return <span>Orders</span>
+    case 'Products':
+      return <span>Products</span>
+    case 'Insights':
+      return <span>Insights</span>
+    case 'Suggestions':
+      return <span>Suggestions</span>
+    case 'Align':
+      return <span>Align</span>
+    case 'Integrations':
+      return <span>Integrations</span>
+    case 'MCP':
+      return <span>MCP</span>
+    case 'Agents':
+      return <span>Agents</span>
+    case 'Schedules':
+      return <span>Schedules</span>
+    case 'Runs':
+      return <span>Runs</span>
+    case 'Roles':
+      return <span>Roles</span>
+    case 'Team':
+      return <span>Team</span>
+    case 'Audit':
+      return <span>Audit</span>
+    case 'Notifications':
+      return <span>Notifications</span>
+    case 'Settings':
+      return <span>Settings</span>
+    case 'Danger zone':
+      return <span>Danger zone</span>
+    default:
+      return <span>{label}</span>
+  }
+}
+
 export function OrgSidebar() {
   const { organizationId, orgType, permissions, isAdmin } = useOrg()
   const pathname = usePathname()
@@ -224,7 +267,7 @@ export function OrgSidebar() {
               className="flex items-center gap-2 px-3 pb-1 pt-2 text-xs font-medium text-muted-foreground"
             >
               <Icon className={cn('h-4 w-4', item.iconColor)} />
-              {item.label}
+              <NavLabel label={item.label} />
             </div>
           )
         }
@@ -246,7 +289,7 @@ export function OrgSidebar() {
             )}
           >
             <Icon className={cn('h-4 w-4', item.iconColor)} />
-            {item.label}
+            <NavLabel label={item.label} />
             {item.path === '/suggestions' &&
               pendingCount &&
               pendingCount.count > 0 && (

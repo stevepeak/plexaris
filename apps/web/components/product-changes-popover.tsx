@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Undo2 } from 'lucide-react'
@@ -36,14 +37,15 @@ export function ProductChangesPopover({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm">
-          ({changes.length}) {changes.length === 1 ? 'Change' : 'Changes'}
+          ({changes.length}){' '}
+          {changes.length === 1 ? <span>Change</span> : <span>Changes</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="border-b px-3 py-2">
           <p className="text-sm font-medium">
             {changes.length} unsaved{' '}
-            {changes.length === 1 ? 'change' : 'changes'}
+            {changes.length === 1 ? <span>change</span> : <span>changes</span>}
           </p>
         </div>
         <ScrollArea className="max-h-80">

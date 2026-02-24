@@ -1,3 +1,4 @@
+'use i18n'
 import { cn } from '@/lib/utils'
 
 interface CartItemAddedBy {

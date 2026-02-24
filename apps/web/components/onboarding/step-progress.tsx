@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { cn } from '@/lib/utils'
@@ -36,7 +37,7 @@ export function StepProgress({
                 : 'text-muted-foreground',
             )}
           >
-            {step.label}
+            <span>{step.label}</span>
           </span>
           {index < steps.length - 1 && <div className="h-px w-8 bg-border" />}
         </div>

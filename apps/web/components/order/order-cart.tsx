@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { ShoppingCart } from 'lucide-react'
@@ -200,7 +201,12 @@ export const OrderCart = forwardRef<OrderCartHandle, OrderCartProps>(
             {cart.allItems.length > 0 && (
               <div className="mb-3 flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
-                  {cart.itemCount} {cart.itemCount === 1 ? 'item' : 'items'}
+                  {cart.itemCount}{' '}
+                  {cart.itemCount === 1 ? (
+                    <span>item</span>
+                  ) : (
+                    <span>items</span>
+                  )}
                 </span>
                 <span className="font-semibold">
                   ${cart.subtotal.toFixed(2)}

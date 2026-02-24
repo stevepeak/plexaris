@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Loader2, TriangleAlert } from 'lucide-react'

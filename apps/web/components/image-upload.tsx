@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Camera, ImageUp, Loader2, Trash2 } from 'lucide-react'

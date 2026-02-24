@@ -1,3 +1,4 @@
+'use i18n'
 import { Calendar, CreditCard, Loader2, ShieldAlert } from 'lucide-react'
 import { useState } from 'react'
 
@@ -80,7 +81,8 @@ export function CheckoutForm({
         <div className="rounded-lg border p-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
-              {itemCount} {itemCount === 1 ? 'item' : 'items'}
+              {itemCount}{' '}
+              {itemCount === 1 ? <span>item</span> : <span>items</span>}
             </span>
             <span className="font-bold">${subtotal.toFixed(2)}</span>
           </div>

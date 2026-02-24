@@ -1,3 +1,4 @@
+'use i18n'
 import { Undo2 } from 'lucide-react'
 
 import { Input } from '@/components/ui/input'
@@ -82,7 +83,7 @@ export function FieldNumber({
   onChange,
   change,
 }: {
-  label: string
+  label: React.ReactNode
   value: string
   onChange: (v: number | undefined) => void
   change?: ChangeInfo

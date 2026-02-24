@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Bot, Eye, Package, Settings, ShoppingCart, Users } from 'lucide-react'
@@ -26,6 +27,52 @@ type OrgCounts = {
   members: number
   orders: number
   agentRuns: number
+}
+
+function OnboardingTitle({ text }: { text: string }) {
+  switch (text) {
+    case 'Add your first product':
+      return <span>Add your first product</span>
+    case 'Invite your team':
+      return <span>Invite your team</span>
+    case 'Start your first order':
+      return <span>Start your first order</span>
+    case 'Run your first AI agent':
+      return <span>Run your first AI agent</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
+function OnboardingDescription({ text }: { text: string }) {
+  switch (text) {
+    case 'Start building your catalog so customers can discover and order from you.':
+      return (
+        <span>
+          Start building your catalog so customers can discover and order from
+          you.
+        </span>
+      )
+    case 'Collaborate with your colleagues by inviting them to your organization.':
+      return (
+        <span>
+          Collaborate with your colleagues by inviting them to your
+          organization.
+        </span>
+      )
+    case 'Browse suppliers and products to place your first order.':
+      return (
+        <span>Browse suppliers and products to place your first order.</span>
+      )
+    case 'Use AI agents to keep your product catalog up to date automatically.':
+      return (
+        <span>
+          Use AI agents to keep your product catalog up to date automatically.
+        </span>
+      )
+    default:
+      return <span>{text}</span>
+  }
 }
 
 export function DashboardTab({
@@ -139,8 +186,12 @@ export function DashboardTab({
                       <card.icon className={`h-5 w-5 ${card.iconColor}`} />
                     </div>
                     <div className="grid gap-1">
-                      <CardTitle className="text-base">{card.title}</CardTitle>
-                      <CardDescription>{card.description}</CardDescription>
+                      <CardTitle className="text-base">
+                        <OnboardingTitle text={card.title} />
+                      </CardTitle>
+                      <CardDescription>
+                        <OnboardingDescription text={card.description} />
+                      </CardDescription>
                     </div>
                   </CardHeader>
                 </Card>

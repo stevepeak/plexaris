@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { useState } from 'react'
@@ -76,7 +77,13 @@ export function TriggerCard() {
                       : 'font-medium text-blue-600'
                 }
               >
-                {isCompleted ? 'Completed' : isFailed ? 'Failed' : 'Running...'}
+                {isCompleted ? (
+                  <span>Completed</span>
+                ) : isFailed ? (
+                  <span>Failed</span>
+                ) : (
+                  <span>Running...</span>
+                )}
               </span>
             </p>
           </div>

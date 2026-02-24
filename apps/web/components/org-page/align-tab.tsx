@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import {
@@ -232,7 +233,11 @@ export function AlignTab(props: { organizationId: string }) {
               isDragging ? 'text-primary' : 'text-foreground',
             )}
           >
-            {isDragging ? 'Drop files here' : 'Drop any document here'}
+            {isDragging ? (
+              <span>Drop files here</span>
+            ) : (
+              <span>Drop any document here</span>
+            )}
           </p>
           <p className="mt-1.5 text-sm text-muted-foreground">
             Plexaris AI will discover product and organization details and turn

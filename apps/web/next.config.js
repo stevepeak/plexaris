@@ -1,3 +1,4 @@
+import { withLingo } from '@lingo.dev/compiler/next'
 import { withSentryConfig } from '@sentry/nextjs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -28,22 +29,42 @@ const securityHeaders = [
   },
 ]
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   turbopack: {
-    root: resolve(dirname(fileURLToPath(import.meta.url)), '../..'),
+    root: resolve(__dirname, '../..'),
   },
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }]
   },
 }
 
-export default withSentryConfig(nextConfig, {
+export default async function config() {
+  // lingo.dev's lmdb native module crashes turbopack build workers (SIGABRT),
+  // so we only enable it during development.
   // eslint-disable-next-line no-process-env
-  silent: !process.env.CI,
-  sourcemaps: {
-    deleteSourcemapsAfterUpload: true,
-  },
-  widenClientFileUpload: true,
-})
+  const isDev = process.env.NODE_ENV !== 'production'
+
+  const baseConfig = isDev
+    ? await withLingo(nextConfig, {
+        sourceRoot: './app',
+        sourceLocale: 'en',
+        targetLocales: ['nl'],
+        models: { '*:*': 'openrouter:anthropic/claude-sonnet-4-6' },
+        localePersistence: 'cookie',
+        useDirective: true,
+      })
+    : nextConfig
+
+  return withSentryConfig(baseConfig, {
+    // eslint-disable-next-line no-process-env
+    silent: !process.env.CI,
+    sourcemaps: {
+      deleteSourcemapsAfterUpload: true,
+    },
+    widenClientFileUpload: true,
+  })
+}

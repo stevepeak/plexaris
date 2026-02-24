@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import {
@@ -546,7 +547,7 @@ function DietaryDisplay({ data }: { data: Record<string, unknown> }) {
       {flags.map((flag) =>
         data[flag] != null ? (
           <Badge key={flag} variant={data[flag] ? 'default' : 'outline'}>
-            {flag}: {data[flag] ? 'Yes' : 'No'}
+            {flag}: {data[flag] ? <span>Yes</span> : <span>No</span>}
           </Badge>
         ) : null,
       )}

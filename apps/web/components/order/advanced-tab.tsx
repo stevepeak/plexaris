@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Archive, Copy } from 'lucide-react'
@@ -74,7 +75,11 @@ export function AdvancedTab({ orderId, onOrderArchived }: AdvancedTabProps) {
           onClick={() => duplicateMutation.mutate({ orderId })}
         >
           <Copy className="h-4 w-4" />
-          {duplicateMutation.isPending ? 'Duplicating...' : 'Duplicate'}
+          {duplicateMutation.isPending ? (
+            <span>Duplicating...</span>
+          ) : (
+            <span>Duplicate</span>
+          )}
         </Button>
       </div>
 
@@ -95,7 +100,11 @@ export function AdvancedTab({ orderId, onOrderArchived }: AdvancedTabProps) {
               disabled={archiveMutation.isPending}
             >
               <Archive className="h-4 w-4" />
-              {archiveMutation.isPending ? 'Archiving...' : 'Archive'}
+              {archiveMutation.isPending ? (
+                <span>Archiving...</span>
+              ) : (
+                <span>Archive</span>
+              )}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
