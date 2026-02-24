@@ -89,12 +89,7 @@ export const orderRouter = router({
             isNull(schema.order.archivedAt),
           ),
         )
-        .orderBy(
-          desc(
-            sql`CASE WHEN ${schema.order.status} = 'draft' THEN 0 ELSE 1 END`,
-          ),
-          desc(schema.order.updatedAt),
-        )
+        .orderBy(desc(schema.order.orderNumber))
 
       return rows.map((r) => ({ ...r, itemCount: r.itemCount ?? 0 }))
     }),

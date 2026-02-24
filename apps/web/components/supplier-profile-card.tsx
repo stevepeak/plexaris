@@ -40,6 +40,7 @@ export type SupplierProfileCardState =
 interface SupplierProfileCardProps {
   state: SupplierProfileCardState
   products?: SupplierProduct[]
+  header?: React.ReactNode
 }
 
 function formatPrice(price: string | null, unit: string | null) {
@@ -130,6 +131,7 @@ function ProductsSection({ products }: { products: SupplierProduct[] }) {
 export function SupplierProfileCard({
   state,
   products,
+  header,
 }: SupplierProfileCardProps) {
   if (state.status === 'loading') {
     return (
@@ -175,7 +177,8 @@ export function SupplierProfileCard({
   const hasProducts = products && products.length > 0
 
   return (
-    <Card className="w-full max-w-2xl">
+    <Card className="w-full max-w-2xl overflow-hidden">
+      {header}
       <CardHeader>
         <div className="flex items-start gap-4">
           {supplier.logoUrl ? (

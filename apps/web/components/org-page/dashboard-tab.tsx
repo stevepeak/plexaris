@@ -1,6 +1,6 @@
 'use client'
 
-import { Bot, Package, ShoppingCart, Users } from 'lucide-react'
+import { Bot, Eye, Package, Settings, ShoppingCart, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
@@ -105,7 +105,27 @@ export function DashboardTab({
       <div className="relative z-10 space-y-6">
         <PendingInvitations onAccepted={onInvitationAccepted} />
 
-        <SupplierProfileCard state={profileState} />
+        <SupplierProfileCard
+          state={profileState}
+          header={
+            orgType === 'supplier' ? (
+              <div className="flex items-center gap-2 border-b bg-muted px-6 py-3 text-sm text-muted-foreground">
+                <Eye className="h-4 w-4 shrink-0" />
+                <span>
+                  This is how horeca customers see your profile. Update details
+                  in{' '}
+                  <Link
+                    href={`/orgs/${organizationId}/settings`}
+                    className="inline-flex items-center gap-1 font-medium text-foreground underline underline-offset-4 hover:text-foreground/80"
+                  >
+                    <Settings className="h-3.5 w-3.5" />
+                    Settings
+                  </Link>
+                </span>
+              </div>
+            ) : undefined
+          }
+        />
 
         {onboardingCards.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2">
