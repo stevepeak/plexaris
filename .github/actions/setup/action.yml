@@ -34,5 +34,5 @@ runs:
       shell: bash
 
     - name: Install
-      run: bun install
+      run: bun install --frozen-lockfile
       shell: bash
