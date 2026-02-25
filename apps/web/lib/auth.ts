@@ -8,9 +8,13 @@ import { cookies } from 'next/headers'
 import { createElement } from 'react'
 
 async function getLocale(): Promise<Locale> {
-  const cookieStore = await cookies()
-  const value = cookieStore.get('locale')?.value
-  return value === 'nl' ? 'nl' : 'en'
+  try {
+    const cookieStore = await cookies()
+    const value = cookieStore.get('locale')?.value
+    return value === 'nl' ? 'nl' : 'en'
+  } catch {
+    return 'en'
+  }
 }
 
 const db = createDb()
@@ -42,16 +46,21 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user) => {
-          const locale = await getLocale()
-          await sendEmail(
-            user.email,
-            'Welcome to Plexaris',
-            createElement(WelcomeEmail, {
-              userName: user.name,
-              loginLink: `${baseURL}/login`,
-              locale,
-            }),
-          )
+          try {
+            const locale = await getLocale()
+            await sendEmail(
+              user.email,
+              'Welcome to Plexaris',
+              createElement(WelcomeEmail, {
+                userName: user.name,
+                loginLink: `${baseURL}/login`,
+                locale,
+              }),
+            )
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('[auth] Failed to send welcome email:', error)
+          }
         },
       },
     },
