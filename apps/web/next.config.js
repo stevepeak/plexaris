@@ -46,13 +46,13 @@ export default async function config() {
   // eslint-disable-next-line no-process-env
   const isDev = process.env.NODE_ENV !== 'production'
 
-  // guard because lingo fails silently
-  // eslint-disable-next-line no-process-env
-  if (!process.env.OPENROUTER_API_KEY) {
-    throw new Error('OPENROUTER_API_KEY is required')
-  }
-
   // TEMPORARY: Disable Lingo because not worknig in CI
+
+  // // guard because lingo fails silently
+  // // eslint-disable-next-line no-process-env
+  // if (!process.env.OPENROUTER_API_KEY) {
+  //   throw new Error('OPENROUTER_API_KEY is required')
+  // }
   // eslint-disable-next-line no-process-env
   const useLingo = process.env.USE_LINGO_DEV === 'true'
 
