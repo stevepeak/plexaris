@@ -108,20 +108,20 @@ function SignupForm() {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="justify-center gap-1">
-        <span className="text-sm text-muted-foreground">
-          Already have an account?
-        </span>
-        <a
-          href={
-            redirect
-              ? `/login?redirect=${encodeURIComponent(redirect)}`
-              : '/login'
-          }
-          className="text-sm text-primary underline-offset-4 hover:underline"
-        >
-          Sign in
-        </a>
+      <CardFooter className="justify-center">
+        <p className="text-sm text-muted-foreground">
+          Already have an account?{' '}
+          <a
+            href={
+              redirect
+                ? `/login?redirect=${encodeURIComponent(redirect)}`
+                : '/login'
+            }
+            className="text-primary underline-offset-4 hover:underline"
+          >
+            Sign in
+          </a>
+        </p>
       </CardFooter>
     </Card>
   )
