@@ -44,7 +44,7 @@ const nextConfig = {
 
 export default async function config() {
   // eslint-disable-next-line no-process-env
-  const isDev = process.env.NODE_ENV !== 'production'
+  const isDev = process.env.NODE_ENV === 'development'
 
   const baseConfig = await withLingo(nextConfig, {
     sourceRoot: './app',
