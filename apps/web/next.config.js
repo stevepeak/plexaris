@@ -52,15 +52,21 @@ export default async function config() {
     throw new Error('OPENROUTER_API_KEY is required')
   }
 
-  const baseConfig = await withLingo(nextConfig, {
-    sourceRoot: './app',
-    sourceLocale: 'en',
-    targetLocales: ['nl'],
-    models: { '*:*': 'openrouter:anthropic/claude-sonnet-4-6' },
-    localePersistence: 'cookie',
-    useDirective: true,
-    buildMode: isDev ? 'translate' : 'cache-only',
-  })
+  // TEMPORARY: Disable Lingo because not worknig in CI
+  // eslint-disable-next-line no-process-env
+  const useLingo = process.env.USE_LINGO_DEV === 'true'
+
+  const baseConfig = useLingo
+    ? await withLingo(nextConfig, {
+        sourceRoot: './app',
+        sourceLocale: 'en',
+        targetLocales: ['nl'],
+        models: { '*:*': 'openrouter:anthropic/claude-sonnet-4-6' },
+        localePersistence: 'cookie',
+        useDirective: true,
+        buildMode: isDev ? 'translate' : 'cache-only',
+      })
+    : nextConfig
 
   return withSentryConfig(baseConfig, {
     // eslint-disable-next-line no-process-env
