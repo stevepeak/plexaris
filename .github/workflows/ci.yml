@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: bun run build
+      - run: LINGO_CACHE=true bun run build
 
   vercel:
     name: Deploy to Vercel

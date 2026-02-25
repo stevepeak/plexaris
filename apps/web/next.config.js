@@ -44,7 +44,9 @@ const nextConfig = {
 
 export default async function config() {
   // eslint-disable-next-line no-process-env
-  const isDev = process.env.NODE_ENV === 'development'
+  const isDev = process.env.NODE_ENV !== 'production'
+  // eslint-disable-next-line no-process-env
+  const useLingoCache = process.env.LINGO_CACHE === 'true'
 
   const baseConfig = await withLingo(nextConfig, {
     sourceRoot: './app',
@@ -53,7 +55,7 @@ export default async function config() {
     models: { '*:*': 'openrouter:anthropic/claude-sonnet-4-6' },
     localePersistence: 'cookie',
     useDirective: true,
-    buildMode: isDev ? 'translate' : 'cache-only',
+    buildMode: useLingoCache || !isDev ? 'cache-only' : 'translate',
   })
 
   return withSentryConfig(baseConfig, {
