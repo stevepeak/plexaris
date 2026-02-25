@@ -45,8 +45,12 @@ const nextConfig = {
 export default async function config() {
   // eslint-disable-next-line no-process-env
   const isDev = process.env.NODE_ENV !== 'production'
+
+  // guard because lingo fails silently
   // eslint-disable-next-line no-process-env
-  const useLingoCache = process.env.LINGO_CACHE === 'true'
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error('OPENROUTER_API_KEY is required')
+  }
 
   const baseConfig = await withLingo(nextConfig, {
     sourceRoot: './app',
@@ -55,7 +59,7 @@ export default async function config() {
     models: { '*:*': 'openrouter:anthropic/claude-sonnet-4-6' },
     localePersistence: 'cookie',
     useDirective: true,
-    buildMode: useLingoCache || !isDev ? 'cache-only' : 'translate',
+    buildMode: isDev ? 'translate' : 'cache-only',
   })
 
   return withSentryConfig(baseConfig, {
