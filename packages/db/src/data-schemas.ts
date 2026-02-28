@@ -449,7 +449,7 @@ export const nutritionSectionSchema = z.object({
 
 export const allergensSectionSchema = z.object({
   allergens: z
-    .record(allergenEnum, allergenStatusEnum)
+    .partialRecord(allergenEnum, allergenStatusEnum)
     .optional()
     .describe(
       "EU-14 allergen status map: 'contains', 'may_contain', or 'absent'",
@@ -510,7 +510,7 @@ export const labelSectionSchema = z.object({
 export const productSchema = z
   .object({
     sections: z
-      .record(productSectionKeyEnum, z.boolean())
+      .partialRecord(productSectionKeyEnum, z.boolean())
       .optional()
       .describe('Section visibility toggles'),
     general: generalSectionSchema.optional(),
@@ -867,7 +867,7 @@ const foodInfoSchema = z.object({
 
   // EU 14 allergens — each marked as contains / may_contain / absent
   allergens: z
-    .record(allergenEnum, allergenStatusEnum)
+    .partialRecord(allergenEnum, allergenStatusEnum)
     .describe("EU-14 allergen status: 'contains', 'may_contain', or 'absent'"),
 
   nutrition: nutritionSchema.describe('Nutritional values per 100g'),

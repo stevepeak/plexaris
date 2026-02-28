@@ -15,9 +15,9 @@
       "@openrouter/ai-sdk-provider": "^2.1.1",
       "@opentelemetry/api": "^1.8.0",
       "@opentelemetry/sdk-node": "^0.212.0",
-      "@sentry/nextjs": "^10.39.0",
-      "@sentry/node": "^10.39.0",
-      "@sentry/opentelemetry": "^10.39.0",
+      "@sentry/nextjs": "^10.40.0",
+      "@sentry/node": "^10.40.0",
+      "@sentry/opentelemetry": "^10.40.0",
       "@tanstack/react-query": "^5.0.0",
       "@trigger.dev/react-hooks": "^4.4.1",
       "@trigger.dev/sdk": "^4.4.1",
@@ -26,15 +26,15 @@
       "@trpc/client": "^11.10.0",
       "@trpc/react-query": "^11.10.0",
       "@trpc/server": "^11.10.0",
-      "@types/node": "^25.2.3",
-      "ai": "^6.0.97",
+      "@types/node": "^25.3.2",
+      "ai": "^6.0.105",
       "drizzle-orm": "^0.45.0",
       "eslint": "^9.37.0",
       "import-in-the-middle": "^3.0.0",
-      "posthog-js": "^1.353.0",
-      "posthog-node": "^5.25.0",
+      "posthog-js": "^1.356.1",
+      "posthog-node": "^5.26.0",
       "typescript": "^5.9.3",
-      "zod": "^3.25.76"
+      "zod": "^4.3.6"
     }
   },
   "scripts": {
@@ -54,14 +54,14 @@
     "kill": "&& lsof -i :3000 -t | xargs -r kill && lsof -i :3001 -t | xargs -r kill && lsof -i :3002 -t | xargs -r kill && lsof -i :6006 -t | xargs -r kill"
   },
   "devDependencies": {
-    "@ocavue/eslint-config": "^3.12.0",
+    "@ocavue/eslint-config": "^4.2.0",
     "@ocavue/tsconfig": "^0.6.3",
     "eslint": "^9.37.0",
     "knip": "^5.85.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
+    "lint-staged": "^16.3.0",
     "prettier": "^3.8.1",
-    "turbo": "^2.8.10",
+    "turbo": "^2.8.12",
     "typescript": "^5.9.3"
   },
   "lint-staged": {
