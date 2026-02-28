@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { ALL_PERMISSIONS, PERMISSIONS } from '@app/db/schema'
@@ -163,7 +164,11 @@ export function RolesTab({
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  {editingRole ? 'Edit role' : 'Create role'}
+                  {editingRole ? (
+                    <span>Edit role</span>
+                  ) : (
+                    <span>Create role</span>
+                  )}
                 </DialogTitle>
                 <DialogDescription>
                   {editingRole

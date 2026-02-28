@@ -70,19 +70,19 @@ export const alignSourcesTask = task({
     // Fan out: for each source, trigger scrape-organization + discover-products
     const childRuns: string[] = []
 
+    const parentTags = ctx.run.tags
+
     for (const url of urls) {
-      const scrapeHandle = await scrapeOrganizationTask.trigger({
-        organizationId,
-        url,
-        parentRunId,
-      })
+      const scrapeHandle = await scrapeOrganizationTask.trigger(
+        { organizationId, url, parentRunId },
+        { tags: parentTags },
+      )
       childRuns.push(scrapeHandle.id)
 
-      const discoverHandle = await discoverProductsTask.trigger({
-        organizationId,
-        url,
-        parentRunId,
-      })
+      const discoverHandle = await discoverProductsTask.trigger(
+        { organizationId, url, parentRunId },
+        { tags: parentTags },
+      )
       childRuns.push(discoverHandle.id)
 
       void streams.append('progress', `Dispatched agents for URL: ${url}`)
@@ -91,18 +91,16 @@ export const alignSourcesTask = task({
     for (const fileId of fileIds) {
       const fileName = fileNameMap.get(fileId) ?? fileId
 
-      const scrapeHandle = await scrapeOrganizationTask.trigger({
-        organizationId,
-        fileId,
-        parentRunId,
-      })
+      const scrapeHandle = await scrapeOrganizationTask.trigger(
+        { organizationId, fileId, parentRunId },
+        { tags: parentTags },
+      )
       childRuns.push(scrapeHandle.id)
 
-      const discoverHandle = await discoverProductsTask.trigger({
-        organizationId,
-        fileId,
-        parentRunId,
-      })
+      const discoverHandle = await discoverProductsTask.trigger(
+        { organizationId, fileId, parentRunId },
+        { tags: parentTags },
+      )
       childRuns.push(discoverHandle.id)
 
       void streams.append('progress', `Dispatched agents for file: ${fileName}`)

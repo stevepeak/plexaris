@@ -1,3 +1,4 @@
+'use i18n'
 import {
   Select,
   SelectContent,

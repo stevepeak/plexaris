@@ -1,31 +1,30 @@
 import { Button, Heading, Text } from '@react-email/components'
 
 import { Layout } from '../src/components/layout'
+import { type Locale, t } from '../src/i18n'
 
 export type PasswordResetEmailProps = {
   userName: string
   resetLink: string
+  locale?: Locale
 }
 
 export default function PasswordResetEmail({
   userName,
   resetLink,
+  locale = 'en',
 }: PasswordResetEmailProps) {
   return (
-    <Layout preview={`Reset your Plexaris password`}>
-      <Heading style={heading}>Reset your password</Heading>
-      <Text style={text}>Hi {userName},</Text>
+    <Layout preview={t('passwordReset.preview', locale)} locale={locale}>
+      <Heading style={heading}>{t('passwordReset.heading', locale)}</Heading>
       <Text style={text}>
-        We received a request to reset your Plexaris password. Click the button
-        below to choose a new password.
+        {t('passwordReset.greeting', locale, { userName })}
       </Text>
+      <Text style={text}>{t('passwordReset.body', locale)}</Text>
       <Button style={button} href={resetLink}>
-        Reset Password
+        {t('passwordReset.button', locale)}
       </Button>
-      <Text style={muted}>
-        If you didn&apos;t request a password reset, you can safely ignore this
-        email. The link will expire in 1 hour.
-      </Text>
+      <Text style={muted}>{t('passwordReset.disclaimer', locale)}</Text>
     </Layout>
   )
 }

@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import {
@@ -41,7 +42,7 @@ import {
 } from '@/components/ui/tooltip'
 import { hasPermission } from '@/lib/permissions-client'
 import { parseCategoryValue } from '@/lib/product-categories'
-import { cn } from '@/lib/utils'
+import { cn, formatEuro } from '@/lib/utils'
 
 export type Product = {
   id: string
@@ -81,10 +82,7 @@ function statusBadgeVariant(status: string) {
 
 function formatPrice(price: string | null, unit: string | null) {
   if (price == null) return '-'
-  const formatted = new Intl.NumberFormat('nl-NL', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(Number(price))
+  const formatted = formatEuro(Number(price))
   if (unit) return `${formatted} / ${unit}`
   return formatted
 }
@@ -437,7 +435,9 @@ export function ProductList({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                Switch to {viewMode === 'grid' ? 'table' : 'grid'} view
+                Switch to{' '}
+                {viewMode === 'grid' ? <span>table</span> : <span>grid</span>}{' '}
+                view
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

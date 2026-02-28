@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Store, UtensilsCrossed } from 'lucide-react'

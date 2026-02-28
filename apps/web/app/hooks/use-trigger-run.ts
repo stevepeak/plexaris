@@ -42,10 +42,10 @@ interface UseTriggerRunResult<T = unknown> {
  * @example
  * ```tsx
  * // Using token from trigger mutation response (recommended)
- * const triggerMutation = trpc.trigger.exampleAgent.useMutation()
+ * const triggerMutation = trpc.trigger.scrapeOrganization.useMutation()
  *
  * // Trigger the task
- * const handle = await triggerMutation.mutateAsync({ name: 'example' })
+ * const handle = await triggerMutation.mutateAsync({ organizationId: '...' })
  *
  * // Track the run with the returned token
  * const { output, isLoading, isCompleted, error } = useTriggerRun({

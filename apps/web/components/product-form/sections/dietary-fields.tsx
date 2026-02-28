@@ -1,3 +1,4 @@
+'use i18n'
 import { Leaf, Moon, Sprout, Star, Undo2 } from 'lucide-react'
 
 import { Switch } from '@/components/ui/switch'
@@ -42,6 +43,21 @@ const DIETARY_CONFIG = [
     iconColor: 'text-teal-600',
   },
 ] as const
+
+function DietaryLabel({ text }: { text: string }) {
+  switch (text) {
+    case 'Kosher':
+      return <span>Kosher</span>
+    case 'Halal':
+      return <span>Halal</span>
+    case 'Vegetarian':
+      return <span>Vegetarian</span>
+    case 'Vegan':
+      return <span>Vegan</span>
+    default:
+      return <span>{text}</span>
+  }
+}
 
 export function DietaryFields({
   data,
@@ -92,7 +108,9 @@ export function DietaryFields({
                 isActive ? item.iconColor : 'text-muted-foreground',
               )}
             />
-            <span className="text-xs font-medium">{item.label}</span>
+            <span className="text-xs font-medium">
+              <DietaryLabel text={item.label} />
+            </span>
             <Switch
               checked={isActive}
               onCheckedChange={(checked) => u(['dietary', item.key], !!checked)}

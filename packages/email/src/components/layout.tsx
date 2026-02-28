@@ -10,14 +10,17 @@ import {
   Text,
 } from '@react-email/components'
 
+import { type Locale, t } from '../i18n'
+
 interface LayoutProps {
   preview: string
+  locale?: Locale
   children: React.ReactNode
 }
 
-export function Layout({ preview, children }: LayoutProps) {
+export function Layout({ preview, locale = 'en', children }: LayoutProps) {
   return (
-    <Html>
+    <Html lang={locale}>
       <Head />
       <Preview>{preview}</Preview>
       <Body style={body}>
@@ -29,7 +32,8 @@ export function Layout({ preview, children }: LayoutProps) {
           <Hr style={hr} />
           <Section style={footer}>
             <Text style={footerText}>
-              &copy; {new Date().getFullYear()} Plexaris. All rights reserved.
+              &copy; {new Date().getFullYear()} Plexaris.{' '}
+              {t('layout.rights', locale)}
             </Text>
             <Link href="https://plexaris.com" style={footerLink}>
               plexaris.com

@@ -1,0 +1,9 @@
+-- Clean up orphaned references before adding FK constraints
+UPDATE "product" SET "current_version_id" = NULL WHERE "current_version_id" IS NOT NULL AND "current_version_id" NOT IN (SELECT "id" FROM "product_version");--> statement-breakpoint
+UPDATE "trigger_run" SET "parent_run_id" = NULL WHERE "parent_run_id" IS NOT NULL AND "parent_run_id" NOT IN (SELECT "trigger_run_id" FROM "trigger_run");--> statement-breakpoint
+DELETE FROM "suggestion" WHERE "trigger_run_id" NOT IN (SELECT "trigger_run_id" FROM "trigger_run");--> statement-breakpoint
+UPDATE "suggestion" SET "reviewed_by" = NULL WHERE "reviewed_by" IS NOT NULL AND "reviewed_by" NOT IN (SELECT "id" FROM "user");--> statement-breakpoint
+ALTER TABLE "product" ADD CONSTRAINT "product_current_version_id_product_version_id_fk" FOREIGN KEY ("current_version_id") REFERENCES "public"."product_version"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "trigger_run" ADD CONSTRAINT "trigger_run_parent_run_id_trigger_run_trigger_run_id_fk" FOREIGN KEY ("parent_run_id") REFERENCES "public"."trigger_run"("trigger_run_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "suggestion" ADD CONSTRAINT "suggestion_trigger_run_id_trigger_run_trigger_run_id_fk" FOREIGN KEY ("trigger_run_id") REFERENCES "public"."trigger_run"("trigger_run_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "suggestion" ADD CONSTRAINT "suggestion_reviewed_by_user_id_fk" FOREIGN KEY ("reviewed_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;

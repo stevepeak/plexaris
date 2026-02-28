@@ -1,8 +1,9 @@
+'use i18n'
 'use client'
 
 import { Check, ChevronsUpDown, Plus, Shield } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -14,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
+import { trpc } from '@/lib/trpc'
 
 export type Organization = {
   id: string
@@ -47,36 +49,38 @@ function storeOrgId(id: string) {
   localStorage.setItem(ACTIVE_ORG_KEY, id)
 }
 
-export function useActiveOrg(refreshKey?: number) {
-  const [organizations, setOrganizations] = useState<Organization[]>([])
-  const [activeOrg, setActiveOrg] = useState<Organization | null>(null)
-  const [superAdmin, setSuperAdmin] = useState(false)
-  const [isPending, setIsPending] = useState(true)
+export function useActiveOrg() {
+  const { data, isPending } = trpc.organization.mine.useQuery(undefined, {
+    staleTime: 30_000,
+  })
+
+  const organizations = useMemo<Organization[]>(
+    () => data?.organizations ?? [],
+    [data?.organizations],
+  )
+  const superAdmin = data?.superAdmin ?? false
 
   useEffect(() => {
-    async function fetchOrgs() {
-      try {
-        const res = await fetch('/api/organizations/mine')
-        if (!res.ok) return
-        const data = await res.json()
-        const orgs: Organization[] = data.organizations ?? []
-        setSuperAdmin(data.superAdmin === true)
-        setOrganizations(orgs)
-
-        const storedId = getStoredOrgId()
-        const stored = orgs.find((o) => o.id === storedId)
-        const active = stored ?? orgs[0] ?? null
-        setActiveOrg(active)
-        if (active) storeOrgId(active.id)
-      } finally {
-        setIsPending(false)
-      }
+    if (data) {
+      document.cookie = `has_orgs=${data.organizations.length > 0 ? '1' : '0'}; path=/; max-age=86400; SameSite=Lax`
     }
-    void fetchOrgs()
-  }, [refreshKey])
+  }, [data])
+
+  const [activeOrgId, setActiveOrgId] = useState<string | null>(getStoredOrgId)
+
+  const activeOrg = useMemo(() => {
+    if (organizations.length === 0) return null
+    const stored = organizations.find((o) => o.id === activeOrgId)
+    const active = stored ?? organizations[0] ?? null
+    if (active && active.id !== activeOrgId) {
+      storeOrgId(active.id)
+      setActiveOrgId(active.id)
+    }
+    return active
+  }, [organizations, activeOrgId])
 
   const switchOrg = useCallback((org: Organization) => {
-    setActiveOrg(org)
+    setActiveOrgId(org.id)
     storeOrgId(org.id)
   }, [])
 

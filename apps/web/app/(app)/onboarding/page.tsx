@@ -1,13 +1,13 @@
+'use i18n'
 'use client'
 
 import { LogOut, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { OrgNameStep } from '@/components/onboarding/org-name-step'
 import { OrgTypeStep } from '@/components/onboarding/org-type-step'
-import { PasskeyStep } from '@/components/onboarding/passkey-step'
 import { SourcesStep } from '@/components/onboarding/sources-step'
 import { StepProgress } from '@/components/onboarding/step-progress'
 import { getSteps, type OrgType } from '@/components/onboarding/types'
@@ -62,9 +62,6 @@ export default function OnboardingPage() {
     switchOrg,
     isPending: orgsPending,
   } = useActiveOrg()
-  const [passkeyDone, setPasskeyDone] = useState(false)
-  const [passkeyLoading, setPasskeyLoading] = useState(false)
-  const [passkeyError, setPasskeyError] = useState<string | null>(null)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [orgType, setOrgType] = useState<OrgType | null>(null)
   const [name, setName] = useState('')
@@ -73,36 +70,6 @@ export default function OnboardingPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const scrapeMutation = trpc.trigger.scrapeOrganization.useMutation()
-
-  useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      typeof window.PublicKeyCredential === 'undefined'
-    ) {
-      setPasskeyDone(true)
-    }
-  }, [])
-
-  // Skip passkey step when user already has organizations (not first login)
-  useEffect(() => {
-    if (!orgsPending && organizations.length > 0) {
-      setPasskeyDone(true)
-    }
-  }, [orgsPending, organizations.length])
-
-  const handlePasskeySetup = async () => {
-    setPasskeyLoading(true)
-    setPasskeyError(null)
-    const { error: err } = await authClient.passkey.addPasskey({
-      name: session?.user.email ?? 'Passkey',
-    })
-    if (err) {
-      setPasskeyError(err.message ?? 'Failed to set up passkey')
-    } else {
-      setPasskeyDone(true)
-    }
-    setPasskeyLoading(false)
-  }
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -187,7 +154,11 @@ export default function OnboardingPage() {
       <header className="border-b">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="font-bruno text-lg">
+            <Link
+              href="/dashboard"
+              className="font-bruno text-lg"
+              data-lingo-override={{ nl: 'Plexaris' }}
+            >
               Plexaris
             </Link>
             <Separator orientation="vertical" className="h-6" />
@@ -243,54 +214,41 @@ export default function OnboardingPage() {
       </header>
 
       <main className="flex flex-col items-center justify-center gap-8 p-4 py-16">
-        {!passkeyDone ? (
-          <PasskeyStep
-            onSetup={handlePasskeySetup}
-            onSkip={() => setPasskeyDone(true)}
-            isLoading={passkeyLoading}
-            error={passkeyError}
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold">Create your organization</h1>
+          <p className="mt-2 text-muted-foreground">
+            {getSubtitle(currentStep.id)}
+          </p>
+        </div>
+
+        <StepProgress steps={steps} currentStepIndex={currentStepIndex} />
+
+        {currentStep.id === 'type' && (
+          <OrgTypeStep selected={orgType} onSelect={handleTypeSelect} />
+        )}
+
+        {currentStep.id === 'name' && orgType && (
+          <OrgNameStep
+            orgType={orgType}
+            name={name}
+            onNameChange={setName}
+            onBack={handleBack}
+            onSubmit={handleNameNext}
           />
-        ) : (
-          <>
-            <div className="text-center">
-              <h1 className="text-2xl font-semibold">
-                Create your organization
-              </h1>
-              <p className="mt-2 text-muted-foreground">
-                {getSubtitle(currentStep.id)}
-              </p>
-            </div>
+        )}
 
-            <StepProgress steps={steps} currentStepIndex={currentStepIndex} />
-
-            {currentStep.id === 'type' && (
-              <OrgTypeStep selected={orgType} onSelect={handleTypeSelect} />
-            )}
-
-            {currentStep.id === 'name' && orgType && (
-              <OrgNameStep
-                orgType={orgType}
-                name={name}
-                onNameChange={setName}
-                onBack={handleBack}
-                onSubmit={handleNameNext}
-              />
-            )}
-
-            {currentStep.id === 'sources' && orgType && (
-              <SourcesStep
-                orgType={orgType}
-                urls={urls}
-                onUrlsChange={setUrls}
-                files={files}
-                onFilesChange={setFiles}
-                onBack={handleBack}
-                onSubmit={handleSubmit}
-                isLoading={isLoading}
-                error={error}
-              />
-            )}
-          </>
+        {currentStep.id === 'sources' && orgType && (
+          <SourcesStep
+            orgType={orgType}
+            urls={urls}
+            onUrlsChange={setUrls}
+            files={files}
+            onFilesChange={setFiles}
+            onBack={handleBack}
+            onSubmit={handleSubmit}
+            isLoading={isLoading}
+            error={error}
+          />
         )}
       </main>
     </div>

@@ -19,6 +19,7 @@
     "@openrouter/ai-sdk-provider": "catalog:",
     "ai": "catalog:",
     "ts-dedent": "^2.2.0",
+    "xlsx": "^0.18.5",
     "zod": "catalog:"
   },
   "devDependencies": {

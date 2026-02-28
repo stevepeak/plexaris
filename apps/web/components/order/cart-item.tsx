@@ -1,4 +1,5 @@
-import { cn } from '@/lib/utils'
+'use i18n'
+import { cn, formatEuro } from '@/lib/utils'
 
 interface CartItemAddedBy {
   name: string
@@ -15,6 +16,7 @@ export interface CartItemData {
   supplier: string
   supplierId: string
   category?: string
+  articleNumber?: string
   assignee?: string
   addedBy?: CartItemAddedBy
 }
@@ -63,8 +65,8 @@ export function CartItem({
       </div>
       <p className="text-xs text-muted-foreground">
         {item.quantity} {item.unit}
-        {item.quantity !== 1 && !item.unit.endsWith('s') ? 's' : ''} at $
-        {item.price.toFixed(2)} each
+        {item.quantity !== 1 && !item.unit.endsWith('s') ? 's' : ''} at{' '}
+        {formatEuro(item.price)} each
       </p>
     </div>
   )

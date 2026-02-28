@@ -1,12 +1,14 @@
 import { Button, Heading, Text } from '@react-email/components'
 
 import { Layout } from '../src/components/layout'
+import { type Locale, t } from '../src/i18n'
 
 export type UserInviteEmailProps = {
   invitedByName: string
   organizationName: string
   inviteLink: string
   roleName: string
+  locale?: Locale
 }
 
 export default function UserInviteEmail({
@@ -14,26 +16,18 @@ export default function UserInviteEmail({
   organizationName,
   inviteLink,
   roleName,
+  locale = 'en',
 }: UserInviteEmailProps) {
+  const vars = { invitedByName, organizationName, roleName }
   return (
-    <Layout
-      preview={`${invitedByName} invited you to join ${organizationName}`}
-    >
-      <Heading style={heading}>You&apos;ve been invited</Heading>
-      <Text style={text}>
-        <strong>{invitedByName}</strong> has invited you to join{' '}
-        <strong>{organizationName}</strong> as a {roleName}.
-      </Text>
-      <Text style={text}>
-        Click the button below to accept the invitation and get started.
-      </Text>
+    <Layout preview={t('invite.preview', locale, vars)} locale={locale}>
+      <Heading style={heading}>{t('invite.heading', locale)}</Heading>
+      <Text style={text}>{t('invite.body', locale, vars)}</Text>
+      <Text style={text}>{t('invite.cta', locale)}</Text>
       <Button style={button} href={inviteLink}>
-        Accept Invitation
+        {t('invite.button', locale)}
       </Button>
-      <Text style={muted}>
-        If you weren&apos;t expecting this invitation, you can safely ignore
-        this email.
-      </Text>
+      <Text style={muted}>{t('invite.disclaimer', locale)}</Text>
     </Layout>
   )
 }

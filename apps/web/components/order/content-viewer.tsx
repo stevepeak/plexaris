@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { MessageSquare, Search } from 'lucide-react'
@@ -30,6 +31,7 @@ interface ContentViewerProps {
     supplierId: string
     supplierName: string
     category: string | null
+    articleNumber?: string | null
   }) => void
   cart?: CartStateReturn
   activityEntries?: ActivityEntry[]

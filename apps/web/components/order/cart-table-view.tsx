@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { ArrowDown, ArrowUp, Check, ListFilter, Search } from 'lucide-react'
@@ -29,7 +30,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { type CartStateReturn } from '@/hooks/use-cart-state'
-import { cn } from '@/lib/utils'
+import { cn, formatEuro } from '@/lib/utils'
 
 import { type CartItemData } from './cart-item'
 
@@ -171,7 +172,8 @@ export function CartTableView({
           item.name.toLowerCase().includes(q) ||
           item.supplier.toLowerCase().includes(q) ||
           item.category?.toLowerCase().includes(q) ||
-          item.assignee?.toLowerCase().includes(q),
+          item.assignee?.toLowerCase().includes(q) ||
+          item.articleNumber?.toLowerCase().includes(q),
       )
     }
 
@@ -655,6 +657,9 @@ export function CartTableView({
               <TableHead className="min-w-[180px]">
                 {renderSortableHeader('Name', 'name')}
               </TableHead>
+              <TableHead className="min-w-[60px]">
+                <span className="text-xs font-medium">Art. #</span>
+              </TableHead>
               <TableHead className="min-w-[120px]">
                 {renderSortableHeader('Supplier', 'supplier')}
               </TableHead>
@@ -686,6 +691,13 @@ export function CartTableView({
                   >
                     {item.name}
                   </button>
+                </TableCell>
+                <TableCell>
+                  {item.articleNumber && (
+                    <span className="text-[10px] font-mono text-muted-foreground">
+                      {item.articleNumber}
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell
                   className={cellClassName(row, 0)}
@@ -734,11 +746,11 @@ export function CartTableView({
                   {renderQtyCell(item, row)}
                 </TableCell>
                 <TableCell className="text-right">
-                  <span className="text-xs">${item.price.toFixed(2)}</span>
+                  <span className="text-xs">{formatEuro(item.price)}</span>
                 </TableCell>
                 <TableCell className="text-right">
                   <span className="text-xs font-medium">
-                    ${(item.quantity * item.price).toFixed(2)}
+                    {formatEuro(item.quantity * item.price)}
                   </span>
                 </TableCell>
               </TableRow>

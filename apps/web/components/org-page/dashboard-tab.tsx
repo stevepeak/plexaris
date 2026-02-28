@@ -1,6 +1,8 @@
+'use i18n'
 'use client'
 
-import { Mail, MapPin, Phone } from 'lucide-react'
+import { Bot, Eye, Package, ShoppingCart, Users } from 'lucide-react'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 import { PendingInvitations } from '@/components/pending-invitations'
@@ -8,31 +10,69 @@ import {
   type ScrapeIssue,
   ScrapeIssuesTable,
 } from '@/components/scrape-issues-table'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import {
+  SupplierProfileCard,
+  type SupplierProfileCardState,
+} from '@/components/supplier-profile-card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
-type OrgDetails = {
-  name: string
-  type: 'supplier' | 'horeca'
-  description: string | null
-  logoUrl: string | null
-  phone: string | null
-  email: string | null
-  address: string | null
-  deliveryAddress: string | null
-  deliveryAreas: string | null
-  createdAt: string
+type OrgCounts = {
+  products: number
+  members: number
+  orders: number
+  agentRuns: number
 }
 
-function getInitials(name: string | undefined): string {
-  if (!name) return '?'
-  return name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
+function OnboardingTitle({ text }: { text: string }) {
+  switch (text) {
+    case 'Add your first product':
+      return <span>Add your first product</span>
+    case 'Invite your team':
+      return <span>Invite your team</span>
+    case 'Start your first order':
+      return <span>Start your first order</span>
+    case 'Run your first AI agent':
+      return <span>Run your first AI agent</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
+function OnboardingDescription({ text }: { text: string }) {
+  switch (text) {
+    case 'Start building your catalog so customers can discover and order from you.':
+      return (
+        <span>
+          Start building your catalog so customers can discover and order from
+          you.
+        </span>
+      )
+    case 'Collaborate with your colleagues by inviting them to your organization.':
+      return (
+        <span>
+          Collaborate with your colleagues by inviting them to your
+          organization.
+        </span>
+      )
+    case 'Browse suppliers and products to place your first order.':
+      return (
+        <span>Browse suppliers and products to place your first order.</span>
+      )
+    case 'Use AI agents to keep your product catalog up to date automatically.':
+      return (
+        <span>
+          Use AI agents to keep your product catalog up to date automatically.
+        </span>
+      )
+    default:
+      return <span>{text}</span>
+  }
 }
 
 export function DashboardTab({
@@ -46,119 +86,189 @@ export function DashboardTab({
   orgType: 'supplier' | 'horeca'
   onInvitationAccepted?: () => void
 }) {
-  const [orgDetails, setOrgDetails] = useState<OrgDetails | null>(null)
+  const [profileState, setProfileState] = useState<SupplierProfileCardState>({
+    status: 'loading',
+  })
+  const [counts, setCounts] = useState<OrgCounts | null>(null)
   const [scrapeIssues, setScrapeIssues] = useState<ScrapeIssue[]>([])
 
   useEffect(() => {
-    setOrgDetails(null)
+    setProfileState({ status: 'loading' })
+    setCounts(null)
     void fetch(`/api/organizations/${organizationId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.organization) setOrgDetails(data.organization)
+        if (data?.organization) {
+          const org = data.organization
+          setProfileState({
+            status: 'loaded',
+            supplier: {
+              id: org.id,
+              name: org.name,
+              type: org.type,
+              claimed: org.claimed ?? true,
+              description: org.description,
+              logoUrl: org.logoUrl,
+              phone: org.phone,
+              email: org.email,
+              address: org.address,
+              deliveryAreas: org.deliveryAreas,
+            },
+          })
+        }
+        if (data?.counts) setCounts(data.counts)
         if (data?.scrapeIssues) setScrapeIssues(data.scrapeIssues)
       })
   }, [organizationId])
 
+  const onboardingCards = getOnboardingCards(organizationId, orgType, counts)
+
   return (
-    <div className="space-y-6">
-      <PendingInvitations onAccepted={onInvitationAccepted} />
-
-      <div>
-        <div className="flex items-start gap-4">
-          <Avatar className="h-12 w-12 rounded-lg">
-            {orgDetails?.logoUrl && (
-              <AvatarImage
-                src={orgDetails.logoUrl}
-                alt={`${orgName} logo`}
-                className="object-cover"
-              />
-            )}
-            <AvatarFallback className="rounded-lg text-sm font-medium">
-              {getInitials(orgName)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="grid gap-1">
-            <h2 className="text-lg font-semibold">{orgName}</h2>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="capitalize">
-                {orgType}
-              </Badge>
-              {orgDetails?.createdAt && (
-                <span className="text-xs text-muted-foreground">
-                  Created{' '}
-                  {new Date(orgDetails.createdAt).toLocaleDateString(
-                    undefined,
-                    { year: 'numeric', month: 'short', day: 'numeric' },
-                  )}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {orgDetails &&
-          (orgDetails.description ||
-            orgDetails.email ||
-            orgDetails.phone ||
-            orgDetails.address ||
-            orgDetails.deliveryAreas ||
-            orgDetails.deliveryAddress) && (
-            <>
-              <Separator className="my-6" />
-              <div className="grid gap-4">
-                {orgDetails.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {orgDetails.description}
-                  </p>
-                )}
-                {(orgDetails.email ||
-                  orgDetails.phone ||
-                  orgDetails.address) && (
-                  <div className="grid gap-2 text-sm">
-                    {orgDetails.email && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Mail className="h-4 w-4 shrink-0" />
-                        <span>{orgDetails.email}</span>
-                      </div>
-                    )}
-                    {orgDetails.phone && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone className="h-4 w-4 shrink-0" />
-                        <span>{orgDetails.phone}</span>
-                      </div>
-                    )}
-                    {orgDetails.address && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="h-4 w-4 shrink-0" />
-                        <span>{orgDetails.address}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {orgDetails.deliveryAreas && (
-                  <div className="grid gap-1">
-                    <h3 className="text-sm font-medium">Delivery Areas</h3>
-                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                      <span>{orgDetails.deliveryAreas}</span>
-                    </div>
-                  </div>
-                )}
-                {orgDetails.deliveryAddress && (
-                  <div className="grid gap-1">
-                    <h3 className="text-sm font-medium">Delivery Address</h3>
-                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                      <span>{orgDetails.deliveryAddress}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+    <div className="relative min-h-[calc(100vh-8rem)] overflow-hidden">
+      {/* Background pattern (same as integrations page) */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          maskImage:
+            'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-500/15 via-transparent to-amber-500/15" />
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(128,128,128,1) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,1) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+        <div className="absolute left-1/4 top-1/4 h-64 w-64 animate-pulse rounded-full bg-pink-500/20 blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 h-64 w-64 animate-pulse rounded-full bg-amber-500/20 blur-3xl [animation-delay:1s]" />
       </div>
 
-      {scrapeIssues.length > 0 && <ScrapeIssuesTable issues={scrapeIssues} />}
+      {/* Content */}
+      <div className="relative z-10 space-y-6">
+        <PendingInvitations onAccepted={onInvitationAccepted} />
+
+        <SupplierProfileCard
+          state={profileState}
+          header={
+            orgType === 'supplier' ? (
+              <div className="flex items-center gap-1.5 border-b bg-muted px-6 py-3 text-sm text-muted-foreground">
+                <Eye className="h-4 w-4 shrink-0" />
+                <span>
+                  This is how horeca customers see your profile. Update details
+                  in
+                </span>
+                <Link
+                  href={`/orgs/${organizationId}/settings`}
+                  className="font-medium text-foreground underline decoration-muted-foreground/60 decoration-wavy underline-offset-4 transition-all hover:underline-offset-2"
+                >
+                  Settings
+                </Link>
+              </div>
+            ) : undefined
+          }
+        />
+
+        {onboardingCards.length > 0 && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {onboardingCards.map((card) => (
+              <Link key={card.href} href={card.href}>
+                <Card className="group h-full transition-colors hover:border-primary/50">
+                  <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${card.iconBg}`}
+                    >
+                      <card.icon className={`h-5 w-5 ${card.iconColor}`} />
+                    </div>
+                    <div className="grid gap-1">
+                      <CardTitle className="text-base">
+                        <OnboardingTitle text={card.title} />
+                      </CardTitle>
+                      <CardDescription>
+                        <OnboardingDescription text={card.description} />
+                      </CardDescription>
+                    </div>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {scrapeIssues.length > 0 && <ScrapeIssuesTable issues={scrapeIssues} />}
+      </div>
     </div>
   )
+}
+
+type OnboardingCard = {
+  href: string
+  title: string
+  description: string
+  icon: typeof Package
+  iconBg: string
+  iconColor: string
+}
+
+function getOnboardingCards(
+  organizationId: string,
+  orgType: 'supplier' | 'horeca',
+  counts: OrgCounts | null,
+): OnboardingCard[] {
+  if (!counts) return []
+
+  const cards: OnboardingCard[] = []
+
+  if (orgType === 'supplier' && counts.products === 0) {
+    cards.push({
+      href: `/orgs/${organizationId}/products/new`,
+      title: 'Add your first product',
+      description:
+        'Start building your catalog so customers can discover and order from you.',
+      icon: Package,
+      iconBg: 'bg-blue-500/10',
+      iconColor: 'text-blue-500',
+    })
+  }
+
+  if (counts.members <= 1) {
+    cards.push({
+      href: `/orgs/${organizationId}/members`,
+      title: 'Invite your team',
+      description:
+        'Collaborate with your colleagues by inviting them to your organization.',
+      icon: Users,
+      iconBg: 'bg-green-500/10',
+      iconColor: 'text-green-500',
+    })
+  }
+
+  if (orgType === 'horeca' && counts.orders === 0) {
+    cards.push({
+      href: '/order',
+      title: 'Start your first order',
+      description: 'Browse suppliers and products to place your first order.',
+      icon: ShoppingCart,
+      iconBg: 'bg-amber-500/10',
+      iconColor: 'text-amber-500',
+    })
+  }
+
+  if (orgType === 'supplier' && counts.agentRuns === 0) {
+    cards.push({
+      href: `/orgs/${organizationId}/agents/runs`,
+      title: 'Run your first AI agent',
+      description:
+        'Use AI agents to keep your product catalog up to date automatically.',
+      icon: Bot,
+      iconBg: 'bg-purple-500/10',
+      iconColor: 'text-purple-500',
+    })
+  }
+
+  return cards
 }

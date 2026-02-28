@@ -218,6 +218,13 @@
       "when": 1771876765679,
       "tag": "0030_absent_sabretooth",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1772293346502,
+      "tag": "0031_tearful_shiva",
+      "breakpoints": true
     }
   ]
 }

@@ -11,3 +11,5 @@ export { default as SuggestionFoundEmail } from '../emails/suggestion-found'
 export type { SuggestionFoundEmailProps } from '../emails/suggestion-found'
 
 export { renderEmail } from './render'
+
+export type { Locale } from './i18n'

@@ -1,5 +1,5 @@
 import { eq, schema } from '@app/db'
-import { type alignSourcesTask, type exampleAgentTask } from '@app/trigger'
+import { type alignSourcesTask } from '@app/trigger'
 import { tasks } from '@trigger.dev/sdk'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
@@ -7,8 +7,11 @@ import { z } from 'zod'
 import { adminRouter } from './routers/admin'
 import { agentScheduleRouter } from './routers/agent-schedule'
 import { auditRouter } from './routers/audit'
+import { fileRouter } from './routers/file'
 import { notificationRouter } from './routers/notification'
 import { orderRouter } from './routers/order'
+import { organizationRouter } from './routers/organization'
+import { productRouter } from './routers/product'
 import { suggestionRouter } from './routers/suggestion'
 import { triggerRunRouter } from './routers/trigger-run'
 import { protectedProcedure, publicProcedure, router } from './trpc'
@@ -27,22 +30,6 @@ const helloRouter = router({
 })
 
 const triggerRouter = router({
-  exampleAgent: publicProcedure
-    .input(z.object({ name: z.string().optional() }))
-    .mutation(async ({ input }) => {
-      const handle = await tasks.trigger<typeof exampleAgentTask>(
-        'example-agent',
-        {
-          name: input.name,
-        },
-      )
-
-      return {
-        runId: handle.id,
-        publicAccessToken: handle.publicAccessToken,
-      }
-    }),
-
   scrapeOrganization: protectedProcedure
     .input(
       z.object({
@@ -82,6 +69,9 @@ const triggerRouter = router({
       const handle = await tasks.trigger<typeof alignSourcesTask>(
         'align-sources',
         { organizationId, urls, fileIds },
+        {
+          tags: [`org_${organizationId}`, `user_${ctx.session.user.id}`],
+        },
       )
 
       // Insert trigger_run row so the active tasks card picks it up immediately
@@ -143,6 +133,9 @@ const triggerRouter = router({
       const handle = await tasks.trigger<typeof alignSourcesTask>(
         'align-sources',
         { organizationId, urls, fileIds },
+        {
+          tags: [`org_${organizationId}`, `user_${ctx.session.user.id}`],
+        },
       )
 
       // Insert trigger_run row so the active tasks card picks it up immediately
@@ -195,6 +188,9 @@ const triggerRouter = router({
       const handle = await tasks.trigger<typeof alignSourcesTask>(
         'align-sources',
         { organizationId, urls, fileIds },
+        {
+          tags: [`org_${organizationId}`, `user_${ctx.session.user.id}`],
+        },
       )
 
       // Insert trigger_run row so the active tasks card picks it up immediately
@@ -219,11 +215,14 @@ export const appRouter = router({
   trigger: triggerRouter,
   triggerRun: triggerRunRouter,
   agentSchedule: agentScheduleRouter,
+  file: fileRouter,
   suggestion: suggestionRouter,
   order: orderRouter,
+  product: productRouter,
   notification: notificationRouter,
   audit: auditRouter,
   admin: adminRouter,
+  organization: organizationRouter,
 })
 
 // Export type router type signature,

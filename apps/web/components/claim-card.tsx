@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Building2, CheckCircle2, Mail, MapPin, Phone } from 'lucide-react'
@@ -206,7 +207,11 @@ export function ClaimCard({
       <CardFooter>
         {isAuthenticated ? (
           <Button className="w-full" disabled={isClaiming} onClick={onClaim}>
-            {isClaiming ? 'Claiming...' : 'Claim organization'}
+            {isClaiming ? (
+              <span>Claiming...</span>
+            ) : (
+              <span>Claim organization</span>
+            )}
           </Button>
         ) : (
           <Button className="w-full" onClick={onSignUp}>

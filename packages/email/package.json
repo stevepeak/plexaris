@@ -22,10 +22,10 @@
   },
   "devDependencies": {
     "@plexaris/eslint-config": "workspace:*",
-    "@react-email/preview-server": "^5.2.8",
+    "@react-email/preview-server": "^5.2.9",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
-    "react-email": "^5.2.8",
+    "react-email": "^5.2.9",
     "tsconfig": "workspace:*",
     "typescript": "catalog:"
   }

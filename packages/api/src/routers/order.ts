@@ -89,12 +89,7 @@ export const orderRouter = router({
             isNull(schema.order.archivedAt),
           ),
         )
-        .orderBy(
-          desc(
-            sql`CASE WHEN ${schema.order.status} = 'draft' THEN 0 ELSE 1 END`,
-          ),
-          desc(schema.order.updatedAt),
-        )
+        .orderBy(desc(schema.order.orderNumber))
 
       return rows.map((r) => ({ ...r, itemCount: r.itemCount ?? 0 }))
     }),
@@ -173,6 +168,11 @@ export const orderRouter = router({
           createdAt: schema.orderItem.createdAt,
           productName: schema.product.name,
           productCategory: schema.product.category,
+          productArticleNumber: sql<
+            string | null
+          >`${schema.product.data}->'general'->>'articleNumber'`.as(
+            'product_article_number',
+          ),
           supplierName: schema.organization.name,
           addedByName: schema.user.name,
           addedByImage: schema.user.image,

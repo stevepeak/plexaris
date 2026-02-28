@@ -1,3 +1,4 @@
+'use i18n'
 import { AllergensFields } from './sections/allergens-fields'
 import { DietaryFields } from './sections/dietary-fields'
 import { GeneralFields } from './sections/general-fields'

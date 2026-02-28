@@ -1,4 +1,10 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import {
+  type AnyPgColumn,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core'
 
 import { user } from './auth-schema'
 import { organization } from './org-schema'
@@ -11,7 +17,9 @@ export const triggerRun = pgTable('trigger_run', {
   triggerRunId: text('trigger_run_id').notNull().unique(),
   taskType: text('task_type').notNull(),
   label: text('label').notNull(),
-  parentRunId: text('parent_run_id'),
+  parentRunId: text('parent_run_id').references(
+    (): AnyPgColumn => triggerRun.triggerRunId,
+  ),
   status: text('status').notNull().default('running'),
   createdBy: text('created_by').references(() => user.id),
   createdAt: timestamp('created_at', {

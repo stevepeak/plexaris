@@ -1,3 +1,4 @@
+'use i18n'
 import { ProductImageManager } from '@/components/product-image-manager'
 import { uploadFiles } from '@/lib/upload'
 

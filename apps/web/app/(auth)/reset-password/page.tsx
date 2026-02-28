@@ -1,6 +1,6 @@
+'use i18n'
 'use client'
 
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
 
@@ -95,19 +95,23 @@ function ResetPasswordForm() {
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? 'Resetting...' : 'Reset password'}
+            {isLoading ? (
+              <span>Resetting...</span>
+            ) : (
+              <span>Reset password</span>
+            )}
           </Button>
         </form>
       </CardContent>
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
           Remember your password?{' '}
-          <Link
+          <a
             href="/login"
             className="text-primary underline-offset-4 hover:underline"
           >
             Sign in
-          </Link>
+          </a>
         </p>
       </CardFooter>
     </Card>

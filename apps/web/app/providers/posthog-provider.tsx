@@ -1,13 +1,18 @@
 'use client'
 
 import posthog from 'posthog-js'
-import { type ReactNode, useEffect } from 'react'
+import { type ReactNode, useEffect, useRef } from 'react'
+
+import { authClient } from '@/lib/auth-client'
 
 type PostHogProviderProps = {
   children: ReactNode
 }
 
 export function PostHogProvider({ children }: PostHogProviderProps) {
+  const { data: session } = authClient.useSession()
+  const identifiedUserRef = useRef<string | null>(null)
+
   useEffect(() => {
     // Only initialize in production or when explicitly enabled
     // eslint-disable-next-line no-process-env
@@ -36,6 +41,28 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
       },
     })
   }, [])
+
+  useEffect(() => {
+    if (!posthog.__loaded) {
+      return
+    }
+
+    const user = session?.user
+    if (user) {
+      if (identifiedUserRef.current !== user.id) {
+        posthog.identify(user.id, {
+          email: user.email,
+          name: user.name,
+          avatar: user.image,
+          $avatar: user.image,
+        })
+        identifiedUserRef.current = user.id
+      }
+    } else if (identifiedUserRef.current) {
+      posthog.reset()
+      identifiedUserRef.current = null
+    }
+  }, [session])
 
   return <>{children}</>
 }

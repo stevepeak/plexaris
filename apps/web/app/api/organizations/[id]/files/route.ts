@@ -1,5 +1,6 @@
 import { uploadFile } from '@app/cloudinary'
 import { createDb, schema } from '@app/db'
+import { ALLOWED_DOCUMENT_TYPES } from '@app/utils'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
@@ -43,6 +44,14 @@ export async function POST(
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
         { error: `File too large: ${file.name} (max 16MB)` },
+        { status: 400 },
+      )
+    }
+    if (!ALLOWED_DOCUMENT_TYPES.has(file.type)) {
+      return NextResponse.json(
+        {
+          error: `Unsupported file type: ${file.name} (${file.type || 'unknown'})`,
+        },
         { status: 400 },
       )
     }

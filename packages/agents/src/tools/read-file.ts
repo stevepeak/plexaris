@@ -1,6 +1,12 @@
 import { createDb, eq, schema } from '@app/db'
 import { tool } from 'ai'
+import * as XLSX from 'xlsx'
 import { z } from 'zod'
+
+const EXCEL_MIME_TYPES = new Set([
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
+])
 
 /**
  * Tool that reads an uploaded file by ID. Fetches the file content from
@@ -39,7 +45,25 @@ export function createReadFileTool() {
         })
       }
 
-      const content = await res.text()
+      let content: string
+
+      if (EXCEL_MIME_TYPES.has(row.mimeType)) {
+        try {
+          const buffer = await res.arrayBuffer()
+          const workbook = XLSX.read(buffer, { type: 'array' })
+          content = workbook.SheetNames.map((name) => {
+            const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[name])
+            return `--- Sheet: ${name} ---\n${csv}`
+          }).join('\n\n')
+        } catch {
+          return JSON.stringify({
+            error: `Failed to parse Excel file: ${row.name}. The file may be corrupted or password-protected.`,
+          })
+        }
+      } else {
+        content = await res.text()
+      }
+
       return JSON.stringify({
         id: row.id,
         name: row.name,

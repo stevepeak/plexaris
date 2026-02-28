@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { MessageSquare, Search, ShoppingCart } from 'lucide-react'
@@ -34,6 +35,19 @@ const TOGGLES: {
   { key: 'chat', icon: MessageSquare, label: 'Chat', shortcut: 'C' },
 ]
 
+function ToggleLabel({ text }: { text: string }) {
+  switch (text) {
+    case 'Search':
+      return <span>Search</span>
+    case 'Cart':
+      return <span>Cart</span>
+    case 'Chat':
+      return <span>Chat</span>
+    default:
+      return <span>{text}</span>
+  }
+}
+
 export function PanelToggleBar({ panels, onToggle }: PanelToggleBarProps) {
   const value = TOGGLES.filter((t) => panels[t.key]).map((t) => t.key)
 
@@ -67,7 +81,8 @@ export function PanelToggleBar({ panels, onToggle }: PanelToggleBarProps) {
               </ToggleGroupItem>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {toggle.label} <Kbd className="ml-1">{toggle.shortcut}</Kbd>
+              <ToggleLabel text={toggle.label} />{' '}
+              <Kbd className="ml-1">{toggle.shortcut}</Kbd>
             </TooltipContent>
           </Tooltip>
         ))}

@@ -1,3 +1,4 @@
+'use i18n'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -8,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
+import { cn, formatEuro } from '@/lib/utils'
 
 import { type CartItemData } from '../cart-item'
 
@@ -79,7 +80,8 @@ export function CheckoutInvoice({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50%]">Item</TableHead>
+                  <TableHead className="w-[40%]">Item</TableHead>
+                  <TableHead>Article #</TableHead>
                   <TableHead className="text-right">Qty</TableHead>
                   <TableHead className="text-right">Unit Price</TableHead>
                   <TableHead className="text-right">Total</TableHead>
@@ -89,14 +91,17 @@ export function CheckoutInvoice({
                 {items.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {item.articleNumber ?? '—'}
+                    </TableCell>
                     <TableCell className="text-right">
                       {item.quantity}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-right">
-                      ${item.price.toFixed(2)}
+                      {formatEuro(item.price)}
                     </TableCell>
                     <TableCell className="text-right">
-                      ${(item.quantity * item.price).toFixed(2)}
+                      {formatEuro(item.quantity * item.price)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -109,7 +114,7 @@ export function CheckoutInvoice({
               <div className="w-48 space-y-2">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatEuro(subtotal)}</span>
                 </div>
               </div>
             </div>

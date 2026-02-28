@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import Link from 'next/link'
@@ -22,6 +23,23 @@ const statusConfig: Record<
   confirmed: { label: 'Confirmed', variant: 'outline' },
   delivered: { label: 'Delivered', variant: 'outline' },
   cancelled: { label: 'Cancelled', variant: 'destructive' },
+}
+
+function StatusLabel({ text }: { text: string }) {
+  switch (text) {
+    case 'Draft':
+      return <span>Draft</span>
+    case 'Submitted':
+      return <span>Submitted</span>
+    case 'Confirmed':
+      return <span>Confirmed</span>
+    case 'Delivered':
+      return <span>Delivered</span>
+    case 'Cancelled':
+      return <span>Cancelled</span>
+    default:
+      return <span>{text}</span>
+  }
 }
 
 const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
@@ -210,9 +228,16 @@ function HorecaOrders({ organizationId }: { organizationId: string }) {
                   <span className="font-mono text-sm font-medium">
                     #{order.orderNumber}
                   </span>
-                  <Badge variant={config.variant}>{config.label}</Badge>
+                  <Badge variant={config.variant}>
+                    <StatusLabel text={config.label} />
+                  </Badge>
                   <span className="text-sm">
-                    {order.itemCount} {order.itemCount === 1 ? 'item' : 'items'}
+                    {order.itemCount}{' '}
+                    {order.itemCount === 1 ? (
+                      <span>item</span>
+                    ) : (
+                      <span>items</span>
+                    )}
                   </span>
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     by

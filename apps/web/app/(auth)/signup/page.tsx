@@ -1,8 +1,10 @@
+'use i18n'
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
 
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -98,7 +100,11 @@ function SignupForm() {
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? 'Creating account...' : 'Sign up'}
+            {isLoading ? (
+              <span>Creating account...</span>
+            ) : (
+              <span>Sign up</span>
+            )}
           </Button>
         </form>
       </CardContent>
@@ -194,12 +200,16 @@ export default function SignupPage() {
       </div>
 
       <div className="relative flex flex-col items-center gap-6">
-        <h1 className="font-bruno text-4xl tracking-wide text-foreground">
+        <h1
+          className="font-bruno text-4xl tracking-wide text-foreground"
+          data-lingo-override={{ nl: 'Plexaris' }}
+        >
           Plexaris
         </h1>
         <Suspense fallback={<SignupFallback />}>
           <SignupForm />
         </Suspense>
+        <LanguageSwitcher />
       </div>
     </div>
   )

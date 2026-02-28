@@ -1,8 +1,9 @@
+'use i18n'
 'use client'
 
-import Link from 'next/link'
 import { useState } from 'react'
 
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -97,7 +98,10 @@ export default function ForgotPasswordPage() {
       </div>
 
       <div className="relative flex flex-col items-center gap-6">
-        <h1 className="font-bruno text-4xl tracking-wide text-foreground">
+        <h1
+          className="font-bruno text-4xl tracking-wide text-foreground"
+          data-lingo-override={{ nl: 'Plexaris' }}
+        >
           Plexaris
         </h1>
         <Card className="relative w-full max-w-md bg-white dark:bg-card">
@@ -126,7 +130,11 @@ export default function ForgotPasswordPage() {
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading ? 'Sending...' : 'Send reset link'}
+                  {isLoading ? (
+                    <span>Sending...</span>
+                  ) : (
+                    <span>Send reset link</span>
+                  )}
                 </Button>
               </form>
             </CardContent>
@@ -134,15 +142,16 @@ export default function ForgotPasswordPage() {
           <CardFooter className="justify-center">
             <p className="text-sm text-muted-foreground">
               Remember your password?{' '}
-              <Link
+              <a
                 href="/login"
                 className="text-primary underline-offset-4 hover:underline"
               >
                 Sign in
-              </Link>
+              </a>
             </p>
           </CardFooter>
         </Card>
+        <LanguageSwitcher />
       </div>
     </div>
   )

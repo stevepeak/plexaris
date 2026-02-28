@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Building2, Mail, MapPin, Package, Phone } from 'lucide-react'
@@ -40,6 +41,7 @@ export type SupplierProfileCardState =
 interface SupplierProfileCardProps {
   state: SupplierProfileCardState
   products?: SupplierProduct[]
+  header?: React.ReactNode
 }
 
 function formatPrice(price: string | null, unit: string | null) {
@@ -130,6 +132,7 @@ function ProductsSection({ products }: { products: SupplierProduct[] }) {
 export function SupplierProfileCard({
   state,
   products,
+  header,
 }: SupplierProfileCardProps) {
   if (state.status === 'loading') {
     return (
@@ -175,7 +178,8 @@ export function SupplierProfileCard({
   const hasProducts = products && products.length > 0
 
   return (
-    <Card className="w-full max-w-2xl">
+    <Card className="w-full max-w-2xl overflow-hidden">
+      {header}
       <CardHeader>
         <div className="flex items-start gap-4">
           {supplier.logoUrl ? (
@@ -239,19 +243,20 @@ export function SupplierProfileCard({
           </div>
         )}
 
-        {hasProducts ? (
-          <ProductsSection products={products} />
-        ) : (
-          <div className="grid gap-3">
-            <h3 className="text-sm font-medium">Products</h3>
-            <div className="flex flex-col items-center py-6 text-center">
-              <Package className="h-8 w-8 text-muted-foreground/50" />
-              <p className="mt-2 text-sm text-muted-foreground">
-                No products listed yet.
-              </p>
+        {products !== undefined &&
+          (hasProducts ? (
+            <ProductsSection products={products} />
+          ) : (
+            <div className="grid gap-3">
+              <h3 className="text-sm font-medium">Products</h3>
+              <div className="flex flex-col items-center py-6 text-center">
+                <Package className="h-8 w-8 text-muted-foreground/50" />
+                <p className="mt-2 text-sm text-muted-foreground">
+                  No products listed yet.
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          ))}
       </CardContent>
     </Card>
   )

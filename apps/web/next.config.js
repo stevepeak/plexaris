@@ -1,3 +1,4 @@
+import { withLingo } from '@lingo.dev/compiler/next'
 import { withSentryConfig } from '@sentry/nextjs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -28,22 +29,51 @@ const securityHeaders = [
   },
 ]
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   turbopack: {
-    root: resolve(dirname(fileURLToPath(import.meta.url)), '../..'),
+    root: resolve(__dirname, '../..'),
   },
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }]
   },
 }
 
-export default withSentryConfig(nextConfig, {
+export default async function config() {
   // eslint-disable-next-line no-process-env
-  silent: !process.env.CI,
-  sourcemaps: {
-    deleteSourcemapsAfterUpload: true,
-  },
-  widenClientFileUpload: true,
-})
+  const isDev = process.env.NODE_ENV !== 'production'
+
+  // TEMPORARY: Disable Lingo because not worknig in CI
+
+  // // guard because lingo fails silently
+  // // eslint-disable-next-line no-process-env
+  // if (!process.env.OPENROUTER_API_KEY) {
+  //   throw new Error('OPENROUTER_API_KEY is required')
+  // }
+  // eslint-disable-next-line no-process-env
+  const useLingo = process.env.USE_LINGO_DEV === 'true'
+
+  const baseConfig = useLingo
+    ? await withLingo(nextConfig, {
+        sourceRoot: './app',
+        sourceLocale: 'en',
+        targetLocales: ['nl'],
+        models: { '*:*': 'openrouter:anthropic/claude-sonnet-4-6' },
+        localePersistence: 'cookie',
+        useDirective: true,
+        buildMode: isDev ? 'translate' : 'cache-only',
+      })
+    : nextConfig
+
+  return withSentryConfig(baseConfig, {
+    // eslint-disable-next-line no-process-env
+    silent: !process.env.CI,
+    sourcemaps: {
+      deleteSourcemapsAfterUpload: true,
+    },
+    widenClientFileUpload: true,
+  })
+}

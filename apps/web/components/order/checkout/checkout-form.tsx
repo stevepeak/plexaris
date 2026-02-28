@@ -1,3 +1,4 @@
+'use i18n'
 import { Calendar, CreditCard, Loader2, ShieldAlert } from 'lucide-react'
 import { useState } from 'react'
 
@@ -6,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
+import { formatEuro } from '@/lib/utils'
 
 interface CheckoutFormProps {
   hasPlaceOrderPermission: boolean
@@ -80,9 +82,10 @@ export function CheckoutForm({
         <div className="rounded-lg border p-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
-              {itemCount} {itemCount === 1 ? 'item' : 'items'}
+              {itemCount}{' '}
+              {itemCount === 1 ? <span>item</span> : <span>items</span>}
             </span>
-            <span className="font-bold">${subtotal.toFixed(2)}</span>
+            <span className="font-bold">{formatEuro(subtotal)}</span>
           </div>
         </div>
 

@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { AlertCircle, CheckCircle2, ExternalLink, Loader2 } from 'lucide-react'

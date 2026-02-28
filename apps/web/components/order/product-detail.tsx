@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import {
@@ -45,6 +46,7 @@ interface ProductDetailProps {
     supplierId: string
     supplierName: string
     category: string | null
+    articleNumber?: string | null
   }) => void
   organizationId?: string | null
   onFavoriteToggled?: () => void
@@ -244,6 +246,12 @@ export function ProductDetail({
                 supplierId: product.supplier.id,
                 supplierName: product.supplier.name,
                 category: product.category,
+                articleNumber: (
+                  product.data as
+                    | { general?: { articleNumber?: string } }
+                    | null
+                    | undefined
+                )?.general?.articleNumber,
               })
             }
           >
@@ -546,7 +554,7 @@ function DietaryDisplay({ data }: { data: Record<string, unknown> }) {
       {flags.map((flag) =>
         data[flag] != null ? (
           <Badge key={flag} variant={data[flag] ? 'default' : 'outline'}>
-            {flag}: {data[flag] ? 'Yes' : 'No'}
+            {flag}: {data[flag] ? <span>Yes</span> : <span>No</span>}
           </Badge>
         ) : null,
       )}

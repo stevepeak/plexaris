@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Monitor, Moon, Sun } from 'lucide-react'

@@ -1,3 +1,4 @@
+'use i18n'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 

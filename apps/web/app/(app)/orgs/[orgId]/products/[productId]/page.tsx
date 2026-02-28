@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Bot } from 'lucide-react'
@@ -28,7 +29,21 @@ export default function ProductEditPage() {
   const [isPending, setIsPending] = useState(true)
   const [productNotFound, setProductNotFound] = useState(false)
   const [isActivating, setIsActivating] = useState(false)
-  const [view, setView] = useState<'edit' | 'history'>('edit')
+  const [view, setView] = useState<'edit' | 'history'>(() => {
+    if (typeof window === 'undefined') return 'edit'
+    return new URLSearchParams(window.location.search).get('view') === 'history'
+      ? 'history'
+      : 'edit'
+  })
+
+  useEffect(() => {
+    const onPopState = () => {
+      const v = new URLSearchParams(window.location.search).get('view')
+      setView(v === 'history' ? 'history' : 'edit')
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
 
   useEffect(() => {
     setIsPending(true)
@@ -97,7 +112,11 @@ export default function ProductEditPage() {
               activate it when ready.
             </span>
             <Button size="sm" onClick={handleActivate} disabled={isActivating}>
-              {isActivating ? 'Activating...' : 'Activate product'}
+              {isActivating ? (
+                <span>Activating...</span>
+              ) : (
+                <span>Activate product</span>
+              )}
             </Button>
           </AlertDescription>
         </Alert>
@@ -105,7 +124,7 @@ export default function ProductEditPage() {
       {view === 'history' ? (
         <ProductVersionHistory
           productId={productId}
-          onBack={() => setView('edit')}
+          onBack={() => window.history.back()}
         />
       ) : (
         <ProductForm
@@ -113,7 +132,12 @@ export default function ProductEditPage() {
           product={product}
           onSubmit={handleUpdate}
           onCancel={handleCancel}
-          onViewHistory={() => setView('history')}
+          onViewHistory={() => {
+            const url = new URL(window.location.href)
+            url.searchParams.set('view', 'history')
+            window.history.pushState(null, '', url.toString())
+            setView('history')
+          }}
           isPending={isPending}
         />
       )}

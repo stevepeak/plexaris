@@ -1,3 +1,4 @@
+'use i18n'
 import { isDev } from '@app/config'
 import { type Metadata } from 'next'
 import Script from 'next/script'
@@ -7,6 +8,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 import './globals.css'
+import { LingoProvider } from './providers/lingo-provider'
 import { PostHogProvider } from './providers/posthog-provider'
 import { ThemeProvider } from './providers/theme-provider'
 import { TRPCProvider } from './providers/trpc-provider'
@@ -59,14 +61,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         )}
       </head>
       <body>
-        <ThemeProvider>
-          <TRPCProvider>
-            <PostHogProvider>
-              <TooltipProvider>{children}</TooltipProvider>
-            </PostHogProvider>
-          </TRPCProvider>
-        </ThemeProvider>
-        <Toaster />
+        <LingoProvider>
+          <ThemeProvider>
+            <TRPCProvider>
+              <PostHogProvider>
+                <TooltipProvider>{children}</TooltipProvider>
+              </PostHogProvider>
+            </TRPCProvider>
+          </ThemeProvider>
+          <Toaster />
+        </LingoProvider>
       </body>
     </html>
   )

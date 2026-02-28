@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Play, Plus, Trash2, X } from 'lucide-react'
@@ -380,7 +381,11 @@ export function CreateScheduleDialog({
               createMutation.isPending
             }
           >
-            {createMutation.isPending ? 'Creating...' : 'Create Schedule'}
+            {createMutation.isPending ? (
+              <span>Creating...</span>
+            ) : (
+              <span>Create Schedule</span>
+            )}
           </Button>
         </form>
       </DialogContent>

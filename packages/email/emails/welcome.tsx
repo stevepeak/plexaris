@@ -1,31 +1,31 @@
 import { Button, Heading, Text } from '@react-email/components'
 
 import { Layout } from '../src/components/layout'
+import { type Locale, t } from '../src/i18n'
 
 export type WelcomeEmailProps = {
   userName: string
   loginLink: string
+  locale?: Locale
 }
 
 export default function WelcomeEmail({
   userName,
   loginLink,
+  locale = 'en',
 }: WelcomeEmailProps) {
   return (
-    <Layout preview={`Welcome to Plexaris, ${userName}!`}>
-      <Heading style={heading}>Welcome to Plexaris</Heading>
-      <Text style={text}>Hi {userName},</Text>
-      <Text style={text}>
-        Thanks for signing up for Plexaris. We&apos;re excited to have you on
-        board. Get started by signing in to your account.
-      </Text>
+    <Layout
+      preview={t('welcome.preview', locale, { userName })}
+      locale={locale}
+    >
+      <Heading style={heading}>{t('welcome.heading', locale)}</Heading>
+      <Text style={text}>{t('welcome.greeting', locale, { userName })}</Text>
+      <Text style={text}>{t('welcome.body', locale)}</Text>
       <Button style={button} href={loginLink}>
-        Sign In
+        {t('welcome.button', locale)}
       </Button>
-      <Text style={muted}>
-        If you have any questions, just reply to this email. We&apos;re here to
-        help.
-      </Text>
+      <Text style={muted}>{t('welcome.help', locale)}</Text>
     </Layout>
   )
 }

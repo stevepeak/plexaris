@@ -18,21 +18,23 @@ function mapServerItems(
     unit: string | null
     addedByName: string
     addedByImage: string | null
-    productName: string
-    productCategory: string | null
+    productName?: string
+    productCategory?: string | null
+    productArticleNumber: string | null
     supplierName: string
     createdAt: Date | string
   }[],
 ): CartItemData[] {
   return items.map((item) => ({
     id: item.productId,
-    name: item.productName,
+    name: item.productName ?? '',
     price: Number(item.unitPrice ?? 0),
     unit: item.unit ?? '',
     quantity: item.quantity,
     supplier: item.supplierName,
     supplierId: item.supplierId,
     category: item.productCategory ?? undefined,
+    articleNumber: item.productArticleNumber ?? undefined,
     addedBy: {
       name: item.addedByName,
       avatarUrl: item.addedByImage ?? undefined,
@@ -68,6 +70,7 @@ export function useOrderCart(orderId: string): CartStateReturn & {
     supplierId: string
     supplierName: string
     category: string | null
+    articleNumber?: string | null
   }) => void
 } {
   const utils = trpc.useUtils()
@@ -137,6 +140,7 @@ export function useOrderCart(orderId: string): CartStateReturn & {
       supplierId: string
       supplierName: string
       category: string | null
+      articleNumber?: string | null
     }) => {
       // Optimistic local update
       cart.addItem({
@@ -148,6 +152,7 @@ export function useOrderCart(orderId: string): CartStateReturn & {
         supplier: item.supplierName,
         supplierId: item.supplierId,
         category: item.category ?? undefined,
+        articleNumber: item.articleNumber ?? undefined,
       })
 
       // Persist to server

@@ -1,3 +1,4 @@
+'use i18n'
 import { Textarea } from '@/components/ui/textarea'
 
 import { FieldInput, FieldLabel } from '../field-primitives'

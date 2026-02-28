@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { ArrowRightLeft, Package, ShoppingCart, Warehouse } from 'lucide-react'

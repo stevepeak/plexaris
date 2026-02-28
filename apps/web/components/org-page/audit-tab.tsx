@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Search } from 'lucide-react'
@@ -46,6 +47,29 @@ const ENTITY_TYPES = [
   { value: 'membership', label: 'Membership' },
   { value: 'invitation', label: 'Invitation' },
 ]
+
+function EntityTypeLabel({ text }: { text: string }) {
+  switch (text) {
+    case 'All types':
+      return <span>All types</span>
+    case 'Order':
+      return <span>Order</span>
+    case 'Suggestion':
+      return <span>Suggestion</span>
+    case 'Agent Schedule':
+      return <span>Agent Schedule</span>
+    case 'Organization':
+      return <span>Organization</span>
+    case 'Role':
+      return <span>Role</span>
+    case 'Membership':
+      return <span>Membership</span>
+    case 'Invitation':
+      return <span>Invitation</span>
+    default:
+      return <span>{text}</span>
+  }
+}
 
 function formatAction(action: string): string {
   return action.replace(/[._]/g, ' ')
@@ -188,7 +212,7 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
           <SelectContent>
             {ENTITY_TYPES.map((t) => (
               <SelectItem key={t.value} value={t.value}>
-                {t.label}
+                <EntityTypeLabel text={t.label} />
               </SelectItem>
             ))}
           </SelectContent>

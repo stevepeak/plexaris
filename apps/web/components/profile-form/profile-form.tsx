@@ -1,3 +1,4 @@
+'use i18n'
 'use client'
 
 import { Cable, KeyRound, Loader2, TriangleAlert, User } from 'lucide-react'
