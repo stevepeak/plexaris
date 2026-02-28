@@ -1,6 +1,7 @@
 'use i18n'
 'use client'
 
+import { ALLOWED_DOCUMENT_TYPES, DOCUMENT_ACCEPT } from '@app/utils'
 import {
   FileSpreadsheet,
   FileText,
@@ -63,6 +64,13 @@ export function AlignTab(props: { organizationId: string }) {
   const uploadFiles = useCallback(
     async (files: FileList) => {
       if (files.length === 0 || isUploading) return
+
+      for (const file of files) {
+        if (!ALLOWED_DOCUMENT_TYPES.has(file.type)) {
+          toast.error(`Unsupported file type: ${file.name}`)
+          return
+        }
+      }
 
       setIsUploading(true)
 
@@ -183,6 +191,7 @@ export function AlignTab(props: { organizationId: string }) {
           ref={fileInputRef}
           type="file"
           multiple
+          accept={DOCUMENT_ACCEPT}
           className="hidden"
           onChange={handleFileChange}
         />

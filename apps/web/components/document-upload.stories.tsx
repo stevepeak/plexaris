@@ -21,8 +21,8 @@ export const WithFiles: Story = {
     <DocumentUpload
       files={[
         new File(['test content'], 'products.csv', { type: 'text/csv' }),
-        new File(['pdf content'], 'catalog.pdf', {
-          type: 'application/pdf',
+        new File(['{"products":[]}'], 'catalog.json', {
+          type: 'application/json',
         }),
       ]}
       onFilesChange={noop}

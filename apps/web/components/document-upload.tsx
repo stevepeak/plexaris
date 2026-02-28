@@ -1,6 +1,7 @@
 'use i18n'
 'use client'
 
+import { ALLOWED_DOCUMENT_TYPES, DOCUMENT_ACCEPT } from '@app/utils'
 import { Upload, X } from 'lucide-react'
 import { useCallback, useRef, useState } from 'react'
 
@@ -32,6 +33,10 @@ export function DocumentUpload({
       setFileError(null)
       const toAdd: File[] = []
       for (const file of newFiles) {
+        if (!ALLOWED_DOCUMENT_TYPES.has(file.type)) {
+          setFileError(`"${file.name}" is not an accepted file type`)
+          continue
+        }
         if (file.size > MAX_FILE_SIZE) {
           setFileError(`"${file.name}" exceeds the 16MB file size limit`)
           continue
@@ -86,7 +91,7 @@ export function DocumentUpload({
               : 'Drop files here or click to browse'}
           </p>
           <p className="text-xs text-muted-foreground">
-            CSV, Excel, PDF, images — 16MB max per file
+            CSV, Excel, HTML, JSON, text, images — 16MB max per file
           </p>
         </div>
       </div>
@@ -94,6 +99,7 @@ export function DocumentUpload({
         ref={fileInputRef}
         type="file"
         multiple
+        accept={DOCUMENT_ACCEPT}
         className="hidden"
         onChange={(e) => {
           if (e.target.files) {
