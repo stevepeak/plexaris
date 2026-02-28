@@ -87,11 +87,14 @@ export const discoverProductsTask = task({
           'progress',
           `Spawning product scrape: ${product.name}`,
         )
-        await scrapeProductTask.trigger({
-          organizationId,
-          productUrl: product.url ?? undefined,
-          productHint: product.name,
-        })
+        await scrapeProductTask.trigger(
+          {
+            organizationId,
+            productUrl: product.url ?? undefined,
+            productHint: product.name,
+          },
+          { tags: ctx.run.tags },
+        )
       }
 
       // 5. Update trigger_run status to completed

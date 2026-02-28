@@ -273,6 +273,9 @@ export const agentScheduleRouter = router({
       const handle = await tasks.trigger<typeof alignSourcesTask>(
         'align-sources',
         { organizationId, urls, fileIds },
+        {
+          tags: [`org_${organizationId}`, `user_${ctx.session.user.id}`],
+        },
       )
 
       await ctx.db.insert(schema.triggerRun).values({

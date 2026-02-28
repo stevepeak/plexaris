@@ -47,6 +47,7 @@ export const scheduledAgentTask = schedules.task({
     const handle = await tasks.trigger<typeof alignSourcesTask>(
       'align-sources',
       { organizationId, urls, fileIds },
+      { tags: [`org_${organizationId}`] },
     )
 
     await db

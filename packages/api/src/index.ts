@@ -68,6 +68,9 @@ const triggerRouter = router({
       const handle = await tasks.trigger<typeof alignSourcesTask>(
         'align-sources',
         { organizationId, urls, fileIds },
+        {
+          tags: [`org_${organizationId}`, `user_${ctx.session.user.id}`],
+        },
       )
 
       // Insert trigger_run row so the active tasks card picks it up immediately
@@ -129,6 +132,9 @@ const triggerRouter = router({
       const handle = await tasks.trigger<typeof alignSourcesTask>(
         'align-sources',
         { organizationId, urls, fileIds },
+        {
+          tags: [`org_${organizationId}`, `user_${ctx.session.user.id}`],
+        },
       )
 
       // Insert trigger_run row so the active tasks card picks it up immediately
@@ -181,6 +187,9 @@ const triggerRouter = router({
       const handle = await tasks.trigger<typeof alignSourcesTask>(
         'align-sources',
         { organizationId, urls, fileIds },
+        {
+          tags: [`org_${organizationId}`, `user_${ctx.session.user.id}`],
+        },
       )
 
       // Insert trigger_run row so the active tasks card picks it up immediately
