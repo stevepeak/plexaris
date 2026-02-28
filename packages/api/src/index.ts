@@ -1,5 +1,5 @@
 import { eq, schema } from '@app/db'
-import { type alignSourcesTask, type exampleAgentTask } from '@app/trigger'
+import { type alignSourcesTask } from '@app/trigger'
 import { tasks } from '@trigger.dev/sdk'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
@@ -29,22 +29,6 @@ const helloRouter = router({
 })
 
 const triggerRouter = router({
-  exampleAgent: publicProcedure
-    .input(z.object({ name: z.string().optional() }))
-    .mutation(async ({ input }) => {
-      const handle = await tasks.trigger<typeof exampleAgentTask>(
-        'example-agent',
-        {
-          name: input.name,
-        },
-      )
-
-      return {
-        runId: handle.id,
-        publicAccessToken: handle.publicAccessToken,
-      }
-    }),
-
   scrapeOrganization: protectedProcedure
     .input(
       z.object({
