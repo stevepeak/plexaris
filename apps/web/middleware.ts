@@ -42,6 +42,8 @@ export async function middleware(request: NextRequest) {
 
   const isAuthenticated = !!session?.session
 
+  const hasOrgs = request.cookies.get('has_orgs')?.value === '1'
+
   // Unauthenticated users on protected routes go to /login
   if (isProtectedRoute && !isAuthenticated) {
     return NextResponse.redirect(new URL('/login', request.url))
