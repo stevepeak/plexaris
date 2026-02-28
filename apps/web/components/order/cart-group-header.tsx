@@ -7,7 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { cn } from '@/lib/utils'
+import { cn, formatEuro } from '@/lib/utils'
 
 interface CartGroupHeaderProps {
   label: string
@@ -40,7 +40,7 @@ export function CartGroupHeader({
           {itemCount}
         </Badge>
         <span className="shrink-0 text-xs text-muted-foreground">
-          ${subtotal.toFixed(2)}
+          {formatEuro(subtotal)}
         </span>
       </CollapsibleTrigger>
       <CollapsibleContent>{children}</CollapsibleContent>

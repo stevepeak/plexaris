@@ -21,6 +21,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { type CartStateReturn } from '@/hooks/use-cart-state'
+import { formatEuro } from '@/lib/utils'
 
 import { CartGroupHeader } from './cart-group-header'
 import { CartItem } from './cart-item'
@@ -209,7 +210,7 @@ export const OrderCart = forwardRef<OrderCartHandle, OrderCartProps>(
                   )}
                 </span>
                 <span className="font-semibold">
-                  ${cart.subtotal.toFixed(2)}
+                  {formatEuro(cart.subtotal)}
                 </span>
               </div>
             )}

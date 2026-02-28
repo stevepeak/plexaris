@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
+import { cn, formatEuro } from '@/lib/utils'
 
 import { type CartItemData } from '../cart-item'
 
@@ -98,10 +98,10 @@ export function CheckoutInvoice({
                       {item.quantity}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-right">
-                      ${item.price.toFixed(2)}
+                      {formatEuro(item.price)}
                     </TableCell>
                     <TableCell className="text-right">
-                      ${(item.quantity * item.price).toFixed(2)}
+                      {formatEuro(item.quantity * item.price)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -114,7 +114,7 @@ export function CheckoutInvoice({
               <div className="w-48 space-y-2">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatEuro(subtotal)}</span>
                 </div>
               </div>
             </div>

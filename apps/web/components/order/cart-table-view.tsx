@@ -30,7 +30,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { type CartStateReturn } from '@/hooks/use-cart-state'
-import { cn } from '@/lib/utils'
+import { cn, formatEuro } from '@/lib/utils'
 
 import { type CartItemData } from './cart-item'
 
@@ -746,11 +746,11 @@ export function CartTableView({
                   {renderQtyCell(item, row)}
                 </TableCell>
                 <TableCell className="text-right">
-                  <span className="text-xs">${item.price.toFixed(2)}</span>
+                  <span className="text-xs">{formatEuro(item.price)}</span>
                 </TableCell>
                 <TableCell className="text-right">
                   <span className="text-xs font-medium">
-                    ${(item.quantity * item.price).toFixed(2)}
+                    {formatEuro(item.quantity * item.price)}
                   </span>
                 </TableCell>
               </TableRow>

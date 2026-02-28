@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
+import { formatEuro } from '@/lib/utils'
 
 interface CheckoutFormProps {
   hasPlaceOrderPermission: boolean
@@ -84,7 +85,7 @@ export function CheckoutForm({
               {itemCount}{' '}
               {itemCount === 1 ? <span>item</span> : <span>items</span>}
             </span>
-            <span className="font-bold">${subtotal.toFixed(2)}</span>
+            <span className="font-bold">{formatEuro(subtotal)}</span>
           </div>
         </div>
 
