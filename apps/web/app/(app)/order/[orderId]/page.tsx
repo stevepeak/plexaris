@@ -380,6 +380,7 @@ export default function OrderPage() {
       supplierId: string
       supplierName: string
       category: string | null
+      articleNumber?: string | null
     }) => {
       cart.addItemToOrder(item)
     },

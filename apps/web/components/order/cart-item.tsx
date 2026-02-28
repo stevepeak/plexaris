@@ -16,6 +16,7 @@ export interface CartItemData {
   supplier: string
   supplierId: string
   category?: string
+  articleNumber?: string
   assignee?: string
   addedBy?: CartItemAddedBy
 }

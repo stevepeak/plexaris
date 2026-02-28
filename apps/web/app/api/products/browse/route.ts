@@ -1,4 +1,4 @@
-import { and, createDb, eq, ilike, isNull, or, schema } from '@app/db'
+import { and, createDb, eq, ilike, isNull, or, schema, sql } from '@app/db'
 import { NextResponse } from 'next/server'
 
 import { auth } from '@/lib/auth'
@@ -51,6 +51,7 @@ export async function GET(request: Request) {
       or(
         ilike(schema.product.name, pattern),
         ilike(schema.product.description, pattern),
+        sql`${schema.product.data}->'general'->>'articleNumber' ILIKE ${pattern}`,
       )!,
     )
   }
@@ -78,6 +79,11 @@ export async function GET(request: Request) {
       price: schema.product.price,
       unit: schema.product.unit,
       category: schema.product.category,
+      articleNumber: sql<
+        string | null
+      >`${schema.product.data}->'general'->>'articleNumber'`.as(
+        'article_number',
+      ),
       supplierId: schema.organization.id,
       supplierName: schema.organization.name,
     })
@@ -96,6 +102,7 @@ export async function GET(request: Request) {
     price: row.price,
     unit: row.unit,
     category: row.category,
+    articleNumber: row.articleNumber ?? null,
     supplier: { id: row.supplierId, name: row.supplierName },
     ...(favoriteIds ? { isFavorited: favoriteIds.has(row.id) } : {}),
   }))

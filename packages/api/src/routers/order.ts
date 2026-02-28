@@ -168,6 +168,11 @@ export const orderRouter = router({
           createdAt: schema.orderItem.createdAt,
           productName: schema.product.name,
           productCategory: schema.product.category,
+          productArticleNumber: sql<
+            string | null
+          >`${schema.product.data}->'general'->>'articleNumber'`.as(
+            'product_article_number',
+          ),
           supplierName: schema.organization.name,
           addedByName: schema.user.name,
           addedByImage: schema.user.image,

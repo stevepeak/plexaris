@@ -172,7 +172,8 @@ export function CartTableView({
           item.name.toLowerCase().includes(q) ||
           item.supplier.toLowerCase().includes(q) ||
           item.category?.toLowerCase().includes(q) ||
-          item.assignee?.toLowerCase().includes(q),
+          item.assignee?.toLowerCase().includes(q) ||
+          item.articleNumber?.toLowerCase().includes(q),
       )
     }
 
@@ -656,6 +657,9 @@ export function CartTableView({
               <TableHead className="min-w-[180px]">
                 {renderSortableHeader('Name', 'name')}
               </TableHead>
+              <TableHead className="min-w-[60px]">
+                <span className="text-xs font-medium">Art. #</span>
+              </TableHead>
               <TableHead className="min-w-[120px]">
                 {renderSortableHeader('Supplier', 'supplier')}
               </TableHead>
@@ -687,6 +691,13 @@ export function CartTableView({
                   >
                     {item.name}
                   </button>
+                </TableCell>
+                <TableCell>
+                  {item.articleNumber && (
+                    <span className="text-[10px] font-mono text-muted-foreground">
+                      {item.articleNumber}
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell
                   className={cellClassName(row, 0)}

@@ -80,7 +80,8 @@ export function CheckoutInvoice({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50%]">Item</TableHead>
+                  <TableHead className="w-[40%]">Item</TableHead>
+                  <TableHead>Article #</TableHead>
                   <TableHead className="text-right">Qty</TableHead>
                   <TableHead className="text-right">Unit Price</TableHead>
                   <TableHead className="text-right">Total</TableHead>
@@ -90,6 +91,9 @@ export function CheckoutInvoice({
                 {items.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {item.articleNumber ?? '—'}
+                    </TableCell>
                     <TableCell className="text-right">
                       {item.quantity}
                     </TableCell>

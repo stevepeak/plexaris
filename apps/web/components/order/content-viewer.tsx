@@ -31,6 +31,7 @@ interface ContentViewerProps {
     supplierId: string
     supplierName: string
     category: string | null
+    articleNumber?: string | null
   }) => void
   cart?: CartStateReturn
   activityEntries?: ActivityEntry[]

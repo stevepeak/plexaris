@@ -258,6 +258,7 @@ export interface BrowseProduct {
   price: string | null
   unit: string | null
   category: string | null
+  articleNumber?: string | null
   supplier: { id: string; name: string }
   isFavorited?: boolean
 }
@@ -474,7 +475,17 @@ function ProductList({
           onClick={() => onProductClick?.(product)}
         >
           <div className="min-w-0 flex-1">
-            <div className="font-medium">{product.name}</div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-medium">{product.name}</span>
+              {product.articleNumber && (
+                <Badge
+                  variant="outline"
+                  className="shrink-0 font-mono text-[10px]"
+                >
+                  #{product.articleNumber}
+                </Badge>
+              )}
+            </div>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               {product.price != null && (
                 <span>

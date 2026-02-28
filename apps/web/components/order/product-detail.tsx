@@ -46,6 +46,7 @@ interface ProductDetailProps {
     supplierId: string
     supplierName: string
     category: string | null
+    articleNumber?: string | null
   }) => void
   organizationId?: string | null
   onFavoriteToggled?: () => void
@@ -245,6 +246,12 @@ export function ProductDetail({
                 supplierId: product.supplier.id,
                 supplierName: product.supplier.name,
                 category: product.category,
+                articleNumber: (
+                  product.data as
+                    | { general?: { articleNumber?: string } }
+                    | null
+                    | undefined
+                )?.general?.articleNumber,
               })
             }
           >
