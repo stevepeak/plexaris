@@ -8,8 +8,11 @@ import {
   Image,
   Lightbulb,
   Loader2,
+  Plus,
   Receipt,
+  Rocket,
   ScrollText,
+  Trash2,
   Upload,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -17,6 +20,7 @@ import { useParams } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { Button } from '@/components/ui/button'
 import { trpc } from '@/lib/trpc'
 import { uploadOrganizationFiles } from '@/lib/upload-files'
 import { cn } from '@/lib/utils'
@@ -47,10 +51,17 @@ const FILE_HINTS = [
   },
 ] as const
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 export function AlignTab(props: { organizationId: string }) {
   const { orgId } = useParams<{ orgId: string }>()
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [isLaunching, setIsLaunching] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [triggerDevRunId, setTriggerDevRunId] = useState<string | null>(null)
   const [publicAccessToken, setPublicAccessToken] = useState<string | null>(
@@ -59,13 +70,24 @@ export function AlignTab(props: { organizationId: string }) {
   const [taskId, setTaskId] = useState<string | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const utils = trpc.useUtils()
   const scrapeMutation = trpc.trigger.scrapeOrganization.useMutation()
+  const deleteMutation = trpc.file.delete.useMutation({
+    onSuccess: () =>
+      utils.file.list.invalidate({ organizationId: props.organizationId }),
+  })
+
+  const { data: files, isLoading: isLoadingFiles } = trpc.file.list.useQuery({
+    organizationId: props.organizationId,
+  })
+
+  const hasFiles = files && files.length > 0
 
   const uploadFiles = useCallback(
-    async (files: FileList) => {
-      if (files.length === 0 || isUploading) return
+    async (fileList: FileList) => {
+      if (fileList.length === 0 || isUploading) return
 
-      for (const file of files) {
+      for (const file of fileList) {
         if (!ALLOWED_DOCUMENT_TYPES.has(file.type)) {
           toast.error(`Unsupported file type: ${file.name}`)
           return
@@ -75,24 +97,23 @@ export function AlignTab(props: { organizationId: string }) {
       setIsUploading(true)
 
       try {
-        await uploadOrganizationFiles(Array.from(files), props.organizationId)
-
-        const result = await scrapeMutation.mutateAsync({
+        await uploadOrganizationFiles(
+          Array.from(fileList),
+          props.organizationId,
+        )
+        await utils.file.list.invalidate({
           organizationId: props.organizationId,
-          filesOnly: true,
         })
-
-        setTriggerDevRunId(result.runId)
-        setPublicAccessToken(result.publicAccessToken)
-        setTaskId(result.taskId)
-        setDialogOpen(true)
+        toast.success(
+          `${fileList.length} file${fileList.length > 1 ? 's' : ''} uploaded`,
+        )
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Something went wrong')
       } finally {
         setIsUploading(false)
       }
     },
-    [isUploading, props.organizationId, scrapeMutation],
+    [isUploading, props.organizationId, utils.file.list],
   )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -130,6 +151,35 @@ export function AlignTab(props: { organizationId: string }) {
     },
     [uploadFiles],
   )
+
+  const handleDeleteFile = useCallback(
+    (fileId: string) => {
+      deleteMutation.mutate({
+        fileId,
+        organizationId: props.organizationId,
+      })
+    },
+    [deleteMutation, props.organizationId],
+  )
+
+  const handleLaunchAgent = useCallback(async () => {
+    setIsLaunching(true)
+    try {
+      const result = await scrapeMutation.mutateAsync({
+        organizationId: props.organizationId,
+        filesOnly: true,
+      })
+
+      setTriggerDevRunId(result.runId)
+      setPublicAccessToken(result.publicAccessToken)
+      setTaskId(result.taskId)
+      setDialogOpen(true)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setIsLaunching(false)
+    }
+  }, [scrapeMutation, props.organizationId])
 
   return (
     <>
@@ -186,7 +236,7 @@ export function AlignTab(props: { organizationId: string }) {
           </svg>
         </div>
 
-        {/* Dropzone */}
+        {/* Dropzone + file list */}
         <input
           ref={fileInputRef}
           type="file"
@@ -195,86 +245,172 @@ export function AlignTab(props: { organizationId: string }) {
           className="hidden"
           onChange={handleFileChange}
         />
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={handleClick}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              handleClick()
-            }
-          }}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={cn(
-            'relative z-10 flex w-full max-w-lg cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 transition-all duration-200',
-            isDragging
-              ? 'border-primary bg-background shadow-[0_0_0_4px_rgba(var(--primary)/0.1)]'
-              : 'border-muted-foreground/25 bg-background backdrop-blur-sm hover:border-muted-foreground/40',
-          )}
-        >
-          {isUploading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/80 backdrop-blur-sm">
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-5 w-5 animate-spin" />
-                <span className="text-sm font-medium">Uploading files...</span>
+
+        <div className="relative z-10 flex w-full max-w-lg flex-col items-center gap-6">
+          {/* Dropzone */}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={handleClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleClick()
+              }
+            }}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={cn(
+              'relative flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 transition-all duration-200',
+              hasFiles ? 'py-6' : 'py-10',
+              isDragging
+                ? 'border-primary bg-background shadow-[0_0_0_4px_rgba(var(--primary)/0.1)]'
+                : 'border-muted-foreground/25 bg-background backdrop-blur-sm hover:border-muted-foreground/40',
+            )}
+          >
+            {isUploading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/80 backdrop-blur-sm">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-sm font-medium">
+                    Uploading files...
+                  </span>
+                </div>
               </div>
+            )}
+
+            <div
+              className={cn(
+                'rounded-full transition-all duration-200',
+                hasFiles ? 'mb-2 p-3' : 'mb-5 p-5',
+                isDragging
+                  ? 'bg-primary/10 text-primary'
+                  : 'bg-muted text-muted-foreground',
+              )}
+            >
+              <Upload
+                className={cn(
+                  isDragging && 'animate-wobble',
+                  hasFiles ? 'h-6 w-6' : 'h-10 w-10',
+                )}
+              />
+            </div>
+            <p
+              className={cn(
+                'font-semibold transition-colors',
+                hasFiles ? 'text-base' : 'text-xl',
+                isDragging ? 'text-primary' : 'text-foreground',
+              )}
+            >
+              {isDragging ? (
+                <span>Drop files here</span>
+              ) : hasFiles ? (
+                <span>Drop more files or click to browse</span>
+              ) : (
+                <span>Drop any document here</span>
+              )}
+            </p>
+            {!hasFiles && (
+              <>
+                <p className="mt-1.5 text-sm text-muted-foreground">
+                  Plexaris AI will discover product and organization details and
+                  turn them into{' '}
+                  <Link
+                    href={`/orgs/${orgId}/suggestions`}
+                    className="inline-flex items-center gap-1 underline decoration-yellow-500/60 decoration-wavy underline-offset-4 transition-all hover:underline-offset-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Lightbulb className="h-3.5 w-3.5 text-yellow-500" />
+                    <span className="font-medium text-foreground">
+                      Suggestions
+                    </span>
+                  </Link>
+                </p>
+
+                <div className="mt-8 flex flex-wrap justify-center gap-2">
+                  {FILE_HINTS.map((hint) => (
+                    <div
+                      key={hint.label}
+                      className={cn(
+                        'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium',
+                        hint.color,
+                        isDragging && 'animate-wobble',
+                      )}
+                    >
+                      <hint.icon className="h-3.5 w-3.5" />
+                      {hint.label}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* File list */}
+          {isLoadingFiles && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading files...
             </div>
           )}
 
-          <div
-            className={cn(
-              'mb-5 rounded-full p-5 transition-all duration-200',
-              isDragging
-                ? 'bg-primary/10 text-primary'
-                : 'bg-muted text-muted-foreground',
-            )}
-          >
-            <Upload
-              className={cn('h-10 w-10', isDragging && 'animate-wobble')}
-            />
-          </div>
-          <p
-            className={cn(
-              'text-xl font-semibold transition-colors',
-              isDragging ? 'text-primary' : 'text-foreground',
-            )}
-          >
-            {isDragging ? (
-              <span>Drop files here</span>
-            ) : (
-              <span>Drop any document here</span>
-            )}
-          </p>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Plexaris AI will discover product and organization details and turn
-            them into{' '}
-            <Link
-              href={`/orgs/${orgId}/suggestions`}
-              className="inline-flex items-center gap-1 decoration-yellow-500/60 decoration-wavy underline-offset-4 transition-all hover:underline-offset-2 underline"
-            >
-              <Lightbulb className="h-3.5 w-3.5 text-yellow-500" />
-              <span className="font-medium text-foreground">Suggestions</span>
-            </Link>
-          </p>
-
-          <div className="mt-8 flex flex-wrap justify-center gap-2">
-            {FILE_HINTS.map((hint) => (
-              <div
-                key={hint.label}
-                className={cn(
-                  'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium',
-                  hint.color,
-                  isDragging && 'animate-wobble',
-                )}
-              >
-                <hint.icon className="h-3.5 w-3.5" />
-                {hint.label}
+          {hasFiles && (
+            <div className="w-full space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {files.length} document{files.length > 1 ? 's' : ''} ready
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClick}
+                  className="h-7 gap-1.5 text-xs"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add more
+                </Button>
               </div>
-            ))}
-          </div>
+
+              <ul className="grid gap-2">
+                {files.map((file) => (
+                  <li
+                    key={file.id}
+                    className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm"
+                  >
+                    <span className="truncate">{file.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {formatFileSize(file.size)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteFile(file.id)}
+                        disabled={deleteMutation.isPending}
+                        className="text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <Button
+                onClick={handleLaunchAgent}
+                disabled={isLaunching}
+                className="w-full gap-2"
+                size="lg"
+              >
+                {isLaunching ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Rocket className="h-4 w-4" />
+                )}
+                {isLaunching ? 'Launching...' : 'Launch Agent'}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

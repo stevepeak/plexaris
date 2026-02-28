@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { adminRouter } from './routers/admin'
 import { agentScheduleRouter } from './routers/agent-schedule'
 import { auditRouter } from './routers/audit'
+import { fileRouter } from './routers/file'
 import { notificationRouter } from './routers/notification'
 import { orderRouter } from './routers/order'
 import { organizationRouter } from './routers/organization'
@@ -214,6 +215,7 @@ export const appRouter = router({
   trigger: triggerRouter,
   triggerRun: triggerRunRouter,
   agentSchedule: agentScheduleRouter,
+  file: fileRouter,
   suggestion: suggestionRouter,
   order: orderRouter,
   product: productRouter,
