@@ -8,7 +8,9 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 
+import { user } from './auth-schema'
 import { organization } from './org-schema'
+import { triggerRun } from './trigger-run-schema'
 
 export const suggestionTargetTypeEnum = pgEnum('suggestion_target_type', [
   'product',
@@ -45,9 +47,11 @@ export const suggestion = pgTable(
     confidence: text('confidence'),
     source: text('source'),
     reasoning: text('reasoning'),
-    triggerRunId: text('trigger_run_id').notNull(),
+    triggerRunId: text('trigger_run_id')
+      .notNull()
+      .references(() => triggerRun.triggerRunId),
     status: suggestionStatusEnum('status').notNull().default('pending'),
-    reviewedBy: text('reviewed_by'),
+    reviewedBy: text('reviewed_by').references(() => user.id),
     reviewedAt: timestamp('reviewed_at', { withTimezone: true, mode: 'date' }),
     createdAt: timestamp('created_at', {
       withTimezone: true,

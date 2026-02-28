@@ -1,4 +1,5 @@
 import {
+  type AnyPgColumn,
   index,
   integer,
   jsonb,
@@ -19,7 +20,9 @@ export const product = pgTable(
     organizationId: uuid('organization_id')
       .notNull()
       .references(() => organization.id),
-    currentVersionId: uuid('current_version_id'),
+    currentVersionId: uuid('current_version_id').references(
+      (): AnyPgColumn => productVersion.id,
+    ),
     name: text('name').notNull(),
     description: text('description'),
     price: numeric('price', { precision: 10, scale: 2 }),

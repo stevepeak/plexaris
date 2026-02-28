@@ -3,7 +3,7 @@
 
 import { useRouter } from 'next/navigation'
 
-import { ProductList } from '@/components/product-list'
+import { type Product, ProductList } from '@/components/product-list'
 import { trpc } from '@/lib/trpc'
 
 export function ProductsTab({
@@ -18,11 +18,14 @@ export function ProductsTab({
 
   return (
     <ProductList
-      products={(data ?? []).map((p) => ({
-        ...p,
-        images: p.images ?? [],
-        data: p.data as Record<string, unknown> | null | undefined,
-      }))}
+      products={(data ?? []).map(
+        (p) =>
+          ({
+            ...p,
+            images: p.images ?? [],
+            data: p.data as Record<string, unknown> | null | undefined,
+          }) as unknown as Product,
+      )}
       isPending={isPending}
       permissions={permissions}
       onAddProduct={() => router.push(`/orgs/${organizationId}/products/new`)}

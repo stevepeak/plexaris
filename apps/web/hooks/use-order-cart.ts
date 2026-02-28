@@ -18,8 +18,8 @@ function mapServerItems(
     unit: string | null
     addedByName: string
     addedByImage: string | null
-    productName: string
-    productCategory: string | null
+    productName?: string
+    productCategory?: string | null
     productArticleNumber: string | null
     supplierName: string
     createdAt: Date | string
@@ -27,7 +27,7 @@ function mapServerItems(
 ): CartItemData[] {
   return items.map((item) => ({
     id: item.productId,
-    name: item.productName,
+    name: item.productName ?? '',
     price: Number(item.unitPrice ?? 0),
     unit: item.unit ?? '',
     quantity: item.quantity,
