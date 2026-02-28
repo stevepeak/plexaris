@@ -70,6 +70,34 @@ export function capturePostHogEvent(
 }
 
 /**
+ * Identify a user in PostHog with person properties.
+ * Call this server-side to set properties like `is_employee`.
+ */
+export function identifyPostHogUser(
+  distinctId: string,
+  properties: {
+    email: string
+    name: string
+    is_employee: boolean
+  },
+): void {
+  const client = getPostHogClient()
+  if (!client) {
+    return
+  }
+
+  try {
+    client.identify({
+      distinctId,
+      properties,
+    })
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to identify PostHog user:', error)
+  }
+}
+
+/**
  * Shutdown PostHog client gracefully
  * Should be called when the application is shutting down
  */

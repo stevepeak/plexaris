@@ -20,6 +20,7 @@
     "@app/config": "workspace:*",
     "@app/db": "workspace:*",
     "@app/email": "workspace:*",
+    "@app/posthog": "workspace:*",
     "@app/resend": "workspace:*",
     "@app/utils": "workspace:*",
     "@better-auth/passkey": "^1.4.20",

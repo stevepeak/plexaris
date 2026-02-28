@@ -1,5 +1,6 @@
 import { appRouter, type Context } from '@app/api'
 import { createDb, eq, schema } from '@app/db'
+import { identifyPostHogUser } from '@app/posthog'
 import * as Sentry from '@sentry/nextjs'
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
@@ -33,6 +34,14 @@ const handler = (req: Request) =>
         .where(eq(schema.user.id, result.user.id))
         .limit(1)
 
+      const superAdmin = row?.superAdmin ?? false
+
+      identifyPostHogUser(result.user.id, {
+        email: result.user.email,
+        name: result.user.name,
+        is_employee: superAdmin,
+      })
+
       return {
         db,
         session: {
@@ -40,7 +49,7 @@ const handler = (req: Request) =>
             id: result.user.id,
             name: result.user.name,
             email: result.user.email,
-            superAdmin: row?.superAdmin ?? false,
+            superAdmin,
           },
         },
         captureException: Sentry.captureException,
